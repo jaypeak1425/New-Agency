@@ -128,10 +128,20 @@ This document is the staged build plan for the Insurance Strategy Engine. Each p
 - Avatar matching (HNW / Business Owner / Qualified Fund Heavy / Family/Legacy)
 - Strategy recommendation engine (using Part 5 mapping tables)
 - Pivot-to-alternative logic (when primary doesn't fit)
-- Compliance language guardrails (no "tax-free," "while the policy remains in force," etc.)
-- 9 hard rules enforced (no annuity→life direct §1035, etc.)
+- Compliance language guardrails (no "tax-free," "while the policy remains in force," etc.) —
+  built early as a standalone module in Phase 1 (`src/lib/compliance-filter.ts`); Phase 3 wires it
+  into the real recommendation/handoff output instead of raw text.
+- 9 hard rules enforced (no annuity→life direct §1035, etc.) — same story, built as a standalone
+  module in Phase 1 (`src/lib/hard-rules.ts`); Phase 3 wires it into the real recommendation flow.
 - Field underwriting intake (life + annuity, separate flows)
 - Wholesaler handoff template trigger (when strategy is viable)
+- **Wholesaler assignment + notification** (added post-Phase-2, see
+  `docs/23-wholesaler-assignment.md`): admin assigns one wholesaler (a login-capable user) per
+  agent; the wholesaler gets a portal view of their assigned agents' cases and an email
+  notification at the wholesaler-handoff moment. This layers on top of the wholesaler handoff
+  email above — the handoff email still fires per the existing spec; the assigned wholesaler is
+  additionally notified in-app and by email that a specific agent is working a case with them and
+  should be called.
 
 ### What's out of scope
 - Pitch deck auto-generation (Phase 4)
@@ -149,19 +159,25 @@ This document is the staged build plan for the Insurance Strategy Engine. Each p
 - [ ] The 9 hard rules enforced at the engine level (not just documented)
 - [ ] Field underwriting intake works for both life and annuity
 - [ ] Wholesaler handoff email auto-generates when strategy is viable
+- [ ] An agent's assigned wholesaler can log in, see that agent's cases, and is notified
+      (in-app + email) at the wholesaler-handoff moment
 - [ ] Tested with 5-10 real "I've got a guy" scenarios end-to-end
 
-### Batching for Copilot (8-10 sessions)
-1. **Session 1:** Ingest the strategy library into the database (9 core + 8 supporting, with all fields)
-2. **Session 2:** Build the "I've got a guy" intake flow (10 questions, conversational voice)
-3. **Session 3:** Build the avatar matching engine (classify prospect into 1+ of 4 avatars)
-4. **Session 4:** Build the strategy recommendation engine (draw from Part 5 mapping tables)
-5. **Session 5:** Build the pivot-to-alternative logic (age/health/structure/time/ownership checks)
-6. **Session 6:** Build the compliance language guardrail (every output filtered for "tax-free," false claims, IRS form numbers)
-7. **Session 7:** Build the 9 hard rules enforcement (engine-level, not just documentation)
-8. **Session 8:** Build the field underwriting intake (life + annuity, separate flows)
-9. **Session 9:** Build the wholesaler handoff template trigger
-10. **Session 10:** End-to-end testing with 5-10 real scenarios, fix any bugs
+### Batching for Copilot (11-13 sessions)
+1. **Session 1:** Wholesaler assignment schema + admin management UI + core lib (Brain-independent
+   — built first since it doesn't need the strategy library; see docs/23-wholesaler-assignment.md)
+2. **Session 2:** Wholesaler portal (role-based routing, case list view, notification wiring)
+3. **Session 3:** Ingest the strategy library into the database (9 core + 8 supporting, with all fields)
+4. **Session 4:** Build the "I've got a guy" intake flow (10 questions, conversational voice)
+5. **Session 5:** Build the avatar matching engine (classify prospect into 1+ of 4 avatars)
+6. **Session 6:** Build the strategy recommendation engine (draw from Part 5 mapping tables)
+7. **Session 7:** Build the pivot-to-alternative logic (age/health/structure/time/ownership checks)
+8. **Session 8:** Wire the existing compliance filter module into real recommendation/handoff output
+9. **Session 9:** Wire the existing 9-hard-rules module into the real recommendation flow
+10. **Session 10:** Build the field underwriting intake (life + annuity, separate flows)
+11. **Session 11:** Build the wholesaler handoff template trigger (fires the wholesaler
+    notification from Sessions 1-2 in addition to the illustration-request email)
+12. **Session 12:** End-to-end testing with 5-10 real scenarios, fix any bugs
 
 ---
 

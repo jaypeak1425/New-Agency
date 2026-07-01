@@ -27,6 +27,9 @@ separate portal).
 - **Names — locked:** Agency = **Peakbritt Financial Group**. Software = **Case Atlas**. Bot = **Atlas**.
 - **Build method:** one Copilot/Claude-Code session = one user story = 5–10 related changes. State
   goal, files in scope, constraints, definition of done up front.
+- **Wholesaler assignment (Phase 3):** admin assigns one login-capable wholesaler per agent. The
+  wholesaler gets a portal (`/wholesaler`) showing their assigned agents' cases and is notified
+  (in-app + email) at the wholesaler-handoff moment. See `docs/23-wholesaler-assignment.md`.
 
 ## The 6-phase plan (canonical — from the Master Developer Brief)
 

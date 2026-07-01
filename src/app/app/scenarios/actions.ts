@@ -11,6 +11,7 @@ import {
   type LifeUnderwritingAnswers,
   type AnnuityIntakeAnswers,
 } from "@/lib/underwriting";
+import { saveStrategyEstimate } from "@/lib/commission";
 import type {
   BeneficiaryStructure,
   BusinessOwnerStatus,
@@ -28,6 +29,7 @@ import type {
   MajorDiagnosis,
   MaritalStatus,
   NetWorthEstimate,
+  ProductType,
   QualifiedFundsEstimate,
   SourceOfFunds,
   TaxBracket,
@@ -201,4 +203,29 @@ export async function notifyWholesalerAction(formData: FormData) {
     redirect(`/app/scenarios?error=${encodeURIComponent(message)}`);
   }
   redirect("/app/scenarios");
+}
+
+export async function saveStrategyEstimateAction(formData: FormData) {
+  const user = await getCurrentUser();
+  if (!user) redirect("/login");
+
+  const scenarioId = String(formData.get("scenarioId") ?? "");
+  const strategyId = String(formData.get("strategyId") ?? "");
+  const productType = optionalEnum<ProductType>(formData, "productType");
+  const annualPremium = optionalInt(formData, "annualPremium");
+  const faceAmount = optionalInt(formData, "faceAmount");
+
+  if (!productType) {
+    redirect(
+      `/app/scenarios/${scenarioId}/intake?error=${encodeURIComponent("Pick a product type before saving the estimate.")}`,
+    );
+  }
+
+  try {
+    await saveStrategyEstimate(user.id, scenarioId, strategyId, productType, annualPremium, faceAmount);
+  } catch (error) {
+    const message = error instanceof ScenarioError ? error.message : "Something went wrong.";
+    redirect(`/app/scenarios/${scenarioId}/intake?error=${encodeURIComponent(message)}`);
+  }
+  redirect(`/app/scenarios/${scenarioId}/intake`);
 }

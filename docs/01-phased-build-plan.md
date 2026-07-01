@@ -302,10 +302,19 @@ This document is the staged build plan for the Insurance Strategy Engine. Each p
 - [ ] Tested with a real agent on a real prospect end-to-end
 
 ### Batching for Copilot (8-10 sessions)
-1. **Session 1:** Build the pitch deck template system (per strategy)
-2. **Session 2:** Build the per-prospect deck builder
-3. **Session 3:** Build the marketing piece generator
+1. **Session 1:** Build the pitch deck template system (per strategy) — **blocked, not started:**
+   docs/12-pitch-decks.md turned out to be the *sales* deck for pitching Case Atlas itself to
+   agents/IMOs, not a spec for the per-strategy client-facing deck this session needs. No doc in
+   this repo gives slide-by-slide content for that feature (same shape of gap as the missing brain
+   doc). Built Session 4 first instead, since it has a real, complete spec.
+2. **Session 2:** Build the per-prospect deck builder — blocked on Session 1.
+3. **Session 3:** Build the marketing piece generator — same content gap as Session 1.
 4. **Session 4:** Build the commission math engine (defaults: life 55% Y1, annuity 2%, COLI/face 0.5%)
+   — done. Added `ScenarioStrategyEstimate` (product type + annual premium/face amount per
+   recommended strategy — neither Scenario nor Strategy tracked case-size numbers before this) and
+   `src/lib/commission.ts`'s rate table + agent-level override. Verified end-to-end: a $50,000
+   permanent-life premium against an eligible ILIT correctly computes $27,500 (55%), persists, and
+   rehydrates on reload.
 5. **Session 5:** Build the close rate baseline + pipeline value calculation
 6. **Session 6:** Build the progress dashboard (this week, this year, book, closed)
 7. **Session 7:** Build the prospecting list + weekly call queue

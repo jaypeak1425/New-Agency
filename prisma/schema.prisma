@@ -246,6 +246,8 @@ model Strategy {
   createdAt            DateTime       @default(now())
   updatedAt            DateTime       @updatedAt
 
+  scenarioEstimates ScenarioStrategyEstimate[]
+
   @@map("strategies")
 }
 
@@ -296,9 +298,15 @@ model AgentProfile {
   hasAttorneyRelationship Boolean               @default(false)
   imoAffiliation          String?
   skipped                 Boolean               @default(false)
-  completedAt             DateTime?
-  createdAt               DateTime              @default(now())
-  updatedAt               DateTime              @updatedAt
+
+  // docs/07-progress-dashboard-math.md edge case 1: the agent can override
+  // the default commission rate table with a single flat percentage used
+  // "everywhere" — a real per-carrier/per-product override table is a
+  // future refinement, not what the doc's own edge case describes.
+  commissionRateOverridePercent Float?
+  completedAt                   DateTime?
+  createdAt                     DateTime  @default(now())
+  updatedAt                     DateTime  @updatedAt
 
   @@map("agent_profiles")
 }
@@ -423,6 +431,7 @@ model Scenario {
 
   lifeUnderwritingIntake LifeUnderwritingIntake?
   annuityIntake          AnnuityIntake?
+  strategyEstimates      ScenarioStrategyEstimate[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -525,4 +534,36 @@ model AnnuityIntake {
   updatedAt                     DateTime              @updatedAt
 
   @@map("annuity_intakes")
+}
+
+// docs/07-progress-dashboard-math.md section 2 — neither Scenario nor
+// Strategy track case-size numbers (premium/face amount), so this captures
+// the agent's per-strategy estimate once a strategy is recommended. COLI
+// commissions are computed off faceAmount; every other product type off
+// annualPremium (see src/lib/commission.ts).
+enum ProductType {
+  permanent_life
+  term_life
+  survivorship_life
+  annuity
+  coli_face_amount
+  executive_bonus_162
+  disability_income
+  ltc_hybrid
+}
+
+model ScenarioStrategyEstimate {
+  id            String      @id @default(cuid())
+  scenarioId    String
+  scenario      Scenario    @relation(fields: [scenarioId], references: [id], onDelete: Cascade)
+  strategyId    String
+  strategy      Strategy    @relation(fields: [strategyId], references: [id])
+  productType   ProductType
+  annualPremium Int?
+  faceAmount    Int?
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+
+  @@unique([scenarioId, strategyId])
+  @@map("scenario_strategy_estimates")
 }

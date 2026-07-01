@@ -6,7 +6,12 @@ import { classifyAvatars } from "@/lib/avatars";
 import { recommendStrategies } from "@/lib/recommendations";
 import { getLifeUnderwritingIntake } from "@/lib/underwriting";
 import { buildHandoffPreview } from "@/lib/wholesaler";
-import { completeIntakeAction, notifyWholesalerAction } from "../../actions";
+import { computeExpectedCommission } from "@/lib/commission";
+import {
+  completeIntakeAction,
+  notifyWholesalerAction,
+  saveStrategyEstimateAction,
+} from "../../actions";
 import { Card } from "@/components/ui/Card";
 import { SubmitButton } from "@/components/SubmitButton";
 import type { Scenario, User } from "@/generated/prisma/client";
@@ -690,6 +695,10 @@ async function RecommendationCard({ scenario }: { scenario: Scenario }) {
   );
   const eligible = recommendations.filter((r) => r.eligibility === "eligible");
   const needsMoreInfo = recommendations.filter((r) => r.eligibility === "needs_more_info");
+  const commission = pivot.triggered
+    ? null
+    : await computeExpectedCommission(scenario.userId, scenario.id);
+  const estimateBySlug = new Map(commission?.lines.map((l) => [l.strategy.id, l]) ?? []);
 
   return (
     <Card className="mt-6 max-w-2xl">
@@ -715,25 +724,94 @@ async function RecommendationCard({ scenario }: { scenario: Scenario }) {
             </p>
           ) : (
             <ul className="mt-3 space-y-3">
-              {eligible.map(({ strategy, hardRuleViolations }) => (
-                <li key={strategy.id} className="rounded-md border border-border p-3">
-                  <p className="text-sm font-medium text-navy">{strategy.name}</p>
-                  {strategy.whyUsed && (
-                    <p className="mt-1 text-xs text-charcoal/70">{strategy.whyUsed}</p>
-                  )}
-                  {hardRuleViolations.length > 0 && (
-                    <div className="mt-2 rounded-md bg-red-50 px-2 py-1.5">
-                      {hardRuleViolations.map((v) => (
-                        <p key={v.rule} className="text-xs text-red-700">
-                          <span className="font-medium">Hard rule {v.rule}:</span> {v.message}
-                          {v.suggestion && ` ${v.suggestion}`}
-                        </p>
-                      ))}
-                    </div>
-                  )}
-                </li>
-              ))}
+              {eligible.map(({ strategy, hardRuleViolations }) => {
+                const existingEstimate = estimateBySlug.get(strategy.id);
+                return (
+                  <li key={strategy.id} className="rounded-md border border-border p-3">
+                    <p className="text-sm font-medium text-navy">{strategy.name}</p>
+                    {strategy.whyUsed && (
+                      <p className="mt-1 text-xs text-charcoal/70">{strategy.whyUsed}</p>
+                    )}
+                    {hardRuleViolations.length > 0 && (
+                      <div className="mt-2 rounded-md bg-red-50 px-2 py-1.5">
+                        {hardRuleViolations.map((v) => (
+                          <p key={v.rule} className="text-xs text-red-700">
+                            <span className="font-medium">Hard rule {v.rule}:</span> {v.message}
+                            {v.suggestion && ` ${v.suggestion}`}
+                          </p>
+                        ))}
+                      </div>
+                    )}
+
+                    <form
+                      action={saveStrategyEstimateAction}
+                      className="mt-3 flex flex-wrap items-end gap-2 border-t border-border pt-3"
+                    >
+                      <input type="hidden" name="scenarioId" value={scenario.id} />
+                      <input type="hidden" name="strategyId" value={strategy.id} />
+                      <label className="text-xs text-charcoal">
+                        Product type
+                        <select
+                          name="productType"
+                          defaultValue={existingEstimate?.estimate.productType ?? ""}
+                          className="mt-1 block rounded-md border border-border bg-surface px-2 py-1 text-xs"
+                        >
+                          <option value="">Select</option>
+                          <option value="permanent_life">Permanent life</option>
+                          <option value="term_life">Term life</option>
+                          <option value="survivorship_life">Survivorship life</option>
+                          <option value="annuity">Annuity</option>
+                          <option value="coli_face_amount">COLI (face amount)</option>
+                          <option value="executive_bonus_162">§162 executive bonus</option>
+                          <option value="disability_income">Disability income</option>
+                          <option value="ltc_hybrid">LTC / hybrid</option>
+                        </select>
+                      </label>
+                      <label className="text-xs text-charcoal">
+                        Annual premium
+                        <input
+                          type="number"
+                          name="annualPremium"
+                          min={0}
+                          defaultValue={existingEstimate?.estimate.annualPremium ?? ""}
+                          className="mt-1 block w-28 rounded-md border border-border bg-surface px-2 py-1 text-xs"
+                        />
+                      </label>
+                      <label className="text-xs text-charcoal">
+                        Face amount (COLI)
+                        <input
+                          type="number"
+                          name="faceAmount"
+                          min={0}
+                          defaultValue={existingEstimate?.estimate.faceAmount ?? ""}
+                          className="mt-1 block w-28 rounded-md border border-border bg-surface px-2 py-1 text-xs"
+                        />
+                      </label>
+                      <SubmitButton variant="outline" pendingText="Saving…" className="px-3 py-1 text-xs">
+                        Save estimate
+                      </SubmitButton>
+                      {existingEstimate && (
+                        <span className="text-xs text-charcoal/60">
+                          Est. commission: ${existingEstimate.amount.toLocaleString()} (
+                          {Math.round(existingEstimate.rate * 1000) / 10}%)
+                        </span>
+                      )}
+                    </form>
+                  </li>
+                );
+              })}
             </ul>
+          )}
+
+          {commission && commission.lines.length > 0 && (
+            <p className="mt-3 rounded-md bg-cream px-3 py-2 text-sm text-navy">
+              Total expected commission Y1: ${commission.total.toLocaleString()}
+              {commission.overridePercent !== null && (
+                <span className="ml-1 text-xs text-charcoal/60">
+                  (using your {Math.round(commission.overridePercent * 1000) / 10}% override rate)
+                </span>
+              )}
+            </p>
           )}
 
           {needsMoreInfo.length > 0 && (

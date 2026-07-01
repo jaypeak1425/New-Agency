@@ -1,5 +1,7 @@
+import Link from "next/link";
 import { signUpAction } from "../actions";
 import { SubmitButton } from "@/components/SubmitButton";
+import { Input } from "@/components/ui/Input";
 
 export default async function SignupPage({
   searchParams,
@@ -9,42 +11,34 @@ export default async function SignupPage({
   const { error } = await searchParams;
 
   return (
-    <main style={{ maxWidth: 360, margin: "4rem auto", fontFamily: "sans-serif" }}>
-      <h1>Sign up</h1>
-      {error && <p role="alert">{error}</p>}
-      <form action={signUpAction}>
-        <div>
-          <label>
-            Name
-            <br />
-            <input type="text" name="name" autoComplete="name" />
-          </label>
-        </div>
-        <div>
-          <label>
-            Email
-            <br />
-            <input type="email" name="email" required autoComplete="email" />
-          </label>
-        </div>
-        <div>
-          <label>
-            Password
-            <br />
-            <input
-              type="password"
-              name="password"
-              required
-              minLength={8}
-              autoComplete="new-password"
-            />
-          </label>
-        </div>
-        <SubmitButton pendingText="Creating account…">Create account</SubmitButton>
+    <>
+      <h1 className="text-2xl">Sign up</h1>
+      {error && (
+        <p role="alert" className="mt-3 rounded-md bg-red-50 px-3 py-2 text-sm text-red-700">
+          {error}
+        </p>
+      )}
+      <form action={signUpAction} className="mt-6 space-y-4">
+        <Input label="Name" name="name" type="text" autoComplete="name" />
+        <Input label="Email" name="email" type="email" required autoComplete="email" />
+        <Input
+          label="Password"
+          name="password"
+          type="password"
+          required
+          minLength={8}
+          autoComplete="new-password"
+        />
+        <SubmitButton pendingText="Creating account…" className="w-full">
+          Create account
+        </SubmitButton>
       </form>
-      <p>
-        Already have an account? <a href="/login">Log in</a>
+      <p className="mt-6 text-sm text-charcoal/70">
+        Already have an account?{" "}
+        <Link href="/login" className="text-navy hover:text-gold">
+          Log in
+        </Link>
       </p>
-    </main>
+    </>
   );
 }

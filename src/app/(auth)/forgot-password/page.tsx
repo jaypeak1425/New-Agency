@@ -1,5 +1,7 @@
+import Link from "next/link";
 import { requestPasswordResetAction } from "../actions";
 import { SubmitButton } from "@/components/SubmitButton";
+import { Input } from "@/components/ui/Input";
 
 export default async function ForgotPasswordPage({
   searchParams,
@@ -9,25 +11,25 @@ export default async function ForgotPasswordPage({
   const { sent } = await searchParams;
 
   return (
-    <main style={{ maxWidth: 360, margin: "4rem auto", fontFamily: "sans-serif" }}>
-      <h1>Forgot password</h1>
+    <>
+      <h1 className="text-2xl">Forgot password</h1>
       {sent ? (
-        <p>If an account exists for that email, a reset link has been sent.</p>
+        <p className="mt-6 text-sm text-charcoal/80">
+          If an account exists for that email, a reset link has been sent.
+        </p>
       ) : (
-        <form action={requestPasswordResetAction}>
-          <div>
-            <label>
-              Email
-              <br />
-              <input type="email" name="email" required autoComplete="email" />
-            </label>
-          </div>
-          <SubmitButton pendingText="Sending…">Send reset link</SubmitButton>
+        <form action={requestPasswordResetAction} className="mt-6 space-y-4">
+          <Input label="Email" name="email" type="email" required autoComplete="email" />
+          <SubmitButton pendingText="Sending…" className="w-full">
+            Send reset link
+          </SubmitButton>
         </form>
       )}
-      <p>
-        <a href="/login">Back to log in</a>
+      <p className="mt-6 text-sm">
+        <Link href="/login" className="text-navy hover:text-gold">
+          Back to log in
+        </Link>
       </p>
-    </main>
+    </>
   );
 }

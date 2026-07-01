@@ -1,5 +1,7 @@
+import Link from "next/link";
 import { logInAction } from "../actions";
 import { SubmitButton } from "@/components/SubmitButton";
+import { Input } from "@/components/ui/Input";
 
 export default async function LoginPage({
   searchParams,
@@ -9,34 +11,45 @@ export default async function LoginPage({
   const { error, next, reset } = await searchParams;
 
   return (
-    <main style={{ maxWidth: 360, margin: "4rem auto", fontFamily: "sans-serif" }}>
-      <h1>Log in</h1>
-      {reset && <p>Password reset. Log in with your new password.</p>}
-      {error && <p role="alert">{error}</p>}
-      <form action={logInAction}>
+    <>
+      <h1 className="text-2xl">Log in</h1>
+      {reset && (
+        <p className="mt-3 rounded-md bg-cream px-3 py-2 text-sm text-charcoal">
+          Password reset. Log in with your new password.
+        </p>
+      )}
+      {error && (
+        <p role="alert" className="mt-3 rounded-md bg-red-50 px-3 py-2 text-sm text-red-700">
+          {error}
+        </p>
+      )}
+      <form action={logInAction} className="mt-6 space-y-4">
         <input type="hidden" name="next" value={next ?? "/app"} />
-        <div>
-          <label>
-            Email
-            <br />
-            <input type="email" name="email" required autoComplete="email" />
-          </label>
-        </div>
-        <div>
-          <label>
-            Password
-            <br />
-            <input type="password" name="password" required autoComplete="current-password" />
-          </label>
-        </div>
-        <SubmitButton pendingText="Logging in…">Log in</SubmitButton>
+        <Input label="Email" name="email" type="email" required autoComplete="email" />
+        <Input
+          label="Password"
+          name="password"
+          type="password"
+          required
+          autoComplete="current-password"
+        />
+        <SubmitButton pendingText="Logging in…" className="w-full">
+          Log in
+        </SubmitButton>
       </form>
-      <p>
-        <a href="/forgot-password">Forgot password?</a>
-      </p>
-      <p>
-        No account? <a href="/signup">Sign up</a>
-      </p>
-    </main>
+      <div className="mt-6 space-y-2 text-sm text-charcoal/70">
+        <p>
+          <Link href="/forgot-password" className="text-navy hover:text-gold">
+            Forgot password?
+          </Link>
+        </p>
+        <p>
+          No account?{" "}
+          <Link href="/signup" className="text-navy hover:text-gold">
+            Sign up
+          </Link>
+        </p>
+      </div>
+    </>
   );
 }

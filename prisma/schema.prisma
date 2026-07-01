@@ -46,13 +46,26 @@ model User {
   createdAt    DateTime   @default(now())
   updatedAt    DateTime   @updatedAt
 
-  subscription      Subscription?
-  scenarios         Scenario[]
-  adminActionsTaken AdminAction[] @relation("AdminActionsTaken")
-  adminActionsOn    AdminAction[] @relation("AdminActionsReceived")
-  auditLogEntries   AuditLog[]
+  subscription        Subscription?
+  scenarios           Scenario[]
+  adminActionsTaken   AdminAction[]        @relation("AdminActionsTaken")
+  adminActionsOn      AdminAction[]        @relation("AdminActionsReceived")
+  auditLogEntries     AuditLog[]
+  passwordResetTokens PasswordResetToken[]
 
   @@map("users")
+}
+
+model PasswordResetToken {
+  id        String    @id @default(cuid())
+  userId    String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tokenHash String    @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  @@map("password_reset_tokens")
 }
 
 model Subscription {

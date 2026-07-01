@@ -38,11 +38,19 @@ export default async function AppLayout({ children }: { children: React.ReactNod
     }
   }
 
+  const imo = user.imoId ? await prisma.imo.findUnique({ where: { id: user.imoId } }) : null;
+
   return (
     <div className="flex min-h-full">
       <nav className="flex w-60 flex-col gap-6 bg-navy px-4 py-6">
         <div className="px-2">
-          <Wordmark variant="dark" />
+          <Wordmark
+            variant="dark"
+            withByline={Boolean(imo?.byline)}
+            logoUrl={imo?.logoUrl}
+            accentColor={imo?.accentColor}
+            byline={imo?.byline}
+          />
         </div>
         <AppNav />
         <div className="mt-auto space-y-3 border-t border-cream/10 px-2 pt-4 text-sm">

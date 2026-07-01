@@ -327,8 +327,18 @@ model Imo {
   // the "billing event" the doc describes, for the sales/ops team to invoice
   // against manually.
   contractTerms       String?
-  createdAt           DateTime   @default(now())
-  updatedAt           DateTime   @updatedAt
+
+  // docs/00-developer-brief.md's white-label branding engine: "logo, color,
+  // byline per IMO." `logoUrl` is a hosted image URL the IMO supplies rather
+  // than an uploaded file — no object storage (S3/Supabase Storage/etc.) is
+  // configured anywhere in this repo, so a real upload pipeline is a gap of
+  // the same shape as the missing AI backend, not fabricated here.
+  logoUrl     String?
+  accentColor String? // hex, e.g. "#1a5fb4"
+  byline      String? // replaces "by Peakbritt Financial Group" in the nav
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   agents User[]
 

@@ -1,7 +1,12 @@
 import Link from "next/link";
 import { listImosForAdmin, imoSeatSummary, IMO_PRICE_PER_SEAT } from "@/lib/imo";
 import { listUsersForAdmin } from "@/lib/admin";
-import { createImoAction, updateImoSeatsAction, assignAgentToImoAction } from "./actions";
+import {
+  createImoAction,
+  updateImoSeatsAction,
+  updateImoBrandingAction,
+  assignAgentToImoAction,
+} from "./actions";
 import { SubmitButton } from "@/components/SubmitButton";
 import { Input } from "@/components/ui/Input";
 import { Card } from "@/components/ui/Card";
@@ -110,6 +115,34 @@ export default async function AdminImosPage({
                   </label>
                   <SubmitButton variant="outline" pendingText="Saving…" className="px-3 py-1.5 text-xs">
                     Update
+                  </SubmitButton>
+                </form>
+              </div>
+
+              <div className="mt-4 border-t border-border pt-4">
+                <p className="text-xs font-medium uppercase tracking-wide text-charcoal/50">
+                  White-label branding
+                </p>
+                <p className="mt-1 text-xs text-charcoal/50">
+                  Logo is a hosted image URL the IMO supplies (no file upload — no object storage
+                  is configured in this app). Shown in the nav to agents seated on this contract.
+                </p>
+                <form
+                  action={updateImoBrandingAction}
+                  className="mt-2 grid grid-cols-1 gap-3 sm:grid-cols-3 sm:items-end"
+                >
+                  <input type="hidden" name="imoId" value={imo.id} />
+                  <Input label="Logo URL" name="logoUrl" type="url" defaultValue={imo.logoUrl ?? ""} />
+                  <Input
+                    label="Accent color (hex)"
+                    name="accentColor"
+                    type="text"
+                    placeholder="#1a5fb4"
+                    defaultValue={imo.accentColor ?? ""}
+                  />
+                  <Input label="Byline" name="byline" type="text" defaultValue={imo.byline ?? ""} />
+                  <SubmitButton variant="outline" pendingText="Saving…" className="px-3 py-1.5 text-xs sm:col-span-3">
+                    Save branding
                   </SubmitButton>
                 </form>
               </div>

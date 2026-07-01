@@ -466,7 +466,21 @@ This document is the staged build plan for the Insurance Strategy Engine. Each p
    5-seat IMO contract they reach `/app` directly; the IMO page shows "1 active / 5 purchased seats
    (4 unfilled) — $75/mo"; the master dashboard's Total MRR correctly sums $194 (2 monthly) + $81
    (1 annual) + $75 (1 IMO seat) = $350; and removing the seat immediately revokes dashboard access.
-4. **Session 4:** Build the white-label branding engine
+4. **Session 4:** Build the white-label branding engine — done, scoped to the 3 things
+   docs/00-developer-brief.md actually names: "logo, color, byline per IMO." Added `logoUrl`,
+   `accentColor`, `byline` to `Imo` and a branding form on `/admin/imos`. `logoUrl` is a hosted
+   image URL the IMO supplies, not an uploaded file — no object storage (S3/Supabase Storage/etc.)
+   is configured anywhere in this repo, a gap of the same shape as the missing AI backend, so a
+   real upload pipeline isn't built. Applied to `src/components/ui/Wordmark.tsx` and wired into the
+   agent-facing nav (`src/app/app/layout.tsx`) for seated agents — branding pre-authentication pages
+   (login/signup) or a custom domain per IMO would need real multi-tenant routing infrastructure
+   that's out of scope for one session. Verified end-to-end: a seated agent on a branded IMO sees
+   the IMO's logo and byline in place of "Case Atlas / by Peakbritt Financial Group," while a
+   non-seated user still sees the default branding. (Caught and fixed a test-harness bug during
+   verification, not an app bug: the test script read a stale IMO id off the page immediately after
+   a create-then-redirect, a Next.js router-cache staleness issue — fixed with an explicit fresh
+   page load before the next form interaction, matching the same class of fix used earlier this
+   session for same-page server-action forms.)
 5. **Session 5:** Build the compliance review pipeline
 6. **Session 6:** Build per-seat usage tracking
 7. **Session 7:** Build IMO-level reporting

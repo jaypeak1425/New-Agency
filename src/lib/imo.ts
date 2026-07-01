@@ -86,6 +86,48 @@ export async function updateImoSeats(admin: User, imoId: string, seatsPurchased:
   return imo;
 }
 
+export interface ImoBrandingInput {
+  logoUrl?: string;
+  accentColor?: string;
+  byline?: string;
+}
+
+const HEX_COLOR_PATTERN = /^#[0-9a-fA-F]{6}$/;
+
+// docs/00-developer-brief.md's white-label branding engine: "logo, color,
+// byline per IMO." Applied to the in-app nav (src/app/app/layout.tsx) for
+// seated agents — branding pre-authentication pages (login/signup) or a
+// custom domain per IMO would need real multi-tenant routing infrastructure
+// that's out of scope here.
+export async function updateImoBranding(admin: User, imoId: string, input: ImoBrandingInput) {
+  assertAdmin(admin);
+
+  const accentColor = input.accentColor?.trim() || null;
+  if (accentColor && !HEX_COLOR_PATTERN.test(accentColor)) {
+    throw new ImoActionError("Accent color must be a hex code like #1a5fb4.");
+  }
+
+  const existing = await prisma.imo.findUnique({ where: { id: imoId } });
+  if (!existing) {
+    throw new ImoActionError("IMO not found.");
+  }
+
+  const imo = await prisma.imo.update({
+    where: { id: imoId },
+    data: {
+      logoUrl: input.logoUrl?.trim() || null,
+      accentColor,
+      byline: input.byline?.trim() || null,
+    },
+  });
+
+  await prisma.auditLog.create({
+    data: { actorId: admin.id, action: "imo.branding_updated", target: imoId, metadata: { ...input } },
+  });
+
+  return imo;
+}
+
 export async function assignAgentToImo(admin: User, agentUserId: string, imoId: string) {
   assertAdmin(admin);
 

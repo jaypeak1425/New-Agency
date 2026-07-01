@@ -6,6 +6,7 @@ import {
   ImoActionError,
   createImo,
   updateImoSeats,
+  updateImoBranding,
   assignAgentToImo,
   unassignAgentFromImo,
 } from "@/lib/imo";
@@ -44,6 +45,23 @@ export async function updateImoSeatsAction(formData: FormData) {
 
   try {
     await updateImoSeats(admin, imoId, seatsPurchased);
+  } catch (error) {
+    const message = error instanceof ImoActionError ? error.message : "Something went wrong.";
+    redirect(`/admin/imos?error=${encodeURIComponent(message)}`);
+  }
+  redirect("/admin/imos");
+}
+
+export async function updateImoBrandingAction(formData: FormData) {
+  const admin = await requireAdmin();
+  const imoId = String(formData.get("imoId") ?? "");
+
+  try {
+    await updateImoBranding(admin, imoId, {
+      logoUrl: String(formData.get("logoUrl") ?? ""),
+      accentColor: String(formData.get("accentColor") ?? ""),
+      byline: String(formData.get("byline") ?? ""),
+    });
   } catch (error) {
     const message = error instanceof ImoActionError ? error.message : "Something went wrong.";
     redirect(`/admin/imos?error=${encodeURIComponent(message)}`);

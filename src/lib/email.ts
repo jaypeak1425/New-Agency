@@ -1,6 +1,7 @@
 import { welcomeEmail } from "./emails/welcome";
 import { passwordResetEmail } from "./emails/password-reset";
 import { billingAlertEmail, type BillingAlertType } from "./emails/billing-alert";
+import { wholesalerInviteEmail } from "./emails/wholesaler-invite";
 
 // No email provider is wired up yet — swap the body of this function for a
 // real provider (Resend, Postmark, Supabase, etc.) when one is chosen.
@@ -26,5 +27,14 @@ export async function sendBillingAlertEmail(
   appBaseUrl: string,
 ) {
   const { subject, html } = billingAlertEmail({ type, appBaseUrl });
+  await sendEmail(to, subject, html);
+}
+
+export async function sendWholesalerInviteEmail(
+  to: string,
+  name: string | null,
+  setupUrl: string,
+) {
+  const { subject, html } = wholesalerInviteEmail({ name, setupUrl });
   await sendEmail(to, subject, html);
 }

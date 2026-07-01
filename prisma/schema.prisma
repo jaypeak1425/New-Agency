@@ -14,6 +14,7 @@ datasource db {
 enum UserRole {
   user
   admin
+  wholesaler
 }
 
 enum UserStatus {
@@ -34,6 +35,9 @@ enum AdminActionType {
   revoke
   suspend
   reactivate
+  create_wholesaler
+  assign_wholesaler
+  unassign_wholesaler
 }
 
 enum TenureBand {
@@ -93,6 +97,14 @@ model User {
   auditLogEntries     AuditLog[]
   passwordResetTokens PasswordResetToken[]
   agentProfile        AgentProfile?
+
+  // One wholesaler per agent (docs/23-wholesaler-assignment.md). Only
+  // meaningful when this user's role is "user" (an agent); assignedWholesaler
+  // should always point at a user with role "wholesaler", enforced in
+  // src/lib/wholesaler.ts rather than at the DB level.
+  assignedWholesalerId String?
+  assignedWholesaler   User?   @relation("AgentWholesalerAssignment", fields: [assignedWholesalerId], references: [id])
+  assignedAgents       User[]  @relation("AgentWholesalerAssignment")
 
   @@map("users")
 }
@@ -184,13 +196,19 @@ model WebhookEvent {
   @@map("webhook_events")
 }
 
-// Stub only — fleshed out in Phase 3 (The Brain).
+// Minimal case record for now — a bridge until Phase 3's real 10-question
+// intake, avatar classification, and recommendation engine exist (see
+// docs/03-intake-flow.md). label/notes stand in for the structured intake.
 model Scenario {
-  id        String   @id @default(cuid())
-  userId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  status    String   @default("draft")
-  createdAt DateTime @default(now())
+  id                   String    @id @default(cuid())
+  userId               String
+  user                 User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  label                String
+  notes                String?
+  status               String    @default("draft")
+  wholesalerNotifiedAt DateTime?
+  createdAt            DateTime  @default(now())
+  updatedAt            DateTime  @updatedAt
 
   @@map("scenarios")
 }

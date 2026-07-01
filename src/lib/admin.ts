@@ -68,7 +68,7 @@ export async function revokeAccess(admin: User, targetUserId: string) {
 
 export async function listUsersForAdmin() {
   return prisma.user.findMany({
-    include: { subscription: true },
+    include: { subscription: true, assignedWholesaler: true },
     orderBy: { createdAt: "desc" },
   });
 }

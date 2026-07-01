@@ -1,12 +1,16 @@
 import { listUsersForAdmin } from "@/lib/admin";
+import { listWholesalersForAdmin } from "@/lib/wholesaler";
 import { hasActiveAccess } from "@/lib/billing";
 import {
   suspendUserAction,
   reactivateUserAction,
   grantAccessAction,
   revokeAccessAction,
+  createWholesalerAccountAction,
+  assignWholesalerAction,
 } from "./actions";
 import { SubmitButton } from "@/components/SubmitButton";
+import { Input } from "@/components/ui/Input";
 import { cn } from "@/lib/cn";
 
 function Badge({ tone, children }: { tone: "positive" | "neutral" | "negative"; children: React.ReactNode }) {
@@ -28,8 +32,10 @@ export default async function AdminPage({
   searchParams: Promise<{ error?: string }>;
 }) {
   const { error } = await searchParams;
-  const users = await listUsersForAdmin();
+  const [users, wholesalers] = await Promise.all([listUsersForAdmin(), listWholesalersForAdmin()]);
   const smallButton = "px-3 py-1.5 text-xs";
+  const selectClassName =
+    "rounded-md border border-border bg-surface px-2 py-1.5 text-xs text-charcoal focus:border-gold focus:outline-none focus:ring-1 focus:ring-gold";
 
   return (
     <main className="mx-auto max-w-5xl px-6 py-12">
@@ -39,6 +45,21 @@ export default async function AdminPage({
           {error}
         </p>
       )}
+
+      <section className="mt-8 rounded-lg border border-border bg-surface p-6">
+        <h2 className="text-lg font-medium text-charcoal">Create wholesaler account</h2>
+        <p className="mt-1 text-sm text-charcoal/60">
+          Sends a password-setup email so the wholesaler can log in to their portal.
+        </p>
+        <form action={createWholesalerAccountAction} className="mt-4 flex flex-wrap items-end gap-3">
+          <Input label="Email" name="email" type="email" required autoComplete="off" className="w-64" />
+          <Input label="Name" name="name" type="text" className="w-64" />
+          <SubmitButton pendingText="Creating…" className="px-4 py-2 text-sm">
+            Create wholesaler
+          </SubmitButton>
+        </form>
+      </section>
+
       <div className="mt-6 overflow-hidden rounded-lg border border-border bg-surface">
         <table className="w-full text-left text-sm">
           <thead className="bg-cream text-xs uppercase tracking-wide text-charcoal/60">
@@ -48,6 +69,7 @@ export default async function AdminPage({
               <th className="px-4 py-3 font-medium">Account status</th>
               <th className="px-4 py-3 font-medium">Plan</th>
               <th className="px-4 py-3 font-medium">Subscription</th>
+              <th className="px-4 py-3 font-medium">Wholesaler</th>
               <th className="px-4 py-3 font-medium">Actions</th>
             </tr>
           </thead>
@@ -68,6 +90,30 @@ export default async function AdminPage({
                     <Badge tone={active ? "positive" : "neutral"}>
                       {user.subscription?.status ?? "none"}
                     </Badge>
+                  </td>
+                  <td className="px-4 py-3">
+                    {user.role === "user" ? (
+                      <form action={assignWholesalerAction} className="flex items-center gap-2">
+                        <input type="hidden" name="userId" value={user.id} />
+                        <select
+                          name="wholesalerUserId"
+                          defaultValue={user.assignedWholesalerId ?? ""}
+                          className={selectClassName}
+                        >
+                          <option value="">Unassigned</option>
+                          {wholesalers.map((w) => (
+                            <option key={w.id} value={w.id}>
+                              {w.name ?? w.email}
+                            </option>
+                          ))}
+                        </select>
+                        <SubmitButton variant="outline" pendingText="Saving…" className={smallButton}>
+                          Save
+                        </SubmitButton>
+                      </form>
+                    ) : (
+                      "—"
+                    )}
                   </td>
                   <td className="px-4 py-3">
                     <div className="flex flex-wrap gap-2">

@@ -81,6 +81,24 @@ export async function logOut() {
   await clearSessionCookie();
 }
 
+// Shared by the self-serve "forgot password" flow and the admin-created
+// wholesaler invite flow (docs/23-wholesaler-assignment.md section 1), which
+// reuses this same token mechanism to let a wholesaler set their own password.
+export async function issuePasswordResetToken(userId: string) {
+  const rawToken = randomBytes(32).toString("base64url");
+  const tokenHash = hashToken(rawToken);
+
+  await prisma.passwordResetToken.create({
+    data: {
+      userId,
+      tokenHash,
+      expiresAt: new Date(Date.now() + PASSWORD_RESET_TTL_MS),
+    },
+  });
+
+  return rawToken;
+}
+
 export async function requestPasswordReset(email: string, appBaseUrl: string) {
   const normalizedEmail = email.trim().toLowerCase();
   const user = await prisma.user.findUnique({ where: { email: normalizedEmail } });
@@ -89,16 +107,7 @@ export async function requestPasswordReset(email: string, appBaseUrl: string) {
   // can't be used to enumerate registered emails.
   if (!user) return;
 
-  const rawToken = randomBytes(32).toString("base64url");
-  const tokenHash = hashToken(rawToken);
-
-  await prisma.passwordResetToken.create({
-    data: {
-      userId: user.id,
-      tokenHash,
-      expiresAt: new Date(Date.now() + PASSWORD_RESET_TTL_MS),
-    },
-  });
+  const rawToken = await issuePasswordResetToken(user.id);
 
   await prisma.auditLog.create({
     data: {

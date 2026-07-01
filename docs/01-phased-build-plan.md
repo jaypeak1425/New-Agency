@@ -233,7 +233,15 @@ This document is the staged build plan for the Insurance Strategy Engine. Each p
    something inferable from current scenario fields. Added `existingPolicyTransfer` to the intake;
    when true, the ILIT recommendation now surfaces the rule 4 violation and its suggested fix
    inline rather than silently passing.
-10. **Session 10:** Build the field underwriting intake (life + annuity, separate flows)
+10. **Session 10:** Build the field underwriting intake (life + annuity, separate flows) — done.
+    Age and tobacco (Q1/Q3) reuse the 10-question intake's identical fields rather than asking
+    twice. Medications (Q4) aren't parsed from free text into conditions — that mapping needs the
+    AI backend, not wired up — so majorDiagnoses captures the condition-level signal directly.
+    Built a real `estimateUnderwritingClass()` against section 3's table (age/build/tobacco/
+    diagnoses/family-history/occupation/hobby/DUI, worst-factor-wins), which now feeds Session 7's
+    health-concern note directly instead of the coarse healthRating-only proxy. The annuity intake
+    is standalone infrastructure — no documented strategy is annuity-funded yet, so nothing
+    triggers from it automatically, but it's ready the moment Session 3's content gap closes.
 11. **Session 11:** Build the wholesaler handoff template trigger (fires the wholesaler
     notification from Sessions 1-2 in addition to the illustration-request email)
 12. **Session 12:** End-to-end testing with 5-10 real scenarios, fix any bugs

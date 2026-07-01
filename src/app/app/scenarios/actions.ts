@@ -5,20 +5,32 @@ import { headers } from "next/headers";
 import { getCurrentUser } from "@/lib/auth";
 import { ScenarioError, createScenario, saveIntakeAnswers, type IntakeAnswers } from "@/lib/scenarios";
 import { WholesalerActionError, notifyWholesalerForScenario } from "@/lib/wholesaler";
+import {
+  saveLifeUnderwritingIntake,
+  saveAnnuityIntake,
+  type LifeUnderwritingAnswers,
+  type AnnuityIntakeAnswers,
+} from "@/lib/underwriting";
 import type {
   BeneficiaryStructure,
   BusinessOwnerStatus,
   BusinessStructure,
   ControlPreference,
+  DuiHistory,
+  EstatePlanningIntent,
   ExistingRelationship,
   ExistingStructure,
   FundingPreference,
   HealthRating,
   IncomeRevenueRange,
+  IncomeStartTiming,
   IntakeGoal,
+  MajorDiagnosis,
   MaritalStatus,
   NetWorthEstimate,
   QualifiedFundsEstimate,
+  SourceOfFunds,
+  TaxBracket,
   TobaccoUse,
   UrgencyDriver,
 } from "@/generated/prisma/client";
@@ -116,6 +128,63 @@ export async function completeIntakeAction(formData: FormData) {
     redirect(`/app/scenarios/${scenarioId}/intake?error=${encodeURIComponent(message)}`);
   }
   redirect("/app/scenarios");
+}
+
+export async function completeLifeUnderwritingAction(formData: FormData) {
+  const user = await getCurrentUser();
+  if (!user) redirect("/login");
+
+  const scenarioId = String(formData.get("scenarioId") ?? "");
+
+  const answers: LifeUnderwritingAnswers = {
+    heightInches: optionalInt(formData, "heightInches"),
+    weightLbs: optionalInt(formData, "weightLbs"),
+    majorDiagnoses: formData.getAll("majorDiagnoses") as MajorDiagnosis[],
+    hospitalizationsOrSurgeriesNotes: optionalString(formData, "hospitalizationsOrSurgeriesNotes"),
+    familyHistoryEarlyDeath: optionalBoolean(formData, "familyHistoryEarlyDeath"),
+    occupation: optionalString(formData, "occupation"),
+    hazardousOccupation: optionalBoolean(formData, "hazardousOccupation"),
+    hobbies: optionalString(formData, "hobbies"),
+    hazardousHobby: optionalBoolean(formData, "hazardousHobby"),
+    duiHistory: optionalEnum<DuiHistory>(formData, "duiHistory"),
+    foreignTravelPlanned: optionalBoolean(formData, "foreignTravelPlanned"),
+    foreignTravelNotes: optionalString(formData, "foreignTravelNotes"),
+    existingLifeInsuranceNotes: optionalString(formData, "existingLifeInsuranceNotes"),
+  };
+
+  try {
+    await saveLifeUnderwritingIntake(user.id, scenarioId, answers);
+  } catch (error) {
+    const message = error instanceof ScenarioError ? error.message : "Something went wrong.";
+    redirect(`/app/scenarios/${scenarioId}/underwriting/life?error=${encodeURIComponent(message)}`);
+  }
+  redirect(`/app/scenarios/${scenarioId}/intake`);
+}
+
+export async function completeAnnuityIntakeAction(formData: FormData) {
+  const user = await getCurrentUser();
+  if (!user) redirect("/login");
+
+  const scenarioId = String(formData.get("scenarioId") ?? "");
+
+  const answers: AnnuityIntakeAnswers = {
+    liquidNetWorthRange: optionalEnum<IncomeRevenueRange>(formData, "liquidNetWorthRange"),
+    sourceOfFunds: optionalEnum<SourceOfFunds>(formData, "sourceOfFunds"),
+    allocationAmount: optionalInt(formData, "allocationAmount"),
+    desiredIncomeStartDate: optionalEnum<IncomeStartTiming>(formData, "desiredIncomeStartDate"),
+    existingAnnuityContractsNotes: optionalString(formData, "existingAnnuityContractsNotes"),
+    taxBracket: optionalEnum<TaxBracket>(formData, "taxBracket"),
+    estatePlanningIntent: optionalEnum<EstatePlanningIntent>(formData, "estatePlanningIntent"),
+    needsLiquidityWithin5to7Years: optionalBoolean(formData, "needsLiquidityWithin5to7Years"),
+  };
+
+  try {
+    await saveAnnuityIntake(user.id, scenarioId, answers);
+  } catch (error) {
+    const message = error instanceof ScenarioError ? error.message : "Something went wrong.";
+    redirect(`/app/scenarios/${scenarioId}/underwriting/annuity?error=${encodeURIComponent(message)}`);
+  }
+  redirect(`/app/scenarios/${scenarioId}/intake`);
 }
 
 export async function notifyWholesalerAction(formData: FormData) {

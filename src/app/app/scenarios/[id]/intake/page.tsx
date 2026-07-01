@@ -4,6 +4,7 @@ import { getCurrentUser } from "@/lib/auth";
 import { getScenarioForUser, ScenarioError } from "@/lib/scenarios";
 import { classifyAvatars } from "@/lib/avatars";
 import { recommendStrategies } from "@/lib/recommendations";
+import { getLifeUnderwritingIntake } from "@/lib/underwriting";
 import { completeIntakeAction } from "../../actions";
 import { Card } from "@/components/ui/Card";
 import { SubmitButton } from "@/components/SubmitButton";
@@ -51,6 +52,15 @@ export default async function IntakePage({
       <p className="mt-2 text-sm text-charcoal/60">
         {scenario.label} &mdash; walk through Atlas&rsquo;s 10 questions. Answer what you know;
         you can come back and fill in the rest later.
+      </p>
+      <p className="mt-2 text-sm">
+        <Link href={`/app/scenarios/${id}/underwriting/life`} className="text-navy hover:text-gold">
+          Life insurance underwriting &rarr;
+        </Link>
+        <span className="mx-2 text-charcoal/30">&middot;</span>
+        <Link href={`/app/scenarios/${id}/underwriting/annuity`} className="text-navy hover:text-gold">
+          Annuity intake &rarr;
+        </Link>
       </p>
 
       {error && (
@@ -669,7 +679,11 @@ function AvatarClassificationCard({
 }
 
 async function RecommendationCard({ scenario }: { scenario: Scenario }) {
-  const { pivot, recommendations, healthConcernNote } = await recommendStrategies(scenario);
+  const lifeUnderwritingIntake = await getLifeUnderwritingIntake(scenario.userId, scenario.id);
+  const { pivot, recommendations, healthConcernNote } = await recommendStrategies(
+    scenario,
+    lifeUnderwritingIntake,
+  );
   const eligible = recommendations.filter((r) => r.eligibility === "eligible");
   const needsMoreInfo = recommendations.filter((r) => r.eligibility === "needs_more_info");
 

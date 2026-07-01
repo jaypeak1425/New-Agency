@@ -421,8 +421,108 @@ model Scenario {
   // Transferring an existing policy into the trust doesn't qualify.
   existingPolicyTransfer Boolean?
 
+  lifeUnderwritingIntake LifeUnderwritingIntake?
+  annuityIntake          AnnuityIntake?
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   @@map("scenarios")
+}
+
+// docs/04-field-underwriting.md section 2 — the 12-question life insurance
+// intake. Age (Q1) and tobacco (Q3) are already collected on Scenario by the
+// 10-question intake (same questions, same wording) — not duplicated here.
+// Medications (Q4) aren't modeled as free-text-to-condition parsing (that
+// needs the AI backend that isn't wired up yet, same gap as the "I've got a
+// guy" free-text layer) — majorDiagnoses captures the underwriting-relevant
+// signal directly instead.
+enum MajorDiagnosis {
+  heart_attack_or_stroke
+  cancer
+  diabetes_type_1
+  diabetes_type_2_controlled
+  autoimmune
+  mental_health_hospitalization
+  none
+}
+
+enum DuiHistory {
+  none
+  single_5_plus_years_ago
+  within_3_years
+  multiple
+}
+
+model LifeUnderwritingIntake {
+  id                               String           @id @default(cuid())
+  scenarioId                       String           @unique
+  scenario                         Scenario         @relation(fields: [scenarioId], references: [id], onDelete: Cascade)
+  heightInches                     Int? // Q2
+  weightLbs                        Int? // Q2
+  majorDiagnoses                   MajorDiagnosis[] @default([]) // Q4/Q5 (condition-level signal, not raw medication parsing)
+  hospitalizationsOrSurgeriesNotes String? // Q6
+  familyHistoryEarlyDeath          Boolean? // Q7: parent/sibling died before 60 from cardiac/cancer/stroke
+  occupation                       String? // Q8
+  hazardousOccupation              Boolean? // Q8
+  hobbies                          String? // Q9
+  hazardousHobby                   Boolean? // Q9
+  duiHistory                       DuiHistory? // Q10
+  foreignTravelPlanned             Boolean? // Q11
+  foreignTravelNotes               String? // Q11
+  existingLifeInsuranceNotes       String? // Q12
+  completedAt                      DateTime?
+  createdAt                        DateTime         @default(now())
+  updatedAt                        DateTime         @updatedAt
+
+  @@map("life_underwriting_intakes")
+}
+
+// docs/04-field-underwriting.md section 4 — the 9-question annuity intake.
+// No documented strategy in this library is annuity-funded yet (QWT, Annuity
+// Rescue, Qualified LTC are all pending_content), so this has nothing to
+// trigger from automatically — built as standalone infrastructure, ready for
+// when that content lands.
+enum SourceOfFunds {
+  qualified
+  non_qualified
+  mixed
+}
+
+enum IncomeStartTiming {
+  immediately
+  deferred_5_years
+  deferred_to_retirement_age
+  deferred_accumulation
+}
+
+enum TaxBracket {
+  under_22
+  range_22_32
+  range_32_37
+  above_37
+}
+
+enum EstatePlanningIntent {
+  legacy
+  income_only
+}
+
+model AnnuityIntake {
+  id                            String                @id @default(cuid())
+  scenarioId                    String                @unique
+  scenario                      Scenario              @relation(fields: [scenarioId], references: [id], onDelete: Cascade)
+  liquidNetWorthRange           IncomeRevenueRange? // Q1 — same buckets the doc itself uses
+  sourceOfFunds                 SourceOfFunds? // Q2
+  allocationAmount              Int? // Q3
+  desiredIncomeStartDate        IncomeStartTiming? // Q5
+  existingAnnuityContractsNotes String? // Q6
+  taxBracket                    TaxBracket? // Q7
+  estatePlanningIntent          EstatePlanningIntent? // Q8
+  needsLiquidityWithin5to7Years Boolean? // Q9
+  completedAt                   DateTime?
+  createdAt                     DateTime              @default(now())
+  updatedAt                     DateTime              @updatedAt
+
+  @@map("annuity_intakes")
 }

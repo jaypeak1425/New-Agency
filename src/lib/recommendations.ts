@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/prisma";
-import type { Scenario, Strategy } from "@/generated/prisma/client";
+import type { LifeUnderwritingIntake, Scenario, Strategy } from "@/generated/prisma/client";
 import { checkHardRules, type HardRuleViolation } from "@/lib/hard-rules";
+import { estimateUnderwritingClass } from "@/lib/underwriting";
 
 export type StrategyEligibility = "eligible" | "needs_more_info" | "not_eligible";
 
@@ -185,11 +186,21 @@ export interface RecommendationResult {
   healthConcernNote: string | null;
 }
 
-export async function recommendStrategies(scenario: Scenario): Promise<RecommendationResult> {
+export async function recommendStrategies(
+  scenario: Scenario,
+  lifeUnderwritingIntake: LifeUnderwritingIntake | null = null,
+): Promise<RecommendationResult> {
   const pivot = assessPivot(scenario);
 
-  const healthConcernNote =
-    scenario.healthRating === "health_issues"
+  // docs/04-field-underwriting.md section 3: once the full life underwriting
+  // intake exists, use the real class estimate instead of the coarse
+  // healthRating-only proxy from Session 7.
+  const underwritingEstimate = estimateUnderwritingClass(scenario, lifeUnderwritingIntake);
+  const healthConcernNote = underwritingEstimate
+    ? `Likely underwriting class: ${underwritingEstimate.label} (${underwritingEstimate.confidence} confidence)${
+        underwritingEstimate.rationale.length > 0 ? ` — ${underwritingEstimate.rationale.join("; ")}` : ""
+      }. This is an estimate, not a guarantee — the carrier's underwriter sets the actual class.`
+    : scenario.healthRating === "health_issues"
       ? "Health profile suggests this may face a higher underwriting class (possibly Table-rated) — confirm with a full underwriting intake before quoting."
       : null;
 

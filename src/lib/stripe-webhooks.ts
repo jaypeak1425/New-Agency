@@ -1,5 +1,16 @@
 import type Stripe from "stripe";
 import { prisma } from "@/lib/prisma";
+import { sendBillingAlertEmail } from "@/lib/email";
+import { hasActiveAccess } from "@/lib/billing";
+
+const APP_BASE_URL = process.env.APP_BASE_URL ?? "http://localhost:3000";
+
+async function notifyUser(userId: string, type: Parameters<typeof sendBillingAlertEmail>[1]) {
+  const user = await prisma.user.findUnique({ where: { id: userId } });
+  if (user) {
+    await sendBillingAlertEmail(user.email, type, APP_BASE_URL);
+  }
+}
 
 function mapStripeStatus(
   status: Stripe.Subscription.Status,
@@ -91,6 +102,8 @@ async function handleSubscriptionUpdated(subscription: Stripe.Subscription) {
   }
 
   const currentPeriodEnd = subscription.items.data[0]?.current_period_end;
+  const newStatus = mapStripeStatus(subscription.status);
+  const becameActive = !hasActiveAccess(row.status) && hasActiveAccess(newStatus);
 
   await prisma.$transaction([
     prisma.subscription.update({
@@ -98,7 +111,7 @@ async function handleSubscriptionUpdated(subscription: Stripe.Subscription) {
       data: {
         stripeSubscriptionId: subscription.id,
         stripeCustomerId: customerId,
-        status: mapStripeStatus(subscription.status),
+        status: newStatus,
         currentPeriodEnd: currentPeriodEnd ? new Date(currentPeriodEnd * 1000) : null,
       },
     }),
@@ -111,6 +124,10 @@ async function handleSubscriptionUpdated(subscription: Stripe.Subscription) {
       },
     }),
   ]);
+
+  if (becameActive) {
+    await notifyUser(row.userId, "subscribed");
+  }
 }
 
 async function handleSubscriptionDeleted(subscription: Stripe.Subscription) {
@@ -137,6 +154,8 @@ async function handleSubscriptionDeleted(subscription: Stripe.Subscription) {
       },
     }),
   ]);
+
+  await notifyUser(row.userId, "canceled");
 }
 
 async function handlePaymentFailed(invoice: Stripe.Invoice) {
@@ -170,6 +189,8 @@ async function handlePaymentFailed(invoice: Stripe.Invoice) {
       },
     }),
   ]);
+
+  await notifyUser(row.userId, "payment_failed");
 }
 
 // Returns true if this event was already processed (caller should no-op).

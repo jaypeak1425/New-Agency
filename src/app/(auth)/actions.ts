@@ -16,9 +16,10 @@ export async function signUpAction(formData: FormData) {
   const email = String(formData.get("email") ?? "");
   const password = String(formData.get("password") ?? "");
   const name = String(formData.get("name") ?? "") || undefined;
+  const appBaseUrl = await getAppBaseUrl();
 
   try {
-    await signUp(email, password, name);
+    await signUp(email, password, name, appBaseUrl);
   } catch (error) {
     const message = error instanceof AuthError ? error.message : "Something went wrong.";
     redirect(`/signup?error=${encodeURIComponent(message)}`);

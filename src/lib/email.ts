@@ -1,7 +1,30 @@
-// Minimal email stub for Phase 1. No email provider is wired up yet — swap the
-// body of this function for a real provider (Resend, Postmark, Supabase, etc.)
-// when one is chosen. Logging the link keeps the reset flow testable without
-// live credentials.
+import { welcomeEmail } from "./emails/welcome";
+import { passwordResetEmail } from "./emails/password-reset";
+import { billingAlertEmail, type BillingAlertType } from "./emails/billing-alert";
+
+// No email provider is wired up yet — swap the body of this function for a
+// real provider (Resend, Postmark, Supabase, etc.) when one is chosen.
+// Logging keeps every flow testable without live credentials.
+async function sendEmail(to: string, subject: string, html: string) {
+  console.log(`[email:dev] To: ${to} | Subject: ${subject}`);
+  console.log(html);
+}
+
+export async function sendWelcomeEmail(to: string, name: string | null, appBaseUrl: string) {
+  const { subject, html } = welcomeEmail({ name, appBaseUrl });
+  await sendEmail(to, subject, html);
+}
+
 export async function sendPasswordResetEmail(to: string, resetUrl: string) {
-  console.log(`[email:dev] Password reset for ${to}: ${resetUrl}`);
+  const { subject, html } = passwordResetEmail({ resetUrl });
+  await sendEmail(to, subject, html);
+}
+
+export async function sendBillingAlertEmail(
+  to: string,
+  type: BillingAlertType,
+  appBaseUrl: string,
+) {
+  const { subject, html } = billingAlertEmail({ type, appBaseUrl });
+  await sendEmail(to, subject, html);
 }

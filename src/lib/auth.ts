@@ -2,7 +2,7 @@ import { randomBytes, createHash } from "crypto";
 import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/prisma";
 import { setSessionCookie, clearSessionCookie, getSession } from "@/lib/session";
-import { sendPasswordResetEmail } from "@/lib/email";
+import { sendPasswordResetEmail, sendWelcomeEmail } from "@/lib/email";
 
 const PASSWORD_RESET_TTL_MS = 1000 * 60 * 30; // 30 minutes
 
@@ -12,7 +12,12 @@ function hashToken(token: string) {
   return createHash("sha256").update(token).digest("hex");
 }
 
-export async function signUp(email: string, password: string, name?: string) {
+export async function signUp(
+  email: string,
+  password: string,
+  name?: string,
+  appBaseUrl?: string,
+) {
   const normalizedEmail = email.trim().toLowerCase();
   if (!normalizedEmail || !password || password.length < 8) {
     throw new AuthError("Email is required and password must be at least 8 characters.");
@@ -38,6 +43,11 @@ export async function signUp(email: string, password: string, name?: string) {
   });
 
   await setSessionCookie({ sub: user.id, role: user.role });
+
+  if (appBaseUrl) {
+    await sendWelcomeEmail(user.email, user.name, appBaseUrl);
+  }
+
   return user;
 }
 

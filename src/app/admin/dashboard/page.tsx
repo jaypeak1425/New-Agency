@@ -70,6 +70,16 @@ export default async function MasterDashboardPage() {
           </p>
         </Card>
         <Card>
+          <p className="text-xs uppercase tracking-wide text-charcoal/50">MRR by segment</p>
+          <div className="mt-2 space-y-1">
+            {revenue.segments.map((segment) => (
+              <p key={segment.label} className="text-xs text-charcoal/70">
+                {segment.label}: {money(segment.mrr)} ({segment.count})
+              </p>
+            ))}
+          </div>
+        </Card>
+        <Card>
           <p className="text-xs uppercase tracking-wide text-charcoal/50">Activation rate</p>
           <p className="mt-2 text-2xl font-medium text-navy">
             {activity.activationRatePercent !== null ? `${activity.activationRatePercent}%` : "—"}

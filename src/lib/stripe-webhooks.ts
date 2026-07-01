@@ -2,6 +2,7 @@ import type Stripe from "stripe";
 import { prisma } from "@/lib/prisma";
 import { sendBillingAlertEmail } from "@/lib/email";
 import { hasActiveAccess } from "@/lib/billing";
+import { planKeyToPlanId, type AgentPlanKey } from "@/lib/stripe";
 
 const APP_BASE_URL = process.env.APP_BASE_URL ?? "http://localhost:3000";
 
@@ -57,6 +58,9 @@ async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session) 
     return;
   }
 
+  const planKey = (session.metadata?.planKey as AgentPlanKey | undefined) ?? "monthly";
+  const plan = planKeyToPlanId(planKey);
+
   await prisma.subscription.upsert({
     where: { userId },
     create: {
@@ -64,9 +68,11 @@ async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session) 
       stripeCustomerId: customerId,
       stripeSubscriptionId: subscriptionId,
       status: "incomplete",
+      plan,
     },
     update: {
       stripeCustomerId: customerId,
+      plan,
       ...(subscriptionId ? { stripeSubscriptionId: subscriptionId } : {}),
     },
   });

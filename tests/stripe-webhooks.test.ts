@@ -140,4 +140,34 @@ describe("Stripe webhook route", () => {
       where: { id: { in: [checkoutEventId, subUpdatedEventId, invoiceFailedEventId, subDeletedEventId] } },
     });
   });
+
+  it("records the annual plan when checkout.session.completed carries planKey metadata", async () => {
+    const user = await prisma.user.create({
+      data: {
+        email: `e2e-vitest-annual-${Date.now()}@example.com`,
+        passwordHash: "unused",
+        name: "Vitest Annual",
+      },
+    });
+    createdUserIds.push(user.id);
+
+    const customerId = `cus_test_annual_${user.id}`;
+    const subscriptionId = `sub_test_annual_${user.id}`;
+    const checkoutEventId = `evt_test_annual_checkout_${user.id}`;
+
+    const res = await post(checkoutEventId, "checkout.session.completed", {
+      id: "cs_test_annual_1",
+      object: "checkout.session",
+      customer: customerId,
+      subscription: subscriptionId,
+      client_reference_id: user.id,
+      metadata: { planKey: "annual" },
+    });
+    expect(res.status).toBe(200);
+
+    const sub = await prisma.subscription.findUnique({ where: { userId: user.id } });
+    expect(sub?.plan).toBe("agent_annual_970");
+
+    await prisma.webhookEvent.deleteMany({ where: { id: checkoutEventId } });
+  });
 });

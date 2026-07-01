@@ -14,3 +14,12 @@ export function getStripe(): Stripe {
 }
 
 export const AGENT_MONTHLY_PLAN = "agent_monthly_97";
+// CLAUDE.md / docs/20-business-plan.md: "~$970-980/yr, ~16-20% discount for
+// annual prepay." $970 sits at the low end of that locked range.
+export const AGENT_ANNUAL_PLAN = "agent_annual_970";
+
+export type AgentPlanKey = "monthly" | "annual";
+
+export function planKeyToPlanId(planKey: AgentPlanKey): string {
+  return planKey === "annual" ? AGENT_ANNUAL_PLAN : AGENT_MONTHLY_PLAN;
+}

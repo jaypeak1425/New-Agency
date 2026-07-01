@@ -1,5 +1,5 @@
 import type Stripe from "stripe";
-import { getStripe, AGENT_MONTHLY_PLAN } from "@/lib/stripe";
+import { getStripe, planKeyToPlanId, type AgentPlanKey } from "@/lib/stripe";
 import { prisma } from "@/lib/prisma";
 import type { User } from "@/generated/prisma/client";
 
@@ -35,11 +35,21 @@ async function getOrCreateStripeCustomerId(user: User): Promise<string> {
   return customer.id;
 }
 
-export async function createCheckoutSession(user: User, appBaseUrl: string) {
+const PRICE_ID_ENV_VARS: Record<AgentPlanKey, string> = {
+  monthly: "STRIPE_PRICE_ID_AGENT_MONTHLY",
+  annual: "STRIPE_PRICE_ID_AGENT_ANNUAL",
+};
+
+export async function createCheckoutSession(
+  user: User,
+  appBaseUrl: string,
+  planKey: AgentPlanKey = "monthly",
+) {
   const stripe = getStripe();
-  const priceId = process.env.STRIPE_PRICE_ID_AGENT_MONTHLY;
+  const envVar = PRICE_ID_ENV_VARS[planKey];
+  const priceId = process.env[envVar];
   if (!priceId) {
-    throw new Error("STRIPE_PRICE_ID_AGENT_MONTHLY env var is required.");
+    throw new Error(`${envVar} env var is required.`);
   }
 
   const customerId = await getOrCreateStripeCustomerId(user);
@@ -51,6 +61,10 @@ export async function createCheckoutSession(user: User, appBaseUrl: string) {
     success_url: `${appBaseUrl}/billing/success?session_id={CHECKOUT_SESSION_ID}`,
     cancel_url: `${appBaseUrl}/billing`,
     client_reference_id: user.id,
+    // Read back in the checkout.session.completed webhook and the success
+    // redirect sync below — Stripe's session payload doesn't otherwise carry
+    // which price/plan was purchased without an extra expand+API call.
+    metadata: { planKey },
   });
 
   if (!session.url) {
@@ -89,6 +103,8 @@ export async function syncSubscriptionFromCheckoutSession(checkoutSessionId: str
   }
 
   const currentPeriodEnd = subscription.items.data[0]?.current_period_end;
+  const planKey = (session.metadata?.planKey as AgentPlanKey | undefined) ?? "monthly";
+  const plan = planKeyToPlanId(planKey);
 
   await prisma.$transaction([
     prisma.subscription.upsert({
@@ -98,13 +114,14 @@ export async function syncSubscriptionFromCheckoutSession(checkoutSessionId: str
         stripeCustomerId: session.customer,
         stripeSubscriptionId: subscription.id,
         status: mapStripeStatus(subscription.status),
-        plan: AGENT_MONTHLY_PLAN,
+        plan,
         currentPeriodEnd: currentPeriodEnd ? new Date(currentPeriodEnd * 1000) : null,
       },
       update: {
         stripeCustomerId: session.customer,
         stripeSubscriptionId: subscription.id,
         status: mapStripeStatus(subscription.status),
+        plan,
         currentPeriodEnd: currentPeriodEnd ? new Date(currentPeriodEnd * 1000) : null,
       },
     }),

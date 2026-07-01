@@ -433,7 +433,23 @@ This document is the staged build plan for the Insurance Strategy Engine. Each p
    $97/mo subscription, a canceled one, and an admin-comped one correctly show $97 total MRR (comped
    excluded), $97 churned MRR, ~50% churn rate, and the comped/canceled agents don't appear as
    active MRR contributors.
-2. **Session 2:** Add annual billing with the discount target
+2. **Session 2:** Add annual billing with the discount target — done. Added a
+   `agent_annual_970` plan ($970/yr, the low end of CLAUDE.md/docs/20-business-plan.md's locked
+   "~$970-980/yr, ~16-20% discount" range) alongside the existing $97/mo plan. Both `createCheckoutSession`
+   and the two places that write a subscription row after checkout (the success-redirect sync in
+   `src/lib/billing.ts` and the `checkout.session.completed` webhook handler) now read which plan
+   was purchased off the Checkout session's `metadata.planKey` — Stripe's session payload doesn't
+   otherwise carry the price/plan without an extra expand+API call. The billing page offers both
+   plans side by side. Updated the Session 1 master dashboard's MRR math to add the annual segment
+   (`$970 ÷ 12` per docs/08-master-dashboard.md's own formula) to Total/New/Churned MRR and the
+   "MRR by segment" breakdown. **Not verified via a live Stripe Checkout redirect** — no
+   `STRIPE_PRICE_ID_AGENT_ANNUAL` Stripe Price object exists in this sandbox (creating one would
+   mean writing to the user's real Stripe account without being asked), so the webhook-side plan
+   mapping is covered by a new vitest case in `tests/stripe-webhooks.test.ts` instead (same rigor
+   as the existing $97/mo webhook tests), and the billing-page UI + master-dashboard MRR math were
+   verified by writing a subscription row directly (bypassing Stripe), confirming $970/yr displays
+   correctly and contributes $81/mo (rounded) to Total MRR. A real Price ID needs to be created and
+   set in `.env` before this can process a live annual purchase.
 3. **Session 3:** Build the IMO pricing tier system (50/100/500+)
 4. **Session 4:** Build the white-label branding engine
 5. **Session 5:** Build the compliance review pipeline

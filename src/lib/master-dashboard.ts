@@ -1,10 +1,13 @@
 import { prisma } from "@/lib/prisma";
-import { AGENT_MONTHLY_PLAN } from "@/lib/stripe";
+import { AGENT_MONTHLY_PLAN, AGENT_ANNUAL_PLAN } from "@/lib/stripe";
 import { hasActiveAccess } from "@/lib/billing";
 import type { User, Subscription, AgentProfile } from "@/generated/prisma/client";
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 const MONTHLY_PRICE = 97;
+// docs/08-master-dashboard.md section 2, Widget 1: "annual prepay ($X ÷ 12)."
+const ANNUAL_PRICE = 970;
+const ANNUAL_MONTHLY_EQUIVALENT = ANNUAL_PRICE / 12;
 
 function daysSince(date: Date | null | undefined, now: number): number {
   return date ? (now - date.getTime()) / DAY_MS : Infinity;
@@ -47,11 +50,13 @@ async function getAgentUsers(): Promise<AgentWithRelations[]> {
 }
 
 function mrrContribution(subscription: Subscription | null): number {
-  // Only the real Stripe-billed monthly plan counts as revenue — "comped"
+  // Only the real Stripe-billed plans count as revenue — "comped"
   // subscriptions (docs/20-business-plan.md's design-partner/beta comps,
   // src/lib/admin.ts's grantAccess) are access without revenue.
-  if (!subscription || subscription.plan !== AGENT_MONTHLY_PLAN) return 0;
-  return hasActiveAccess(subscription.status) ? MONTHLY_PRICE : 0;
+  if (!subscription || !hasActiveAccess(subscription.status)) return 0;
+  if (subscription.plan === AGENT_ANNUAL_PLAN) return Math.round(ANNUAL_MONTHLY_EQUIVALENT);
+  if (subscription.plan === AGENT_MONTHLY_PLAN) return MONTHLY_PRICE;
+  return 0;
 }
 
 export interface ClientRow {
@@ -94,6 +99,12 @@ export async function getClientsList(): Promise<ClientRow[]> {
   );
 }
 
+export interface RevenueSegment {
+  label: string;
+  count: number;
+  mrr: number;
+}
+
 export interface RevenueMetrics {
   totalMRR: number;
   activePayingCount: number;
@@ -106,17 +117,21 @@ export interface RevenueMetrics {
   // month's current total plus what churned out of it this month — a
   // reasonable stand-in, not a stored time series.
   churnRatePercent: number | null;
+  // docs/08-master-dashboard.md section 2, Widget 4 "MRR by segment." IMO
+  // seats aren't a segment yet — no IMO data model exists (Session 3).
+  segments: RevenueSegment[];
 }
 
-// docs/08-master-dashboard.md section 2, Module 2. Only the $97/mo plan
-// exists right now — annual billing (Session 2) and IMO seats (Session 3)
-// aren't built yet, so "MRR by segment" is a single segment for now.
+// docs/08-master-dashboard.md section 2, Module 2.
 export async function getRevenueMetrics(): Promise<RevenueMetrics> {
   const monthStart = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
 
-  const [activeSubs, newSubs, churnedSubs] = await Promise.all([
+  const [activeMonthly, activeAnnual, newMonthly, newAnnual, churnedMonthly, churnedAnnual] = await Promise.all([
     prisma.subscription.findMany({
       where: { plan: AGENT_MONTHLY_PLAN, status: { in: ["active", "trialing"] } },
+    }),
+    prisma.subscription.findMany({
+      where: { plan: AGENT_ANNUAL_PLAN, status: { in: ["active", "trialing"] } },
     }),
     prisma.subscription.findMany({
       where: {
@@ -126,23 +141,42 @@ export async function getRevenueMetrics(): Promise<RevenueMetrics> {
       },
     }),
     prisma.subscription.findMany({
+      where: {
+        plan: AGENT_ANNUAL_PLAN,
+        status: { in: ["active", "trialing"] },
+        createdAt: { gte: monthStart },
+      },
+    }),
+    prisma.subscription.findMany({
       where: { plan: AGENT_MONTHLY_PLAN, status: "canceled", updatedAt: { gte: monthStart } },
+    }),
+    prisma.subscription.findMany({
+      where: { plan: AGENT_ANNUAL_PLAN, status: "canceled", updatedAt: { gte: monthStart } },
     }),
   ]);
 
-  const totalMRR = activeSubs.length * MONTHLY_PRICE;
-  const newMRRThisMonth = newSubs.length * MONTHLY_PRICE;
-  const churnedMRRThisMonth = churnedSubs.length * MONTHLY_PRICE;
+  const monthlyMRR = activeMonthly.length * MONTHLY_PRICE;
+  const annualMRR = Math.round(activeAnnual.length * ANNUAL_MONTHLY_EQUIVALENT);
+  const totalMRR = monthlyMRR + annualMRR;
+
+  const newMRRThisMonth =
+    newMonthly.length * MONTHLY_PRICE + Math.round(newAnnual.length * ANNUAL_MONTHLY_EQUIVALENT);
+  const churnedMRRThisMonth =
+    churnedMonthly.length * MONTHLY_PRICE + Math.round(churnedAnnual.length * ANNUAL_MONTHLY_EQUIVALENT);
   const startingMRR = totalMRR + churnedMRRThisMonth;
 
   return {
     totalMRR,
-    activePayingCount: activeSubs.length,
+    activePayingCount: activeMonthly.length + activeAnnual.length,
     newMRRThisMonth,
-    newSubscriptionsThisMonth: newSubs.length,
+    newSubscriptionsThisMonth: newMonthly.length + newAnnual.length,
     churnedMRRThisMonth,
-    churnedSubscriptionsThisMonth: churnedSubs.length,
+    churnedSubscriptionsThisMonth: churnedMonthly.length + churnedAnnual.length,
     churnRatePercent: startingMRR > 0 ? Math.round((churnedMRRThisMonth / startingMRR) * 1000) / 10 : null,
+    segments: [
+      { label: "Individual agents (monthly)", count: activeMonthly.length, mrr: monthlyMRR },
+      { label: "Individual agents (annual)", count: activeAnnual.length, mrr: annualMRR },
+    ],
   };
 }
 

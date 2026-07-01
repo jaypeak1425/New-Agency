@@ -525,7 +525,27 @@ This document is the staged build plan for the Insurance Strategy Engine. Each p
    setting their password via the invite link, and logging in all correctly landed them on
    `/imo-principal` showing $75 MRR, 1/3 seats, and their one seated agent's engagement data — and
    confirmed they're bounced back from `/app` and `/admin` rather than let through.
-8. **Session 8:** End-to-end testing with a pilot IMO
+8. **Session 8:** End-to-end testing with a pilot IMO — done. Ran a full pilot scenario against a
+   production build: admin creates a 50-seat IMO contract, brands it (accent color + byline), seats
+   2 agents, creates the IMO principal login via the real invite-email link. One seated agent runs
+   real work — logs a case, completes intake, saves a $60K premium estimate, notifies a wholesaler.
+   Verified: the principal's dashboard shows exactly $150 MRR (2 active seats × $75), 2/50 seats,
+   both agents' real engagement data (the active one "High engagement, 1 scenario," the idle one
+   "Low engagement, 0 scenarios"), and the Opportunity Flow correctly shows the $33,000 expected
+   commission ($60K × 55%) for the logged case; the seated agent's nav shows the IMO's branding; the
+   principal is correctly bounced from `/app` and `/admin`. Swept every Phase 5 admin page
+   (`/admin/dashboard`, `/admin/imos`, `/admin/compliance`, `/admin/strategies`) plus every
+   agent-facing page for console/page errors across the whole flow — zero found. All 55 Vitest
+   tests, ESLint, and `tsc --noEmit` pass clean.
+
+   **Phase 5 close-out:** all 8 sessions done. Real content/infrastructure gaps carried forward
+   honestly rather than papered over: no object storage exists for IMO logo uploads (a hosted URL
+   is used instead), no cron/job runner exists so the weekly call queue and periodic compliance
+   audit are both lazily/admin-triggered rather than scheduled, the Compliance Flag Queue's
+   filter-caught trigger has no live pipeline to fire from (no client-facing output exists anywhere
+   in this app yet), and the annual billing plan hasn't been verified against a live Stripe
+   Checkout redirect (no real Stripe Price object exists in this sandbox — the webhook-side logic
+   is unit-tested instead). Everything built works honestly within those limits.
 
 ---
 

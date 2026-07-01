@@ -91,6 +91,7 @@ export interface IntakeAnswers {
   fundingPreference: FundingPreference | null;
   existingStructures: ExistingStructure[];
   urgencyDriver: UrgencyDriver | null;
+  existingPolicyTransfer: boolean | null;
 }
 
 export async function saveIntakeAnswers(

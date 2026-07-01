@@ -216,7 +216,23 @@ This document is the staged build plan for the Insurance Strategy Engine. Each p
    LTC) are still pending_content rather than recommending one that isn't in the locked library.
    Verified against the doc's own age/health worked example.
 8. **Session 8:** Wire the existing compliance filter module into real recommendation/handoff output
-9. **Session 9:** Wire the existing 9-hard-rules module into the real recommendation flow
+   — **deferred, not skipped:** there's no client-facing artifact in this codebase yet to wire it
+   into. CLAUDE.md scopes the compliance filter to "every client-facing output" / "client copy" —
+   everything built through Session 9 (the intake, the recommendation card, the wholesaler portal)
+   is internal agent/wholesaler tooling, where the worked examples in the docs themselves show
+   Atlas freely naming strategies ("ILIT," "COLI," "REBA") to the agent. Forcing the filter onto
+   that internal view now would strip exactly the structure names the agent needs to see, and
+   would be reworked the moment Phase 4 builds the actual client-facing pitch deck / marketing
+   piece. Revisit this the moment Phase 4, Session 1 (pitch deck templates) exists.
+9. **Session 9:** Wire the existing 9-hard-rules module into the real recommendation flow — done,
+   scoped honestly. Of the 9 rules, only rule 4 (ILIT must be original owner to avoid the §2035
+   3-year lookback) has anything to check against right now — rules 1/2/3/6/8/9 guard annuity
+   exchanges/MEC/qualified-plan-life scenarios that don't exist in this library (the annuity-side
+   strategies are all pending_content), rule 5 guards COLI (not one of the 17 seeded strategies at
+   all), and rule 7 (reasonable compensation for §162 bonus) is a compliance judgment call, not
+   something inferable from current scenario fields. Added `existingPolicyTransfer` to the intake;
+   when true, the ILIT recommendation now surfaces the rule 4 violation and its suggested fix
+   inline rather than silently passing.
 10. **Session 10:** Build the field underwriting intake (life + annuity, separate flows)
 11. **Session 11:** Build the wholesaler handoff template trigger (fires the wholesaler
     notification from Sessions 1-2 in addition to the illustration-request email)

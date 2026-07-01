@@ -106,6 +106,7 @@ export async function completeIntakeAction(formData: FormData) {
     fundingPreference: optionalEnum<FundingPreference>(formData, "fundingPreference"),
     existingStructures: formData.getAll("existingStructures") as ExistingStructure[],
     urgencyDriver: optionalEnum<UrgencyDriver>(formData, "urgencyDriver"),
+    existingPolicyTransfer: optionalBoolean(formData, "existingPolicyTransfer"),
   };
 
   try {

@@ -416,6 +416,11 @@ model Scenario {
   existingStructures           ExistingStructure[]   @default([])
   urgencyDriver                UrgencyDriver?
 
+  // CLAUDE.md hard rule 4 / docs/hard-rules.ts: the ILIT must be the
+  // original owner of the policy to avoid the §2035 3-year lookback.
+  // Transferring an existing policy into the trust doesn't qualify.
+  existingPolicyTransfer Boolean?
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 

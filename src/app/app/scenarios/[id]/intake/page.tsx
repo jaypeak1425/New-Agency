@@ -588,6 +588,32 @@ export default async function IntakePage({
                 </label>
               ))}
             </div>
+
+            <p className="mt-4 text-sm text-charcoal">
+              If an ILIT is in play, is the policy being transferred in from an existing policy
+              (rather than newly issued with the ILIT as original owner)?
+            </p>
+            <p className="text-xs text-charcoal/50">
+              CLAUDE.md hard rule 4: the ILIT must be the original owner to avoid the §2035 3-year
+              lookback.
+            </p>
+            <div className="mt-2 space-y-2">
+              {(["true", "false"] as const).map((value) => (
+                <label key={value} className={optionLabelClass}>
+                  <input
+                    type="radio"
+                    name="existingPolicyTransfer"
+                    value={value}
+                    defaultChecked={
+                      scenario.existingPolicyTransfer !== null &&
+                      String(scenario.existingPolicyTransfer) === value
+                    }
+                    className={radioClass}
+                  />
+                  {value === "true" ? "Yes, transferring an existing policy" : "No, new-issue"}
+                </label>
+              ))}
+            </div>
           </fieldset>
 
           <div className="flex items-center gap-4 pt-2">
@@ -671,11 +697,21 @@ async function RecommendationCard({ scenario }: { scenario: Scenario }) {
             </p>
           ) : (
             <ul className="mt-3 space-y-3">
-              {eligible.map(({ strategy }) => (
+              {eligible.map(({ strategy, hardRuleViolations }) => (
                 <li key={strategy.id} className="rounded-md border border-border p-3">
                   <p className="text-sm font-medium text-navy">{strategy.name}</p>
                   {strategy.whyUsed && (
                     <p className="mt-1 text-xs text-charcoal/70">{strategy.whyUsed}</p>
+                  )}
+                  {hardRuleViolations.length > 0 && (
+                    <div className="mt-2 rounded-md bg-red-50 px-2 py-1.5">
+                      {hardRuleViolations.map((v) => (
+                        <p key={v.rule} className="text-xs text-red-700">
+                          <span className="font-medium">Hard rule {v.rule}:</span> {v.message}
+                          {v.suggestion && ` ${v.suggestion}`}
+                        </p>
+                      ))}
+                    </div>
                   )}
                 </li>
               ))}

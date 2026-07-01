@@ -1,11 +1,30 @@
 import { prisma } from "@/lib/prisma";
 import type { Scenario, Strategy } from "@/generated/prisma/client";
+import { checkHardRules, type HardRuleViolation } from "@/lib/hard-rules";
 
 export type StrategyEligibility = "eligible" | "needs_more_info" | "not_eligible";
 
 export interface StrategyRecommendation {
   strategy: Strategy;
   eligibility: StrategyEligibility;
+  hardRuleViolations: HardRuleViolation[];
+}
+
+// CLAUDE.md's 9 hard rules (src/lib/hard-rules.ts) guard against annuity
+// exchanges, COLI, MEC, and qualified-plan life insurance — none of which
+// exist in the 17-strategy library yet (COLI isn't a seeded strategy at all;
+// the annuity-side strategies are all pending_content). Rule 4 (ILIT must be
+// original owner to avoid the §2035 3-year lookback) is the one rule that's
+// structurally applicable right now, since ilit-foundation-wrapper is
+// documented. The other 8 rules have nothing to check against yet — wiring
+// them in now would be a no-op, not real enforcement.
+function hardRuleViolationsFor(strategy: Strategy, scenario: Scenario): HardRuleViolation[] {
+  if (strategy.slug !== "ilit-foundation-wrapper" || scenario.existingPolicyTransfer === null) {
+    return [];
+  }
+  return checkHardRules({
+    ilit: { isOriginalOwner: scenario.existingPolicyTransfer === false },
+  }).violations;
 }
 
 // Per-strategy gate logic, hand-written from each documented strategy's
@@ -195,7 +214,7 @@ export async function recommendStrategies(scenario: Scenario): Promise<Recommend
     .map((strategy) => {
       const gate = GATES[strategy.slug];
       const eligibility: StrategyEligibility = gate ? gate(scenario) : "needs_more_info";
-      return { strategy, eligibility };
+      return { strategy, eligibility, hardRuleViolations: hardRuleViolationsFor(strategy, scenario) };
     })
     .filter((r) => r.eligibility !== "not_eligible");
 
@@ -211,6 +230,9 @@ export async function recommendStrategies(scenario: Scenario): Promise<Recommend
         needsMoreInfo: recommendations
           .filter((r) => r.eligibility === "needs_more_info")
           .map((r) => r.strategy.slug),
+        hardRuleViolations: recommendations
+          .filter((r) => r.hardRuleViolations.length > 0)
+          .map((r) => ({ slug: r.strategy.slug, violations: r.hardRuleViolations.map((v) => v.rule) })),
       },
     },
   });

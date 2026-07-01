@@ -206,6 +206,15 @@ This document is the staged build plan for the Insurance Strategy Engine. Each p
    strategies currently touch annuity/COLI/MEC territory, so this is a deliberate sequencing
    choice, not an oversight.
 7. **Session 7:** Build the pivot-to-alternative logic (age/health/structure/time/ownership checks)
+   — done. docs/04-field-underwriting.md section 5 turned out to have the real, doc-sourced gate
+   thresholds (age > 80 for most life strategies) this needed — no invented numbers. Structure/
+   ownership/time gates (no co-owners, no key employees, estate below exemption) were already
+   enforced per-strategy in Session 6's gates. Health is a softer flag (not a hard exclusion) since
+   a real Table-rating estimate needs the full 12-question life underwriting intake (Session 10),
+   not built yet. When the age gate fires, Atlas pivots per docs/03-intake-flow.md section 5's
+   format — but honestly states that the annuity-side alternatives (QWT, Annuity Rescue, Qualified
+   LTC) are still pending_content rather than recommending one that isn't in the locked library.
+   Verified against the doc's own age/health worked example.
 8. **Session 8:** Wire the existing compliance filter module into real recommendation/handoff output
 9. **Session 9:** Wire the existing 9-hard-rules module into the real recommendation flow
 10. **Session 10:** Build the field underwriting intake (life + annuity, separate flows)

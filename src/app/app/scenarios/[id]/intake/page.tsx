@@ -643,7 +643,7 @@ function AvatarClassificationCard({
 }
 
 async function RecommendationCard({ scenario }: { scenario: Scenario }) {
-  const recommendations = await recommendStrategies(scenario);
+  const { pivot, recommendations, healthConcernNote } = await recommendStrategies(scenario);
   const eligible = recommendations.filter((r) => r.eligibility === "eligible");
   const needsMoreInfo = recommendations.filter((r) => r.eligibility === "needs_more_info");
 
@@ -654,26 +654,40 @@ async function RecommendationCard({ scenario }: { scenario: Scenario }) {
         Drawn only from the locked, documented strategy library — never invented.
       </p>
 
-      {eligible.length === 0 ? (
-        <p className="mt-3 text-sm text-charcoal/70">
-          Based on what you&rsquo;ve told me, none of the standard strategies are a clean fit yet.
-          Fill in more of the optional sections above to narrow this down.
-        </p>
+      {pivot.triggered ? (
+        <p className="mt-3 rounded-md bg-cream px-3 py-2 text-sm text-charcoal/80">{pivot.message}</p>
       ) : (
-        <ul className="mt-3 space-y-3">
-          {eligible.map(({ strategy }) => (
-            <li key={strategy.id} className="rounded-md border border-border p-3">
-              <p className="text-sm font-medium text-navy">{strategy.name}</p>
-              {strategy.whyUsed && <p className="mt-1 text-xs text-charcoal/70">{strategy.whyUsed}</p>}
-            </li>
-          ))}
-        </ul>
-      )}
+        <>
+          {healthConcernNote && (
+            <p className="mt-3 rounded-md bg-cream px-3 py-2 text-xs text-charcoal/70">
+              {healthConcernNote}
+            </p>
+          )}
 
-      {needsMoreInfo.length > 0 && (
-        <p className="mt-3 text-xs text-charcoal/50">
-          Could also fit, pending more info: {needsMoreInfo.map((r) => r.strategy.name).join(", ")}.
-        </p>
+          {eligible.length === 0 ? (
+            <p className="mt-3 text-sm text-charcoal/70">
+              Based on what you&rsquo;ve told me, none of the standard strategies are a clean fit
+              yet. Fill in more of the optional sections above to narrow this down.
+            </p>
+          ) : (
+            <ul className="mt-3 space-y-3">
+              {eligible.map(({ strategy }) => (
+                <li key={strategy.id} className="rounded-md border border-border p-3">
+                  <p className="text-sm font-medium text-navy">{strategy.name}</p>
+                  {strategy.whyUsed && (
+                    <p className="mt-1 text-xs text-charcoal/70">{strategy.whyUsed}</p>
+                  )}
+                </li>
+              ))}
+            </ul>
+          )}
+
+          {needsMoreInfo.length > 0 && (
+            <p className="mt-3 text-xs text-charcoal/50">
+              Could also fit, pending more info: {needsMoreInfo.map((r) => r.strategy.name).join(", ")}.
+            </p>
+          )}
+        </>
       )}
     </Card>
   );

@@ -415,7 +415,24 @@ This document is the staged build plan for the Insurance Strategy Engine. Each p
 - [ ] Tested end-to-end with a pilot IMO before going public
 
 ### Batching for Copilot (6-8 sessions)
-1. **Session 1:** Build the admin dashboard (all key metrics)
+1. **Session 1:** Build the admin dashboard (all key metrics) — done, scoped to what's
+   computable from real data today. Built `/admin/dashboard` (docs/08-master-dashboard.md):
+   Module 1's Agents tab (MRR contribution, engagement score, added `User.lastLoginAt`, stamped on
+   both signup and login), Module 2 Revenue (Total/New/Churned MRR — single segment until Session
+   2 adds annual and Session 3 adds IMO seats; churn rate approximates "starting MRR" since no
+   historical MRR snapshot is stored), Module 3 Activity (engagement scores, top-20 active agents,
+   activity trends — pitch-deck and COI-action counters omitted since neither feature exists yet),
+   and Module 4 Churn (at-risk agents via the two triggers this data supports; the third trigger,
+   "declining vs. 90-day average," needs a historical baseline not tracked). Module 1's IMOs tab is
+   blocked on Session 3's IMO model. Module 5 (Support/ticketing) and Module 6 (Compliance Flag
+   Queue, Session 5) are out of scope for this session — Support has no ticketing infrastructure
+   anywhere in this repo, a gap of the same shape as the pitch deck/video recommender. Caught and
+   fixed a real bug during verification: signup establishes a session directly without calling
+   `logIn()`, so every fresh signup read as "never logged in" and permanently appeared on the
+   at-risk churn list — fixed by stamping `lastLoginAt` at signup too. Verified end-to-end: a real
+   $97/mo subscription, a canceled one, and an admin-comped one correctly show $97 total MRR (comped
+   excluded), $97 churned MRR, ~50% churn rate, and the comped/canceled agents don't appear as
+   active MRR contributors.
 2. **Session 2:** Add annual billing with the discount target
 3. **Session 3:** Build the IMO pricing tier system (50/100/500+)
 4. **Session 4:** Build the white-label branding engine

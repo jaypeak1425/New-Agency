@@ -29,8 +29,13 @@ export async function signUp(
   }
 
   const passwordHash = await bcrypt.hash(password, 12);
+  // Signup establishes a session directly (no separate logIn() call), so it
+  // has to stamp lastLoginAt itself — otherwise every freshly signed-up
+  // agent would read as "never logged in" and permanently show up on the
+  // master dashboard's at-risk churn list (docs/08-master-dashboard.md
+  // Module 4) from day one.
   const user = await prisma.user.create({
-    data: { email: normalizedEmail, passwordHash, name },
+    data: { email: normalizedEmail, passwordHash, name, lastLoginAt: new Date() },
   });
 
   await prisma.auditLog.create({
@@ -63,9 +68,12 @@ export async function logIn(email: string, password: string) {
     throw new AuthError("This account has been suspended.");
   }
 
-  await prisma.auditLog.create({
-    data: { actorId: user.id, action: "auth.login", target: user.id, metadata: {} },
-  });
+  await prisma.$transaction([
+    prisma.user.update({ where: { id: user.id }, data: { lastLoginAt: new Date() } }),
+    prisma.auditLog.create({
+      data: { actorId: user.id, action: "auth.login", target: user.id, metadata: {} },
+    }),
+  ]);
 
   await setSessionCookie({ sub: user.id, role: user.role });
   return user;

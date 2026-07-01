@@ -42,9 +42,14 @@ export default async function AdminPage({
     <main className="mx-auto max-w-5xl px-6 py-12">
       <div className="flex items-center justify-between">
         <h1 className="text-3xl">Admin</h1>
-        <Link href="/admin/strategies" className="text-sm text-navy hover:text-gold">
-          Strategy library &rarr;
-        </Link>
+        <div className="flex gap-4">
+          <Link href="/admin/dashboard" className="text-sm text-navy hover:text-gold">
+            Master dashboard &rarr;
+          </Link>
+          <Link href="/admin/strategies" className="text-sm text-navy hover:text-gold">
+            Strategy library &rarr;
+          </Link>
+        </div>
       </div>
       {error && (
         <p role="alert" className="mt-4 rounded-md bg-red-50 px-3 py-2 text-sm text-red-700">

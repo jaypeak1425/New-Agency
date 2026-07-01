@@ -320,9 +320,24 @@ model AgentProfile {
   // docs/07-progress-dashboard-math.md edge case 2 — same pattern for the
   // close rate table.
   closeRateOverridePercent      Float?
-  completedAt                   DateTime?
-  createdAt                     DateTime  @default(now())
-  updatedAt                     DateTime  @updatedAt
+
+  // docs/07-progress-dashboard-math.md section 4 — the book-of-business
+  // opportunity ("unmined gold") is self-reported per-avatar client counts,
+  // collected in onboarding or updated quarterly. Average client age/net
+  // worth/revenue and existing coverage in force are also listed in the doc
+  // as data to collect, but the doc's own calculation and worked example
+  // never use them — only the per-avatar counts feed the formula — so
+  // they're not modeled here to avoid fields nothing reads.
+  businessOwnersWithCoOwnersCount      Int?
+  businessOwnersSoloCount              Int?
+  hnwIndividualsCount                  Int?
+  qualifiedFundHeavyCount              Int?
+  familyLegacyCount                    Int?
+  bookAddressableFilterOverridePercent Float?
+
+  completedAt DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
 
   @@map("agent_profiles")
 }

@@ -52,3 +52,32 @@ export async function skipOnboarding(userId: string) {
     }),
   ]);
 }
+
+export interface BookOfBusinessInput {
+  businessOwnersWithCoOwnersCount: number | null;
+  businessOwnersSoloCount: number | null;
+  hnwIndividualsCount: number | null;
+  qualifiedFundHeavyCount: number | null;
+  familyLegacyCount: number | null;
+  bookAddressableFilterOverridePercent: number | null;
+}
+
+// docs/07-progress-dashboard-math.md section 4: "in Onboarding or Updated
+// Quarterly" — kept editable from Settings (not just the one-time onboarding
+// wizard) since the doc expects this to change over time.
+export async function updateBookOfBusiness(userId: string, input: BookOfBusinessInput) {
+  await prisma.$transaction([
+    prisma.agentProfile.upsert({
+      where: { userId },
+      create: { userId, ...input },
+      update: input,
+    }),
+    prisma.auditLog.create({
+      data: { actorId: userId, action: "agent_profile.book_of_business_updated", target: userId, metadata: {} },
+    }),
+  ]);
+}
+
+export async function getAgentProfile(userId: string) {
+  return prisma.agentProfile.findUnique({ where: { userId } });
+}

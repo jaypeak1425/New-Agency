@@ -325,7 +325,15 @@ This document is the staged build plan for the Insurance Strategy Engine. Each p
 6. **Session 6:** Build the progress dashboard (this week, this year, book, closed)
 7. **Session 7:** Build the prospecting list + weekly call queue
 8. **Session 8:** Build the video recommender (strategy → video mapping)
-9. **Session 9:** Build the book-of-business opportunity calculation
+9. **Session 9:** Build the book-of-business opportunity calculation — done, built ahead of
+   Session 6 (dashboard) since the dashboard needs this number. Added the 5 per-avatar client
+   counts to AgentProfile and a Settings-page form (kept editable outside the one-time onboarding
+   wizard, since the doc expects quarterly updates) using CLAUDE.md's locked per-avatar rates ($35k
+   BO w/ co-owners, $12k BO solo, $8k HNW, $6k Qualified-Fund, $2.5k Family/Legacy) and 15%
+   addressable filter. Average client age/net worth/revenue and existing-coverage fields from the
+   doc's "data the agent provides" list aren't modeled — the doc's own calculation and worked
+   example never use them, only the per-avatar counts do. Verified against the doc's exact worked
+   example (40/15/25/30/50 clients): $2,085,000 total, $312,750 addressable at 15%.
 10. **Session 10:** End-to-end testing, fix bugs, polish UX
 
 ---

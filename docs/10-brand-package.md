@@ -8,7 +8,7 @@ This is the foundation document for every marketing asset going forward. It lock
 
 **Last updated:** June 30, 2026
 
-**Note:** The agency name and software name are using placeholders (`[Insert Agency Name]` and `[Insert Software Name]`) until Jay locks them. The brand package is built so that find-and-replace works cleanly when the names are chosen.
+**Note:** Names are locked — Agency = **Peakbritt Financial Group** (Jay Peak + Luke Britt), Software = **Case Atlas**, Bot = **Atlas**. Section 1 below is the original naming exploration that preceded that decision; it's kept for reference.
 
 ---
 
@@ -18,13 +18,14 @@ This is the foundation document for every marketing asset going forward. It lock
 
 | Rank | Name | Why it fits | Watch out for |
 |---|---|---|---|
-| 1 | **Ascend Advisory** | "The producer's journey upward" + "advisor to the advisor" = exactly your model. Reads elegant, premium, timeless. | "Advisory" can blur with traditional advisory firms. |
-| 2 | **Northstar Advisory** | Trust-coded, clear direction, premium. Strong in financial services. | Slightly overused in the advisor space. |
-| 3 | **Apex Strategy Group** | The peak. Reads strong, capable, premium. "Strategy Group" positions as a strategic partner, not a product shop. | "Apex" is busy in B2B SaaS. |
-| 4 | **CrestPoint** | Premium without being flashy. Reads established. | Less directly tied to "strategy." |
-| 5 | **Northwind Strategy Partners** | Trust, clarity, forward motion. Reads established. | Two-word name is longer. |
+| Rank (original exploration) | Name | Why it fits | Watch out for |
+|---|---|---|---|
+| 1 | **Northstar Advisory** | Trust-coded, clear direction, premium. Strong in financial services. | Slightly overused in the advisor space. |
+| 2 | **Apex Strategy Group** | The peak. Reads strong, capable, premium. "Strategy Group" positions as a strategic partner, not a product shop. | "Apex" is busy in B2B SaaS. |
+| 3 | **CrestPoint** | Premium without being flashy. Reads established. | Less directly tied to "strategy." |
+| 4 | **Northwind Strategy Partners** | Trust, clarity, forward motion. Reads established. | Two-word name is longer. |
 
-**Recommended lock-in:** Ascend Advisory
+**Locked:** Peakbritt Financial Group — named directly for founders Jay Peak and Luke Britt. Reads as a real, established financial-services firm rather than a coined SaaS-style name, which fits an agency (as distinct from the software product, Case Atlas).
 
 ### Software Name — Top 5
 
@@ -179,8 +180,8 @@ Before any asset goes public, check it against this list:
 
 When Jay locks the agency name and software name, here's how to swap them across all 12 docs:
 
-**Agency name:** Find `[Insert Agency Name]` → Replace with `[Locked Name]`
-**Software name:** Find `[Insert Software Name]` → Replace with `[Locked Name]`
+**Agency name:** Find `Peakbritt Financial Group` → Replace with `[Locked Name]`
+**Software name:** Find `Case Atlas` → Replace with `[Locked Name]`
 **Bot name:** Atlas (already locked, no replacement needed)
 
 The placeholders are deliberately placed in every doc that mentions a name. The find-and-replace takes about 10 minutes.
@@ -189,14 +190,14 @@ The placeholders are deliberately placed in every doc that mentions a name. The 
 
 ## 7. Three Brand Directions for Jay to React To
 
-**Direction 1: Lock Ascend Advisory + Case Atlas + Atlas**
-- "Ascend Advisory" (the agency)
+**Direction 1: Lock Peakbritt Financial Group + Case Atlas + Atlas**
+- "Peakbritt Financial Group" (the agency)
 - "Case Atlas" (the software)
 - "Atlas" (the bot — already locked)
 - Tagline: "The strategy engine for the producer who's done guessing."
 - Visual: Premium Elegance (Moodboard A)
 - Voice: Honest Adventurer, applied across all three
-- Pairing: Strong. "I asked Atlas inside Case Atlas" has nice rhythm. "Ascend Advisory" is advisor-to-the-advisor.
+- Pairing: Strong. "I asked Atlas inside Case Atlas" has nice rhythm. "Peakbritt Financial Group" reads as a real, founder-named financial-services firm.
 
 **Direction 2: Lock Northstar Advisory + The Strategy Engine + Atlas**
 - "Northstar Advisory" (the agency)
@@ -216,7 +217,7 @@ The placeholders are deliberately placed in every doc that mentions a name. The 
 - Voice: Honest Adventurer, applied across all three
 - Pairing: Strong. "Apex" is the peak. "Case Atlas" pairs with "Atlas."
 
-**My recommendation: Direction 1.** It's the cleanest pairing (Ascend + Case Atlas + Atlas all flow together), the strongest premium feel, and the most defensible position.
+**Locked: Direction 1** (Peakbritt Financial Group + Case Atlas + Atlas). Cleanest pairing, strongest premium feel, most defensible position.
 
 ---
 
@@ -248,4 +249,4 @@ These all depend on the names being locked. If the names are still placeholders,
 
 ---
 
-*Last updated: June 30, 2026. Default recommended lock-in: Ascend Advisory + Case Atlas + Atlas. All other recommendations listed above for Jay to react to.*
+*Last updated: July 1, 2026. Locked: Peakbritt Financial Group + Case Atlas + Atlas.*

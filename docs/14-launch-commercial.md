@@ -3,7 +3,7 @@
 ## Purpose
 The 60-second launch commercial that anchors the public launch. Demo-first, iPhone-moment energy, the agent in the car typing "I've got a guy," Atlas returning the case design, the agent walking into the next meeting with everything ready. The hero asset of the marketing package.
 
-**Note:** Agency name is `[Insert Agency Name]` and software name is `[Insert Software Name]` until Jay locks them. Find-and-replace works.
+**Note:** Agency name is `Peakbritt Financial Group` and software name is `Case Atlas` until Jay locks them. Find-and-replace works.
 
 **Last updated:** June 30, 2026
 
@@ -20,14 +20,14 @@ The 60-second launch commercial that anchors the public launch. Demo-first, iPho
 **On-screen text:** "I've got a guy."
 
 ### Scene 2: The Demo (0:08-0:25)
-**Visual:** Screen recording of the agent opening [Insert Software Name] on their phone. They tap the new scenario button. They type (or speak):
+**Visual:** Screen recording of the agent opening Case Atlas on their phone. They tap the new scenario button. They type (or speak):
 
 *"Two owners 50 and 49, C-Corp, two key employees, average to good health. Want to set up a buy-sell and put money aside in a company reserve."*
 
 Atlas asks 10 questions, conversational, one at a time. The agent answers. The screen shows the questions and the answers flowing.
 
 **Voiceover:**
-"You open [Insert Software Name]. You type 'I've got a guy.' Atlas asks you the right questions."
+"You open Case Atlas. You type 'I've got a guy.' Atlas asks you the right questions."
 
 **On-screen text:** Atlas is asking. The agent is answering.
 
@@ -61,7 +61,7 @@ The pitch deck appears. The wholesaler handoff email appears. The COI action app
 "The strategy engine for the producer who's done guessing."
 
 **On-screen text:**
-"[Insert Software Name]"
+"Case Atlas"
 "$97/month. 30-day money-back."
 "[URL]"
 

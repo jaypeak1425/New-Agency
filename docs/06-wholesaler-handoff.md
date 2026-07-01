@@ -272,7 +272,7 @@ AGENT CONTACT
 Jay Peak
 [Phone]
 jay@email.com
-[Insert Agency Name] — affiliated with [IMO Name]
+Peakbritt Financial Group — affiliated with [IMO Name]
 Licensed in: [State list]
 ```
 

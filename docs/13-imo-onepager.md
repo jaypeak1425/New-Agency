@@ -3,7 +3,7 @@
 ## Purpose
 A single-page sales asset (front and back) for IMO/FMO/BGA/GA principals. The leave-behind after a discovery call or a cold outreach. Print-ready, premium feel, compliance-checked, defensible claims only.
 
-**Note:** Agency name is `[Insert Agency Name]` and software name is `[Insert Software Name]` until Jay locks them. Find-and-replace works.
+**Note:** Agency name is `Peakbritt Financial Group` and software name is `Case Atlas` until Jay locks them. Find-and-replace works.
 
 **Last updated:** June 30, 2026
 
@@ -15,7 +15,7 @@ A single-page sales asset (front and back) for IMO/FMO/BGA/GA principals. The le
 **"Give your agents a strategy engine they can't get anywhere else."**
 
 ### Subhead
-**"White-label [Insert Software Name] for your downline. Recruiting. Retention. Revenue."**
+**"White-label Case Atlas for your downline. Recruiting. Retention. Revenue."**
 
 ### The Three Positions (3 columns)
 
@@ -77,10 +77,10 @@ All tiers include: white-label branding, per-seat usage dashboard, compliance re
 
 ### Required Disclosures (bottom, smaller text)
 
-- [Insert Software Name] is a software product. It does not provide tax, legal, or investment advice.
+- Case Atlas is a software product. It does not provide tax, legal, or investment advice.
 - All benefit claims non-taxable while the policy remains in force. Final strategy subject to underwriting and client decision.
 - Past case results do not guarantee future commissions or production.
-- [Insert Agency Name] is not a CPA firm, law firm, or registered investment advisor. COI relationships are the responsibility of the agent.
+- Peakbritt Financial Group is not a CPA firm, law firm, or registered investment advisor. COI relationships are the responsibility of the agent.
 
 ---
 

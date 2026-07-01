@@ -77,7 +77,7 @@ infra, or credential action · **[Blocked]** = needs an input you haven't provid
   #f5f1e8; Playfair + Inter); branded login/dashboard/email templates; marketing landing page
   (three-position messaging); onboarding flow (tenure, income, goal, avatar mix, voice-vs-type,
   output prefs); brand-rules linter over all copy.
-- **[You/Dev]** Lock the names (recommended: Ascend Advisory + Case Atlas + Atlas); final logo art.
+- **[You/Dev]** Lock the names (recommended: Peakbritt Financial Group + Case Atlas + Atlas); final logo art.
 - **Done when:** all UI on-brand; marketing site states recruiting/retention/revenue; copy passes
   the brand-rules checklist.
 

@@ -24,8 +24,7 @@ separate portal).
 - **AI:** routed by complexity — simple tasks → cheap/fast model, complex → capable model.
   Single provider abstraction; model choice behind one `callModel(complexity, messages)` function.
 - **Pricing:** $97/mo direct (Phase 1). Annual (~$970–980) and IMO per-seat ($75) come in Phase 5.
-- **Names:** placeholders `[Insert Agency Name]` / `[Insert Software Name]`; bot name **Atlas** is
-  locked. Find-and-replace later. Recommended lock: Ascend Advisory + Case Atlas + Atlas.
+- **Names — locked:** Agency = **Peakbritt Financial Group**. Software = **Case Atlas**. Bot = **Atlas**.
 - **Build method:** one Copilot/Claude-Code session = one user story = 5–10 related changes. State
   goal, files in scope, constraints, definition of done up front.
 

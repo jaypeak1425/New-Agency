@@ -3,7 +3,7 @@
 ## Purpose
 A 7-email sequence that walks a stuck $100K producer from "I might be stuck forever" to "I need to see this strategy engine." Written in Jay's Adventurer voice — story-led, conversational, opening each email like a friend reaching out. Compliance checked, brand rules applied, every CTA one clear action.
 
-**Note:** Agency name is `[Insert Agency Name]` and software name is `[Insert Software Name]` until Jay locks them. Find-and-replace works.
+**Note:** Agency name is `Peakbritt Financial Group` and software name is `Case Atlas` until Jay locks them. Find-and-replace works.
 
 **Last updated:** June 30, 2026
 
@@ -247,8 +247,8 @@ Thanks for reading. Whatever you decide, I hope you find what's sitting in your 
 
 ## Sequence Notes
 
-- **From name:** Jay Peak (or "Jay from [Insert Agency Name]")
-- **From email:** jay@[Insert Agency Name].com (or similar)
+- **From name:** Jay Peak (or "Jay from Peakbritt Financial Group")
+- **From email:** jay@peakbrittfinancial.com (or similar)
 - **Reply-to:** A monitored inbox — Jay reads every reply
 - **Unsubscribe:** Prominent, every email, one click
 - **Send time:** Tuesday and Friday mornings, 7-8am agent local time

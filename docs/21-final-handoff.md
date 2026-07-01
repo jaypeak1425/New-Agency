@@ -30,12 +30,12 @@ Brain (separate, ingested during Phase 3): the canonical strategy library, with 
 
 | Decision | Default I'm using | What to do |
 |---|---|---|
-| Agency name | [Insert Agency Name] placeholder | Lock the name. Use find-and-replace across the docs. |
-| Software name | [Insert Software Name] placeholder | Lock the name. Use find-and-replace across the docs. |
+| Agency name | Peakbritt Financial Group placeholder | Lock the name. Use find-and-replace across the docs. |
+| Software name | Case Atlas placeholder | Lock the name. Use find-and-replace across the docs. |
 | Bot name | Atlas (locked) | No action needed. ✓ |
 
 My recommended picks if Jay wants them:
-• Agency: Ascend Advisory
+• Agency: Peakbritt Financial Group
 • Software: Case Atlas (pairs with the bot name Atlas — "I asked Atlas" inside Case Atlas has nice symmetry)
 • Bot: Atlas ✓ (locked)
 

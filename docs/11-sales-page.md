@@ -3,7 +3,7 @@
 ## Purpose
 The long-form sales page that lives at the URL where the demo is the centerpiece. The hero section leads with the "iPhone moment" demo. The page is written in the Adventurer voice, the promise is defensible, the brand rules are applied throughout, and the compliance language guardrails are baked in.
 
-**Note:** Agency name is `[Insert Agency Name]` and software name is `[Insert Software Name]` until Jay locks them. Find-and-replace works.
+**Note:** Agency name is `Peakbritt Financial Group` and software name is `Case Atlas` until Jay locks them. Find-and-replace works.
 
 **Last updated:** June 30, 2026
 
@@ -15,7 +15,7 @@ The long-form sales page that lives at the URL where the demo is the centerpiece
 
 **Subhead:** "Type 'I've got a guy.' Get the full case design — strategy, pitch deck, illustrations, order of operations for the sales meeting."
 
-**Primary CTA:** "Try [Insert Software Name] — $97/month, 30-day money-back"
+**Primary CTA:** "Try Case Atlas — $97/month, 30-day money-back"
 
 **Secondary CTA:** "Watch the 60-second demo"
 
@@ -51,7 +51,7 @@ The producers stuck at $100K wing it every time. They call the wholesaler, wait 
 **Body:**
 You're in your car. You have a thought: *"I've got a guy."*
 
-You pull out your phone. You open [Insert Software Name]. You tap the new scenario button. You type:
+You pull out your phone. You open Case Atlas. You tap the new scenario button. You type:
 
 *"Two owners 50 and 49, C-Corp, two key employees, average to good health. Want to set up a buy-sell and put money aside in a company reserve."*
 
@@ -147,7 +147,7 @@ You know compliance. The engine knows compliance.
 **Headline:** "Run your week inside the app."
 
 **Body:**
-When you open [Insert Software Name], four numbers are at the top:
+When you open Case Atlas, four numbers are at the top:
 
 - **This Week's Pipeline** — the expected commission value of every "I've got a guy" scenario you're working on this week
 - **This Year's Pipeline** — the expected commission value of every scenario you've been working on YTD
@@ -216,7 +216,7 @@ That's how confident we are.
 
 ## Section 12: The Final CTA
 
-**Headline:** "Try [Insert Software Name] for 30 days."
+**Headline:** "Try Case Atlas for 30 days."
 
 **Subhead:** "Run your first 'I've got a guy' tonight. See what the engine finds in your book. $97/month. Money back if you don't find an opportunity."
 
@@ -254,7 +254,7 @@ A: We refund you. No questions asked. This isn't a free month — this is a mone
 A: Yes. Monthly subscription, cancel anytime. Annual plans are available with a discount.
 
 **Q: Who is Jay Peak?**
-A: Jay Peak is the founder of [Insert Agency Name]. He and Luke Britt have spent their careers in life insurance and annuity case design. The engine is built on their thinking.
+A: Jay Peak is the founder of Peakbritt Financial Group. He and Luke Britt have spent their careers in life insurance and annuity case design. The engine is built on their thinking.
 
 **Q: Who is Luke Britt?**
 A: Luke Britt is the co-founder. His brain drives the High Net Worth, estate planning, and survivorship strategies.
@@ -265,10 +265,10 @@ A: Luke Britt is the co-founder. His brain drives the High Net Worth, estate pla
 
 **Required disclosures (prominent, every page footer):**
 
-- [Insert Software Name] is a software product. It does not provide tax, legal, or investment advice.
+- Case Atlas is a software product. It does not provide tax, legal, or investment advice.
 - All benefit claims non-taxable while the policy remains in force. Final strategy subject to underwriting and client decision.
 - Past case results do not guarantee future commissions or production.
-- [Insert Agency Name] is not a CPA firm, law firm, or registered investment advisor. COI relationships are the responsibility of the agent.
+- Peakbritt Financial Group is not a CPA firm, law firm, or registered investment advisor. COI relationships are the responsibility of the agent.
 
 ---
 

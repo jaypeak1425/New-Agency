@@ -3,7 +3,7 @@
 ## Purpose
 Three complete pitch decks, written so a sales hire or Jay can walk into a meeting and deliver them. Each deck has the slide-by-slide, the supporting bullets, the visual direction, the speaker notes, and the compliance check.
 
-**Note:** Agency name is `[Insert Agency Name]` and software name is `[Insert Software Name]` until Jay locks them. Find-and-replace works.
+**Note:** Agency name is `Peakbritt Financial Group` and software name is `Case Atlas` until Jay locks them. Find-and-replace works.
 
 **Last updated:** June 30, 2026
 
@@ -13,7 +13,7 @@ Three complete pitch decks, written so a sales hire or Jay can walk into a meeti
 
 ### Slide 1: Cover
 **Headline:** "The strategy engine for the producer who's done guessing."
-**Subhead:** "[Insert Software Name] by [Insert Agency Name]"
+**Subhead:** "Case Atlas by Peakbritt Financial Group"
 **Visual:** Premium dark navy background, gold accent line, Atlas logo (when locked)
 **Speaker notes:** Open with the line. Pause. Let it land. Most producers have been guessing for years. This is the moment they realize there's a better way.
 
@@ -113,7 +113,7 @@ Three complete pitch decks, written so a sales hire or Jay can walk into a meeti
 **Speaker notes:** "Top producers aren't smarter than you. They have a system. The system is what the engine gives you."
 
 ### Slide 16: The CTA
-**Headline:** "Try [Insert Software Name] for 30 days."
+**Headline:** "Try Case Atlas for 30 days."
 **Subhead:** "[Insert URL]. $97/month. Money back if you don't find an opportunity."
 **Visual:** CTA card, premium style
 **Speaker notes:** "Sign up today. Run your first 'I've got a guy' tonight. See what the engine finds in your book."
@@ -133,7 +133,7 @@ Three complete pitch decks, written so a sales hire or Jay can walk into a meeti
 
 ### Slide 1: Cover
 **Headline:** "Give your agents a strategy engine they can't get anywhere else."
-**Subhead:** "[Insert Software Name] — White-label for [Insert Agency Name]"
+**Subhead:** "Case Atlas — White-label for Peakbritt Financial Group"
 **Visual:** Premium dark navy, gold accent, white-label branding shown
 **Speaker notes:** Open with the line. This is the IMO pitch. The buyer is the principal. The pitch is "category of one."
 
@@ -263,7 +263,7 @@ This is the deck used on the actual discovery call. It's shorter, more visual, a
 
 ### Slide 1: Cover
 **Headline:** "Welcome. Let's look at the engine together."
-**Subhead:** "[Insert Software Name]"
+**Subhead:** "Case Atlas"
 **Visual:** Minimal premium cover
 **Speaker notes:** "Thanks for taking the call. Here's what we'll do in 20 minutes: I'll show you the engine, run a real 'I've got a guy' scenario, and show you the output. You can ask anything."
 

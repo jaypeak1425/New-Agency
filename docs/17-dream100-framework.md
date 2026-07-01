@@ -78,12 +78,12 @@ For each principal on the list, the outreach follows this sequence:
 - Note the personalized angle (which of the 5 segments, which of the 5 outreach angles applies)
 
 ### Step 2: LinkedIn Connection Request (Day 1)
-**Template:** "Hi [Name], I noticed [Insert Agency Name] focuses on [niche]. We've built something that addresses [pain point] for IMOs in your space. Would love to connect."
+**Template:** "Hi [Name], I noticed Peakbritt Financial Group focuses on [niche]. We've built something that addresses [pain point] for IMOs in your space. Would love to connect."
 
 **Compliance check:** No guarantee language. No specific income claims. The connection request is one sentence, no pitch.
 
 ### Step 3: Follow-Up Message (Day 3-5, if accepted)
-**Template:** "Thanks for connecting, [Name]. Quick context: I co-founded a strategy engine for insurance producers. It's a Jarvis-style tool that takes a 'I've got a guy' scenario and returns the full case design — strategy, pitch deck, COI workflow, wholesaler handoff. Several IMOs are using it white-label to drive recruiting, retention, and revenue. Worth a 15-minute call to see if it'd fit [Insert Agency Name]'s downline?"
+**Template:** "Thanks for connecting, [Name]. Quick context: I co-founded a strategy engine for insurance producers. It's a Jarvis-style tool that takes a 'I've got a guy' scenario and returns the full case design — strategy, pitch deck, COI workflow, wholesaler handoff. Several IMOs are using it white-label to drive recruiting, retention, and revenue. Worth a 15-minute call to see if it'd fit Peakbritt Financial Group's downline?"
 
 **Compliance check:** Same as above. No pitch in the message — just an ask for a call.
 

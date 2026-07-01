@@ -3,7 +3,13 @@
 import { redirect } from "next/navigation";
 import { headers } from "next/headers";
 import { getCurrentUser } from "@/lib/auth";
-import { ScenarioError, createScenario, saveIntakeAnswers, type IntakeAnswers } from "@/lib/scenarios";
+import {
+  ScenarioError,
+  createScenario,
+  saveIntakeAnswers,
+  updateScenarioStatus,
+  type IntakeAnswers,
+} from "@/lib/scenarios";
 import { WholesalerActionError, notifyWholesalerForScenario } from "@/lib/wholesaler";
 import {
   saveLifeUnderwritingIntake,
@@ -32,6 +38,7 @@ import type {
   ProductType,
   QualifiedFundsEstimate,
   RelationshipType,
+  ScenarioStatus,
   SourceOfFunds,
   TaxBracket,
   TobaccoUse,
@@ -189,6 +196,22 @@ export async function completeAnnuityIntakeAction(formData: FormData) {
     redirect(`/app/scenarios/${scenarioId}/underwriting/annuity?error=${encodeURIComponent(message)}`);
   }
   redirect(`/app/scenarios/${scenarioId}/intake`);
+}
+
+export async function updateScenarioStatusAction(formData: FormData) {
+  const user = await getCurrentUser();
+  if (!user) redirect("/login");
+
+  const scenarioId = String(formData.get("scenarioId") ?? "");
+  const status = String(formData.get("status") ?? "") as ScenarioStatus;
+
+  try {
+    await updateScenarioStatus(user.id, scenarioId, status);
+  } catch (error) {
+    const message = error instanceof ScenarioError ? error.message : "Something went wrong.";
+    redirect(`/app/scenarios?error=${encodeURIComponent(message)}`);
+  }
+  redirect("/app/scenarios");
 }
 
 export async function notifyWholesalerAction(formData: FormData) {

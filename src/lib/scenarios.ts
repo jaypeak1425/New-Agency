@@ -14,6 +14,7 @@ import type {
   NetWorthEstimate,
   QualifiedFundsEstimate,
   RelationshipType,
+  ScenarioStatus,
   TobaccoUse,
   UrgencyDriver,
 } from "@/generated/prisma/client";
@@ -57,6 +58,30 @@ export async function getScenarioForUser(userId: string, scenarioId: string) {
   if (!scenario || scenario.userId !== userId) {
     throw new ScenarioError("Case not found.");
   }
+  return scenario;
+}
+
+// docs/07-progress-dashboard-math.md section 5, edge cases 4/5: closed_won
+// and closed_lost stamp `closedAt` so the dashboard's "Closed This Year"
+// widget can filter to this year's closes; every other transition clears it.
+export async function updateScenarioStatus(userId: string, scenarioId: string, status: ScenarioStatus) {
+  await getScenarioForUser(userId, scenarioId);
+
+  const closedAt = status === "closed_won" || status === "closed_lost" ? new Date() : null;
+  const scenario = await prisma.scenario.update({
+    where: { id: scenarioId },
+    data: { status, closedAt },
+  });
+
+  await prisma.auditLog.create({
+    data: {
+      actorId: userId,
+      action: "scenario.status_updated",
+      target: scenarioId,
+      metadata: { status },
+    },
+  });
+
   return scenario;
 }
 

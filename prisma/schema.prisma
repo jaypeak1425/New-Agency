@@ -404,18 +404,31 @@ model WebhookEvent {
   @@map("webhook_events")
 }
 
+// docs/07-progress-dashboard-math.md section 1 lists "proposal sent, in
+// underwriting, closed, lost" as the pipeline statuses. Split "closed" into
+// won/lost per section 5's edge cases 4/5, since the dashboard's "Closed This
+// Year" widget (actual commissions earned) only makes sense for won cases.
+enum ScenarioStatus {
+  draft
+  active
+  in_underwriting
+  closed_won
+  closed_lost
+}
+
 // label/notes are the minimal case record from Phase 3 Session 3 (still used
 // for the wholesaler-notify bridge action). The intake* fields below are the
 // structured 10-question "I've got a guy" answers (docs/03-intake-flow.md
 // section 2) — avatar classification (Session 5) and the recommendation
 // engine (Session 6) still need to be wired up to read from them.
 model Scenario {
-  id                   String    @id @default(cuid())
+  id                   String         @id @default(cuid())
   userId               String
-  user                 User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user                 User           @relation(fields: [userId], references: [id], onDelete: Cascade)
   label                String
   notes                String?
-  status               String    @default("draft")
+  status               ScenarioStatus @default(draft)
+  closedAt             DateTime?
   wholesalerNotifiedAt DateTime?
 
   // Q1-Q10 answers

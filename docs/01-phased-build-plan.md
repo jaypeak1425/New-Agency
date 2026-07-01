@@ -322,7 +322,20 @@ This document is the staged build plan for the Insurance Strategy Engine. Each p
    pattern. `computeExpectedCommissionValue()` = expected commission × close rate. Verified: a
    $27,500 expected commission at the "existing prospect, second meeting" (40%) rate correctly
    computes an $11,000 expected commission value.
-6. **Session 6:** Build the progress dashboard (this week, this year, book, closed)
+6. **Session 6:** Build the progress dashboard (this week, this year, book, closed) — done. Added a
+   real `ScenarioStatus` enum (draft/active/in_underwriting/closed_won/closed_lost, replacing the
+   unused free-text `status` string) plus `closedAt`, and a status-change control on the scenarios
+   list. `/app` now renders the four widgets from section 5: This Week's Pipeline (not-closed
+   scenarios updated in the last 7 days), This Year's Pipeline (every scenario created YTD, with
+   the status breakdown), Book-of-Business Opportunity (Session 9's calculator), and Closed This
+   Year (actual commission — not close-rate-adjusted — for `closed_won` scenarios closed this
+   year), plus the doc's "list of every active scenario" below the four numbers. No separate
+   activity log or meeting-scheduler exists, so "activity in the last 7 days" uses `updatedAt` as a
+   simplification. Section 6's pipeline aging (stale/at-risk/cold flags), section 7's coaching
+   triggers, and goal tracking are out of scope for this session — they need the activity log and
+   agent-set goals this repo doesn't have yet. Verified end-to-end: a closed_won scenario with a
+   $50k permanent-life estimate and an "existing, strong relationship" type correctly shows $27,500
+   under Closed This Year and $11,000 (the close-rate-adjusted value) under This Year's Pipeline.
 7. **Session 7:** Build the prospecting list + weekly call queue
 8. **Session 8:** Build the video recommender (strategy → video mapping)
 9. **Session 9:** Build the book-of-business opportunity calculation — done, built ahead of

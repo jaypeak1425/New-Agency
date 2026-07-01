@@ -1,10 +1,19 @@
 import Link from "next/link";
 import { getCurrentUser } from "@/lib/auth";
 import { listScenariosForUser } from "@/lib/scenarios";
-import { createScenarioAction, notifyWholesalerAction } from "./actions";
+import { createScenarioAction, notifyWholesalerAction, updateScenarioStatusAction } from "./actions";
 import { SubmitButton } from "@/components/SubmitButton";
+import { StatusSelect } from "@/components/StatusSelect";
 import { Input } from "@/components/ui/Input";
 import { Card } from "@/components/ui/Card";
+
+const STATUS_OPTIONS = [
+  { value: "draft", label: "Draft" },
+  { value: "active", label: "Active" },
+  { value: "in_underwriting", label: "In underwriting" },
+  { value: "closed_won", label: "Closed — won" },
+  { value: "closed_lost", label: "Closed — lost" },
+];
 
 export default async function ScenariosPage({
   searchParams,
@@ -61,9 +70,10 @@ export default async function ScenariosPage({
               <div>
                 <h3 className="text-lg font-medium text-navy">{scenario.label}</h3>
                 {scenario.notes && <p className="mt-1 text-sm text-charcoal/70">{scenario.notes}</p>}
-                <p className="mt-2 text-xs uppercase tracking-wide text-charcoal/50">
-                  {scenario.status}
-                </p>
+                <form action={updateScenarioStatusAction} className="mt-2">
+                  <input type="hidden" name="scenarioId" value={scenario.id} />
+                  <StatusSelect name="status" defaultValue={scenario.status} options={STATUS_OPTIONS} />
+                </form>
                 {scenario.wholesalerNotifiedAt && (
                   <p className="mt-1 text-xs text-charcoal/50">
                     Wholesaler notified {new Date(scenario.wholesalerNotifiedAt).toLocaleString()}

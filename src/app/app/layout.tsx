@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { hasActiveAccess } from "@/lib/billing";
+import { needsOnboarding } from "@/lib/onboarding";
 import { logOutAction } from "../(auth)/actions";
 import { SubmitButton } from "@/components/SubmitButton";
 import { AppNav } from "@/components/AppNav";
@@ -23,6 +24,9 @@ export default async function AppLayout({ children }: { children: React.ReactNod
     const subscription = await prisma.subscription.findUnique({ where: { userId: user.id } });
     if (!hasActiveAccess(subscription?.status)) {
       redirect("/billing");
+    }
+    if (await needsOnboarding(user.id, user.role)) {
+      redirect("/onboarding");
     }
   }
 

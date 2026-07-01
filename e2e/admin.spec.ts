@@ -78,6 +78,8 @@ test("admin can suspend, reactivate, grant, and revoke a user's access", async (
   await expect(row).toContainText("comped");
 
   const targetPage3 = await loginAs(browser, targetEmail, "supersecret123");
+  await targetPage3.waitForURL("**/onboarding");
+  await targetPage3.click('button:has-text("Skip for now")');
   await targetPage3.waitForURL("**/app");
   await expect(targetPage3.locator("main")).toContainText("Dashboard");
 

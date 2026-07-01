@@ -36,6 +36,46 @@ enum AdminActionType {
   reactivate
 }
 
+enum TenureBand {
+  under_1yr
+  yr_1_3
+  yr_3_5
+  yr_5_10
+  yr_10_plus
+}
+
+enum IncomeBand {
+  under_50k
+  band_50k_100k
+  band_100k_250k
+  band_250k_500k
+  over_500k
+}
+
+enum InteractionPreference {
+  type
+  voice
+}
+
+enum OutputPreference {
+  pdf
+  slide_deck
+  one_pager
+}
+
+enum ReminderFrequency {
+  none
+  weekly
+  daily
+}
+
+enum Avatar {
+  high_net_worth
+  business_owner
+  qualified_fund_heavy
+  family_legacy
+}
+
 model User {
   id           String     @id @default(cuid())
   email        String     @unique
@@ -52,8 +92,34 @@ model User {
   adminActionsOn      AdminAction[]        @relation("AdminActionsReceived")
   auditLogEntries     AuditLog[]
   passwordResetTokens PasswordResetToken[]
+  agentProfile        AgentProfile?
 
   @@map("users")
+}
+
+// Onboarding profile per docs/03-intake-flow.md section 11 and
+// docs/00-developer-brief.md's "Agent onboarding and customization" layer.
+// completedAt null = onboarding not yet finished (including skipped).
+model AgentProfile {
+  id                      String                @id @default(cuid())
+  userId                  String                @unique
+  user                    User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tenureBand              TenureBand?
+  currentIncomeBand       IncomeBand?
+  goalIncome              Int?
+  avatarMix               Avatar[]              @default([])
+  interactionPreference   InteractionPreference @default(type)
+  outputPreference        OutputPreference      @default(pdf)
+  reminderFrequency       ReminderFrequency     @default(weekly)
+  hasCpaRelationship      Boolean               @default(false)
+  hasAttorneyRelationship Boolean               @default(false)
+  imoAffiliation          String?
+  skipped                 Boolean               @default(false)
+  completedAt             DateTime?
+  createdAt               DateTime              @default(now())
+  updatedAt               DateTime              @updatedAt
+
+  @@map("agent_profiles")
 }
 
 model PasswordResetToken {

@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { listImosForAdmin, imoSeatSummary, IMO_PRICE_PER_SEAT } from "@/lib/imo";
+import { listImosForAdmin, imoSeatSummary, getImoSeatUsage, IMO_PRICE_PER_SEAT } from "@/lib/imo";
 import { listUsersForAdmin } from "@/lib/admin";
 import {
   createImoAction,
@@ -29,6 +29,11 @@ export default async function AdminImosPage({
   const { error } = await searchParams;
   const [imos, users] = await Promise.all([listImosForAdmin(), listUsersForAdmin()]);
   const agents = users.filter((u) => u.role === "user");
+  const seatUsageByImoId = new Map(
+    await Promise.all(imos.map(async (imo) => [imo.id, await getImoSeatUsage(imo.id)] as const)),
+  );
+
+  const ENGAGEMENT_LABELS = { high: "High", medium: "Medium", low: "Low" };
 
   return (
     <main className="mx-auto max-w-5xl px-6 py-12">
@@ -149,15 +154,21 @@ export default async function AdminImosPage({
 
               <div className="mt-4 border-t border-border pt-4">
                 <p className="text-xs font-medium uppercase tracking-wide text-charcoal/50">
-                  Seated agents
+                  Seated agents — usage
                 </p>
                 <div className="mt-2 space-y-2">
                   {imo.agents.length === 0 && (
                     <p className="text-sm text-charcoal/60">No agents assigned yet.</p>
                   )}
-                  {imo.agents.map((agent) => (
+                  {(seatUsageByImoId.get(imo.id) ?? []).map(({ agent, engagementScore, scenarioCount }) => (
                     <div key={agent.id} className="flex items-center justify-between text-sm">
-                      <span className="text-charcoal">{agent.name ?? agent.email}</span>
+                      <div>
+                        <span className="text-charcoal">{agent.name ?? agent.email}</span>
+                        <span className="ml-2 text-xs text-charcoal/50">
+                          {ENGAGEMENT_LABELS[engagementScore]} engagement · {scenarioCount} scenario(s) ·
+                          last login {agent.lastLoginAt ? new Date(agent.lastLoginAt).toLocaleDateString() : "never"}
+                        </span>
+                      </div>
                       <form action={assignAgentToImoAction}>
                         <input type="hidden" name="agentUserId" value={agent.id} />
                         <input type="hidden" name="imoId" value="" />

@@ -500,7 +500,14 @@ This document is the staged build plan for the Insurance Strategy Engine. Each p
    wholesaler handoff, running the audit, and resolving the resulting flag all persisted correctly
    in the database (confirmed directly, since two of the checks hit the same `textContent()`
    whitespace quirk documented earlier this session).
-6. **Session 6:** Build per-seat usage tracking
+6. **Session 6:** Build per-seat usage tracking — done. docs/20-business-plan.md's "Per IMO: plan,
+   seats purchased, seats active, seats churning" aggregate counts were already built in Session 3
+   (`imoSeatSummary`); this adds the per-seat detail underneath it on `/admin/imos` — each seated
+   agent's engagement score, scenario count, and last login, reusing the exact scoring the master
+   dashboard's Clients module uses (extracted into a shared `src/lib/engagement.ts` to avoid a
+   circular import between `master-dashboard.ts` and `imo.ts`, both of which now depend on it).
+   Verified visually: seated agents across several test IMO contracts each show their real
+   engagement level, scenario count, and last-login date.
 7. **Session 7:** Build IMO-level reporting
 8. **Session 8:** End-to-end testing with a pilot IMO
 

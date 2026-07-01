@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma";
+import { engagementScoreFor, type EngagementScore } from "@/lib/engagement";
 import type { User, ImoOrgType } from "@/generated/prisma/client";
 
 export class ImoActionError extends Error {}
@@ -180,4 +181,44 @@ export function imoSeatSummary(imo: { seatsPurchased: number; agents: Array<Pick
 // access via the IMO's contract, not their own Stripe Subscription.
 export function hasImoSeatAccess(user: Pick<User, "imoId" | "status">): boolean {
   return Boolean(user.imoId) && user.status === "active";
+}
+
+export interface SeatUsageRow {
+  agent: User;
+  engagementScore: EngagementScore;
+  scenarioCount: number;
+}
+
+// docs/20-business-plan.md section "Per IMO": "seats active, seats churning."
+// docs/08-master-dashboard.md doesn't give a per-seat detail view beyond the
+// aggregate counts (imoSeatSummary above) — this reuses the same engagement
+// scoring the master dashboard's Clients module uses, so an IMO admin can see
+// which specific seats are being used, not just how many.
+export async function getImoSeatUsage(imoId: string): Promise<SeatUsageRow[]> {
+  const agents = await prisma.user.findMany({ where: { imoId }, orderBy: { name: "asc" } });
+  const now = Date.now();
+
+  return Promise.all(
+    agents.map(async (agent) => {
+      const [scenarioCount, mostRecentScenario, mostRecentIntake] = await Promise.all([
+        prisma.scenario.count({ where: { userId: agent.id } }),
+        prisma.scenario.findFirst({ where: { userId: agent.id }, orderBy: { createdAt: "desc" } }),
+        prisma.scenario.findFirst({
+          where: { userId: agent.id, intakeCompletedAt: { not: null } },
+          orderBy: { intakeCompletedAt: "desc" },
+        }),
+      ]);
+
+      return {
+        agent,
+        scenarioCount,
+        engagementScore: engagementScoreFor(
+          agent.lastLoginAt,
+          mostRecentScenario?.createdAt ?? null,
+          mostRecentIntake?.intakeCompletedAt ?? null,
+          now,
+        ),
+      };
+    }),
+  );
 }

@@ -274,13 +274,14 @@ model User {
   createdAt    DateTime   @default(now())
   updatedAt    DateTime   @updatedAt
 
-  subscription        Subscription?
-  scenarios           Scenario[]
-  adminActionsTaken   AdminAction[]        @relation("AdminActionsTaken")
-  adminActionsOn      AdminAction[]        @relation("AdminActionsReceived")
-  auditLogEntries     AuditLog[]
-  passwordResetTokens PasswordResetToken[]
-  agentProfile        AgentProfile?
+  subscription           Subscription?
+  scenarios              Scenario[]
+  adminActionsTaken      AdminAction[]          @relation("AdminActionsTaken")
+  adminActionsOn         AdminAction[]          @relation("AdminActionsReceived")
+  auditLogEntries        AuditLog[]
+  passwordResetTokens    PasswordResetToken[]
+  agentProfile           AgentProfile?
+  weeklyCallQueueEntries WeeklyCallQueueEntry[]
 
   // One wholesaler per agent (docs/23-wholesaler-assignment.md). Only
   // meaningful when this user's role is "user" (an agent); assignedWholesaler
@@ -479,11 +480,37 @@ model Scenario {
   lifeUnderwritingIntake LifeUnderwritingIntake?
   annuityIntake          AnnuityIntake?
   strategyEstimates      ScenarioStrategyEstimate[]
+  weeklyCallQueueEntries WeeklyCallQueueEntry[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   @@map("scenarios")
+}
+
+// docs/00-developer-brief.md's "This week, call these 3 prospects with these
+// pitches" + docs/01-phased-build-plan.md's "weekly call queue auto-generates
+// each Monday." No cron/job runner exists in this repo, so generation is lazy
+// (computed the first time the agent opens /app/prospects in a given week)
+// rather than a scheduled background job — but once generated, the week's 3
+// entries are persisted and stay fixed even if the ranking shifts later that
+// week, matching "auto-generates each Monday" (a stable weekly snapshot).
+model WeeklyCallQueueEntry {
+  id                String   @id @default(cuid())
+  userId            String
+  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  scenarioId        String
+  scenario          Scenario @relation(fields: [scenarioId], references: [id], onDelete: Cascade)
+  weekStart         DateTime
+  rank              Int
+  // Snapshotted at generation time so re-viewing the queue later in the week
+  // doesn't re-run (and re-audit-log) the recommendation engine for entries
+  // that are already pinned.
+  pitchStrategyName String?
+  createdAt         DateTime @default(now())
+
+  @@unique([userId, weekStart, scenarioId])
+  @@map("weekly_call_queue_entries")
 }
 
 // docs/04-field-underwriting.md section 2 — the 12-question life insurance

@@ -336,7 +336,21 @@ This document is the staged build plan for the Insurance Strategy Engine. Each p
    agent-set goals this repo doesn't have yet. Verified end-to-end: a closed_won scenario with a
    $50k permanent-life estimate and an "existing, strong relationship" type correctly shows $27,500
    under Closed This Year and $11,000 (the close-rate-adjusted value) under This Year's Pipeline.
-7. **Session 7:** Build the prospecting list + weekly call queue
+7. **Session 7:** Build the prospecting list + weekly call queue — done. No dedicated spec doc
+   exists for this feature (same gap shape as the pitch deck); the only concrete content is
+   docs/00-developer-brief.md's "this week, call these 3 prospects with these pitches" and
+   docs/03-intake-flow.md's own worked example, where a "prospect" is just a logged scenario and
+   its expected commission value. Built `/app/prospects`: a full prospecting list of every open
+   (non-closed) scenario ranked by expected commission value (reusing Session 5/6's calculators),
+   plus a top-3 weekly call queue where each entry's "pitch" is its top eligible recommendation from
+   the Phase 3 recommendation engine. There's no cron/job runner in this repo, so "auto-generates
+   each Monday" is implemented as lazy generation: the queue is computed and persisted
+   (`WeeklyCallQueueEntry`, keyed by user + Monday-anchored week) the first time the agent opens the
+   page that week, then stays pinned for the rest of the week rather than re-ranking on every view.
+   Verified end-to-end: 4 scenarios with premiums yielding $44,000/$27,500/$11,000/$2,750 expected
+   commission correctly rank in that order on the full list, the top 3 are queued with the ILIT
+   pitch, the 4th is excluded, and adding a 5th, higher-value scenario mid-week does not reshuffle
+   the already-generated queue.
 8. **Session 8:** Build the video recommender (strategy → video mapping)
 9. **Session 9:** Build the book-of-business opportunity calculation — done, built ahead of
    Session 6 (dashboard) since the dashboard needs this number. Added the 5 per-avatar client

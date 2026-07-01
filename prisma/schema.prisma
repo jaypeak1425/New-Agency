@@ -1,0 +1,107 @@
+// Case Atlas — Phase 1 schema (Skeleton).
+// Scope per phase-1-sessions/PHASE-1.md Session 1: users, subscriptions,
+// admin_actions, audit_log, and a scenarios stub (fleshed out in Phase 3).
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum UserRole {
+  user
+  admin
+}
+
+enum UserStatus {
+  active
+  suspended
+}
+
+enum SubscriptionStatus {
+  incomplete
+  trialing
+  active
+  past_due
+  canceled
+}
+
+enum AdminActionType {
+  grant
+  revoke
+  suspend
+  reactivate
+}
+
+model User {
+  id           String     @id @default(cuid())
+  email        String     @unique
+  passwordHash String
+  name         String?
+  role         UserRole   @default(user)
+  status       UserStatus @default(active)
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+
+  subscription      Subscription?
+  scenarios         Scenario[]
+  adminActionsTaken AdminAction[] @relation("AdminActionsTaken")
+  adminActionsOn    AdminAction[] @relation("AdminActionsReceived")
+  auditLogEntries   AuditLog[]
+
+  @@map("users")
+}
+
+model Subscription {
+  id                   String             @id @default(cuid())
+  userId               String             @unique
+  user                 User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  stripeCustomerId     String             @unique
+  stripeSubscriptionId String?            @unique
+  status               SubscriptionStatus @default(incomplete)
+  plan                 String             @default("agent_monthly_97")
+  currentPeriodEnd     DateTime?
+  createdAt            DateTime           @default(now())
+  updatedAt            DateTime           @updatedAt
+
+  @@map("subscriptions")
+}
+
+model AdminAction {
+  id           String          @id @default(cuid())
+  adminId      String
+  admin        User            @relation("AdminActionsTaken", fields: [adminId], references: [id])
+  targetUserId String
+  targetUser   User            @relation("AdminActionsReceived", fields: [targetUserId], references: [id])
+  action       AdminActionType
+  reason       String?
+  createdAt    DateTime        @default(now())
+
+  @@map("admin_actions")
+}
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  actorId   String?
+  actor     User?    @relation(fields: [actorId], references: [id])
+  action    String
+  target    String
+  metadata  Json?
+  createdAt DateTime @default(now())
+
+  @@map("audit_log")
+}
+
+// Stub only — fleshed out in Phase 3 (The Brain).
+model Scenario {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  status    String   @default("draft")
+  createdAt DateTime @default(now())
+
+  @@map("scenarios")
+}

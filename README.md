@@ -30,3 +30,15 @@ without it. Phase 3's *content* (real strategy records) needs it. When you have 
 
 `docs/00-developer-brief.md` → `docs/01-phased-build-plan.md` → then the phase you're on. The full
 index and per-phase "what I can build" map is in `docs/BUILD_PLAN_reconciled.md`.
+
+## Running the app locally (Phase 1+)
+
+1. `npm install`
+2. `cp .env.example .env` and fill in a real `DATABASE_URL` (a local Postgres or a Supabase
+   project connection string). The other keys (Supabase, Stripe) can stay as placeholders until
+   the sessions that need them.
+3. `npx prisma migrate dev` — applies the schema in `prisma/schema.prisma`.
+4. `npm run db:seed` — creates one admin user from `SEED_ADMIN_EMAIL` / `SEED_ADMIN_PASSWORD`.
+5. `npm run dev` — app runs at `http://localhost:3000`; `/api/health` checks DB connectivity.
+
+Deploy target is Railway; `railway.json` runs `prisma migrate deploy` before `next start`.

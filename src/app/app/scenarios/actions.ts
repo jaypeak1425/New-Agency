@@ -6,15 +6,21 @@ import { getCurrentUser } from "@/lib/auth";
 import { ScenarioError, createScenario, saveIntakeAnswers, type IntakeAnswers } from "@/lib/scenarios";
 import { WholesalerActionError, notifyWholesalerForScenario } from "@/lib/wholesaler";
 import type {
+  BeneficiaryStructure,
   BusinessOwnerStatus,
   BusinessStructure,
+  ControlPreference,
   ExistingRelationship,
+  ExistingStructure,
+  FundingPreference,
   HealthRating,
   IncomeRevenueRange,
   IntakeGoal,
+  MaritalStatus,
   NetWorthEstimate,
   QualifiedFundsEstimate,
   TobaccoUse,
+  UrgencyDriver,
 } from "@/generated/prisma/client";
 
 async function getAppBaseUrl() {
@@ -90,6 +96,16 @@ export async function completeIntakeAction(formData: FormData) {
     netWorthEstimate: optionalEnum<NetWorthEstimate>(formData, "netWorthEstimate"),
     qualifiedFundsEstimate: optionalEnum<QualifiedFundsEstimate>(formData, "qualifiedFundsEstimate"),
     hasDependentsUnder18: optionalBoolean(formData, "hasDependentsUnder18"),
+    maritalStatus: optionalEnum<MaritalStatus>(formData, "maritalStatus"),
+    stateOfResidence: optionalString(formData, "stateOfResidence"),
+    illiquidNetWorth: optionalBoolean(formData, "illiquidNetWorth"),
+    estateExceedsExemption: optionalBoolean(formData, "estateExceedsExemption"),
+    concentratedLowBasisPosition: optionalBoolean(formData, "concentratedLowBasisPosition"),
+    beneficiaryStructure: optionalEnum<BeneficiaryStructure>(formData, "beneficiaryStructure"),
+    controlPreference: optionalEnum<ControlPreference>(formData, "controlPreference"),
+    fundingPreference: optionalEnum<FundingPreference>(formData, "fundingPreference"),
+    existingStructures: formData.getAll("existingStructures") as ExistingStructure[],
+    urgencyDriver: optionalEnum<UrgencyDriver>(formData, "urgencyDriver"),
   };
 
   try {

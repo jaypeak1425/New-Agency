@@ -1,14 +1,20 @@
 import { prisma } from "@/lib/prisma";
 import type {
+  BeneficiaryStructure,
   BusinessOwnerStatus,
   BusinessStructure,
+  ControlPreference,
   ExistingRelationship,
+  ExistingStructure,
+  FundingPreference,
   HealthRating,
   IncomeRevenueRange,
   IntakeGoal,
+  MaritalStatus,
   NetWorthEstimate,
   QualifiedFundsEstimate,
   TobaccoUse,
+  UrgencyDriver,
 } from "@/generated/prisma/client";
 
 export class ScenarioError extends Error {}
@@ -75,6 +81,16 @@ export interface IntakeAnswers {
   netWorthEstimate: NetWorthEstimate | null;
   qualifiedFundsEstimate: QualifiedFundsEstimate | null;
   hasDependentsUnder18: boolean | null;
+  maritalStatus: MaritalStatus | null;
+  stateOfResidence: string | null;
+  illiquidNetWorth: boolean | null;
+  estateExceedsExemption: boolean | null;
+  concentratedLowBasisPosition: boolean | null;
+  beneficiaryStructure: BeneficiaryStructure | null;
+  controlPreference: ControlPreference | null;
+  fundingPreference: FundingPreference | null;
+  existingStructures: ExistingStructure[];
+  urgencyDriver: UrgencyDriver | null;
 }
 
 export async function saveIntakeAnswers(

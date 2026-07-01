@@ -3,9 +3,11 @@ import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth";
 import { getScenarioForUser, ScenarioError } from "@/lib/scenarios";
 import { classifyAvatars } from "@/lib/avatars";
+import { recommendStrategies } from "@/lib/recommendations";
 import { completeIntakeAction } from "../../actions";
 import { Card } from "@/components/ui/Card";
 import { SubmitButton } from "@/components/SubmitButton";
+import type { Scenario } from "@/generated/prisma/client";
 
 const AVATAR_LABELS: Record<string, string> = {
   business_owner: "Business Owner",
@@ -373,6 +375,221 @@ export default async function IntakePage({
             </div>
           </fieldset>
 
+          <fieldset className="border-t border-border pt-6">
+            <legend className="text-sm font-medium text-navy">
+              Optional — HNW estate-planning details
+            </legend>
+            <p className="mt-1 text-xs text-charcoal/50">
+              Only needed to check this prospect against the HNW estate-planning strategies (ILIT,
+              SLAT, Dynasty Trust, and similar). Most scenarios can skip this section.
+            </p>
+
+            <p className="mt-4 text-sm text-charcoal">Marital status</p>
+            <div className="mt-2 space-y-2">
+              {(["married", "single"] as const).map((value) => (
+                <label key={value} className={optionLabelClass}>
+                  <input
+                    type="radio"
+                    name="maritalStatus"
+                    value={value}
+                    defaultChecked={scenario.maritalStatus === value}
+                    className={radioClass}
+                  />
+                  {value === "married" ? "Married" : "Single"}
+                </label>
+              ))}
+            </div>
+
+            <label className="mt-4 block text-sm font-medium text-charcoal">
+              State of residence
+              <input
+                type="text"
+                name="stateOfResidence"
+                defaultValue={scenario.stateOfResidence ?? ""}
+                placeholder="For state estate-tax exposure"
+                className={`${textInputClass} w-48`}
+              />
+            </label>
+
+            <p className="mt-4 text-sm text-charcoal">
+              Is their net worth mostly illiquid (real estate, closely held business)?
+            </p>
+            <div className="mt-2 space-y-2">
+              {(["true", "false"] as const).map((value) => (
+                <label key={value} className={optionLabelClass}>
+                  <input
+                    type="radio"
+                    name="illiquidNetWorth"
+                    value={value}
+                    defaultChecked={
+                      scenario.illiquidNetWorth !== null && String(scenario.illiquidNetWorth) === value
+                    }
+                    className={radioClass}
+                  />
+                  {value === "true" ? "Yes" : "No"}
+                </label>
+              ))}
+            </div>
+
+            <p className="mt-4 text-sm text-charcoal">
+              Does their estate value exceed the federal exemption ($15M single / $30M married in
+              2026)?
+            </p>
+            <div className="mt-2 space-y-2">
+              {(["true", "false"] as const).map((value) => (
+                <label key={value} className={optionLabelClass}>
+                  <input
+                    type="radio"
+                    name="estateExceedsExemption"
+                    value={value}
+                    defaultChecked={
+                      scenario.estateExceedsExemption !== null &&
+                      String(scenario.estateExceedsExemption) === value
+                    }
+                    className={radioClass}
+                  />
+                  {value === "true" ? "Yes" : "No"}
+                </label>
+              ))}
+            </div>
+
+            <p className="mt-4 text-sm text-charcoal">
+              Do they hold a concentrated, low-basis appreciated asset (founder stock, appreciated
+              real estate)?
+            </p>
+            <div className="mt-2 space-y-2">
+              {(["true", "false"] as const).map((value) => (
+                <label key={value} className={optionLabelClass}>
+                  <input
+                    type="radio"
+                    name="concentratedLowBasisPosition"
+                    value={value}
+                    defaultChecked={
+                      scenario.concentratedLowBasisPosition !== null &&
+                      String(scenario.concentratedLowBasisPosition) === value
+                    }
+                    className={radioClass}
+                  />
+                  {value === "true" ? "Yes" : "No"}
+                </label>
+              ))}
+            </div>
+
+            <p className="mt-4 text-sm text-charcoal">Who&rsquo;s the intended beneficiary structure?</p>
+            <div className="mt-2 space-y-2">
+              {(
+                [
+                  ["spouse_only", "Spouse only"],
+                  ["children", "Children"],
+                  ["grandchildren_multigenerational", "Grandchildren / multi-generational"],
+                  ["charity", "Charity"],
+                ] as const
+              ).map(([value, label]) => (
+                <label key={value} className={optionLabelClass}>
+                  <input
+                    type="radio"
+                    name="beneficiaryStructure"
+                    value={value}
+                    defaultChecked={scenario.beneficiaryStructure === value}
+                    className={radioClass}
+                  />
+                  {label}
+                </label>
+              ))}
+            </div>
+
+            <p className="mt-4 text-sm text-charcoal">Control preference</p>
+            <div className="mt-2 space-y-2">
+              {(
+                [
+                  ["relinquish_control", "Willing to fully relinquish control (outright gift)"],
+                  ["retained_access_or_control", "Wants retained access or control"],
+                ] as const
+              ).map(([value, label]) => (
+                <label key={value} className={optionLabelClass}>
+                  <input
+                    type="radio"
+                    name="controlPreference"
+                    value={value}
+                    defaultChecked={scenario.controlPreference === value}
+                    className={radioClass}
+                  />
+                  {label}
+                </label>
+              ))}
+            </div>
+
+            <p className="mt-4 text-sm text-charcoal">Funding preference</p>
+            <div className="mt-2 space-y-2">
+              {(
+                [
+                  ["gift_or_exemption", "Willing to gift / use exemption"],
+                  ["financing_or_loan", "Prefers financing / loan structures"],
+                  ["employer_funded", "Wants employer-funded (executive benefit)"],
+                ] as const
+              ).map(([value, label]) => (
+                <label key={value} className={optionLabelClass}>
+                  <input
+                    type="radio"
+                    name="fundingPreference"
+                    value={value}
+                    defaultChecked={scenario.fundingPreference === value}
+                    className={radioClass}
+                  />
+                  {label}
+                </label>
+              ))}
+            </div>
+
+            <p className="mt-4 text-sm text-charcoal">Existing structures already in place</p>
+            <div className="mt-2 space-y-2">
+              {(
+                [
+                  ["ilit", "ILIT"],
+                  ["grantor_trust", "Grantor trust"],
+                  ["qualified_plan", "Qualified plan"],
+                  ["business_entity", "Business entity"],
+                ] as const
+              ).map(([value, label]) => (
+                <label key={value} className={optionLabelClass}>
+                  <input
+                    type="checkbox"
+                    name="existingStructures"
+                    value={value}
+                    defaultChecked={scenario.existingStructures.includes(value)}
+                    className={checkboxClass}
+                  />
+                  {label}
+                </label>
+              ))}
+            </div>
+
+            <p className="mt-4 text-sm text-charcoal">Urgency driver</p>
+            <div className="mt-2 space-y-2">
+              {(
+                [
+                  ["legislative_exemption_sunset", "Legislative / exemption-sunset concern"],
+                  ["liquidity_event", "Liquidity event"],
+                  ["health_change", "Health change"],
+                  ["business_sale", "Business sale"],
+                  ["generational_transfer_event", "Generational transfer event"],
+                  ["none", "None / not urgent"],
+                ] as const
+              ).map(([value, label]) => (
+                <label key={value} className={optionLabelClass}>
+                  <input
+                    type="radio"
+                    name="urgencyDriver"
+                    value={value}
+                    defaultChecked={scenario.urgencyDriver === value}
+                    className={radioClass}
+                  />
+                  {label}
+                </label>
+              ))}
+            </div>
+          </fieldset>
+
           <div className="flex items-center gap-4 pt-2">
             <SubmitButton pendingText="Saving…">Save intake answers</SubmitButton>
           </div>
@@ -380,6 +597,7 @@ export default async function IntakePage({
       </Card>
 
       {scenario.intakeCompletedAt && <AvatarClassificationCard scenario={scenario} />}
+      {scenario.intakeCompletedAt && <RecommendationCard scenario={scenario} />}
     </div>
   );
 }
@@ -418,6 +636,43 @@ function AvatarClassificationCard({
       {classification.amtTrapFlag && (
         <p className="mt-3 rounded-md bg-cream px-3 py-2 text-xs text-charcoal/70">
           {classification.amtTrapNote}
+        </p>
+      )}
+    </Card>
+  );
+}
+
+async function RecommendationCard({ scenario }: { scenario: Scenario }) {
+  const recommendations = await recommendStrategies(scenario);
+  const eligible = recommendations.filter((r) => r.eligibility === "eligible");
+  const needsMoreInfo = recommendations.filter((r) => r.eligibility === "needs_more_info");
+
+  return (
+    <Card className="mt-6 max-w-2xl">
+      <h2 className="text-lg font-medium text-navy">Strategy recommendation</h2>
+      <p className="mt-1 text-xs text-charcoal/50">
+        Drawn only from the locked, documented strategy library — never invented.
+      </p>
+
+      {eligible.length === 0 ? (
+        <p className="mt-3 text-sm text-charcoal/70">
+          Based on what you&rsquo;ve told me, none of the standard strategies are a clean fit yet.
+          Fill in more of the optional sections above to narrow this down.
+        </p>
+      ) : (
+        <ul className="mt-3 space-y-3">
+          {eligible.map(({ strategy }) => (
+            <li key={strategy.id} className="rounded-md border border-border p-3">
+              <p className="text-sm font-medium text-navy">{strategy.name}</p>
+              {strategy.whyUsed && <p className="mt-1 text-xs text-charcoal/70">{strategy.whyUsed}</p>}
+            </li>
+          ))}
+        </ul>
+      )}
+
+      {needsMoreInfo.length > 0 && (
+        <p className="mt-3 text-xs text-charcoal/50">
+          Could also fit, pending more info: {needsMoreInfo.map((r) => r.strategy.name).join(", ")}.
         </p>
       )}
     </Card>

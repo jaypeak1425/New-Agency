@@ -193,7 +193,18 @@ This document is the staged build plan for the Insurance Strategy Engine. Each p
    engine returns `needsMoreInfo` for HNW/Qualified-Fund-Heavy when those follow-ups are unanswered
    rather than guessing. The AMT-trap flag is band-level (from Q10's income/revenue bucket), not a
    precise trigger — noted on the output.
-6. **Session 6:** Build the strategy recommendation engine (draw from Part 5 mapping tables)
+6. **Session 6:** Build the strategy recommendation engine (draw from Part 5 mapping tables) —
+   done, scoped to the 10 documented strategies only (Brain Lock: pending_content strategies are
+   never evaluated or surfaced). No Part 5 mapping tables exist in this repo (same brain-doc gap as
+   Session 3), so each documented strategy's gate is hand-coded from its own
+   `matchingParameters` against real scenario fields — extended intake with
+   docs/advanced-case-design-framework.md section 2's HNW parser schema (marital status, estate
+   value vs. exemption, control/funding preference, existing structures, etc.) as an optional
+   section, since the 8 supporting strategies' gates need it. Each strategy resolves to
+   eligible / needs-more-info / not-eligible; only eligible + needs-more-info are shown to the
+   agent. Hard-rules wiring is still Session 9's job, not done here — none of the 10 documented
+   strategies currently touch annuity/COLI/MEC territory, so this is a deliberate sequencing
+   choice, not an oversight.
 7. **Session 7:** Build the pivot-to-alternative logic (age/health/structure/time/ownership checks)
 8. **Session 8:** Wire the existing compliance filter module into real recommendation/handoff output
 9. **Session 9:** Wire the existing 9-hard-rules module into the real recommendation flow

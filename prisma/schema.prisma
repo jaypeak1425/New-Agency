@@ -121,6 +121,12 @@ enum IntakeGoal {
   estate_planning
   legacy
   other
+  // Added for the recommendation engine (Session 6) — vocabulary from
+  // docs/advanced-case-design-framework.md section 2's "Primary goal" parser
+  // target, layered onto the existing Q8 "select all that apply" list.
+  minimize_estate_tax
+  charitable_intent
+  estate_liquidity
 }
 
 enum ExistingRelationship {
@@ -151,6 +157,51 @@ enum NetWorthEstimate {
 enum QualifiedFundsEstimate {
   under_500k
   over_500k
+}
+
+// docs/advanced-case-design-framework.md section 2 — the "Scenario Input
+// Parameters" the doc itself designs as the parser target for the 8 HNW
+// estate-planning (supporting) strategies' matchingParameters. Optional
+// follow-up fields, same pattern as the Session 5 avatar fields above: asked
+// only when a HNW-tagged strategy's gate needs them, not part of the fixed
+// 10 questions.
+enum MaritalStatus {
+  married
+  single
+}
+
+enum BeneficiaryStructure {
+  spouse_only
+  children
+  grandchildren_multigenerational
+  charity
+}
+
+enum ControlPreference {
+  relinquish_control
+  retained_access_or_control
+}
+
+enum FundingPreference {
+  gift_or_exemption
+  financing_or_loan
+  employer_funded
+}
+
+enum ExistingStructure {
+  ilit
+  grantor_trust
+  qualified_plan
+  business_entity
+}
+
+enum UrgencyDriver {
+  legislative_exemption_sunset
+  liquidity_event
+  health_change
+  business_sale
+  generational_transfer_event
+  none
 }
 
 // docs/00-developer-brief.md: "a locked library of 9 core + 8 supporting
@@ -350,6 +401,20 @@ model Scenario {
   netWorthEstimate       NetWorthEstimate?
   qualifiedFundsEstimate QualifiedFundsEstimate?
   hasDependentsUnder18   Boolean?
+
+  // Optional recommendation-engine follow-ups (docs/advanced-case-design-framework.md
+  // section 2) — only needed to gate-check the 8 HNW estate-planning (supporting)
+  // strategies; most scenarios will never fill these in.
+  maritalStatus                MaritalStatus?
+  stateOfResidence             String?
+  illiquidNetWorth             Boolean?
+  estateExceedsExemption       Boolean?
+  concentratedLowBasisPosition Boolean?
+  beneficiaryStructure         BeneficiaryStructure?
+  controlPreference            ControlPreference?
+  fundingPreference            FundingPreference?
+  existingStructures           ExistingStructure[]   @default([])
+  urgencyDriver                UrgencyDriver?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

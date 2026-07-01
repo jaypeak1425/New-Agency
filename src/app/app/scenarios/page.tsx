@@ -1,8 +1,10 @@
+import { EmptyState } from "@/components/ui/EmptyState";
+
 export default function ScenariosPage() {
   return (
-    <>
-      <h1>Scenarios</h1>
-      <p>No scenarios yet. The &ldquo;I&rsquo;ve got a guy&rdquo; intake ships in Phase 3.</p>
-    </>
+    <EmptyState
+      title="Scenarios"
+      body="No scenarios yet. The “I’ve got a guy” intake ships in Phase 3."
+    />
   );
 }

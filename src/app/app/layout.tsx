@@ -1,18 +1,11 @@
-import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { hasActiveAccess } from "@/lib/billing";
 import { logOutAction } from "../(auth)/actions";
 import { SubmitButton } from "@/components/SubmitButton";
-
-const NAV_ITEMS = [
-  { href: "/app", label: "Dashboard" },
-  { href: "/app/scenarios", label: "Scenarios" },
-  { href: "/app/pipeline", label: "Pipeline" },
-  { href: "/app/prospects", label: "Prospects" },
-  { href: "/app/settings", label: "Settings" },
-];
+import { AppNav } from "@/components/AppNav";
+import { Wordmark } from "@/components/ui/Wordmark";
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
   const user = await getCurrentUser();
@@ -34,31 +27,22 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   }
 
   return (
-    <div style={{ display: "flex", minHeight: "100vh", fontFamily: "sans-serif" }}>
-      <nav
-        style={{
-          width: 200,
-          borderRight: "1px solid #ddd",
-          padding: "1.5rem 1rem",
-          display: "flex",
-          flexDirection: "column",
-          gap: "0.75rem",
-        }}
-      >
-        <strong>Case Atlas</strong>
-        {NAV_ITEMS.map((item) => (
-          <Link key={item.href} href={item.href}>
-            {item.label}
-          </Link>
-        ))}
-        <div style={{ marginTop: "auto", fontSize: "0.85rem" }}>
-          <p>{user.email}</p>
+    <div className="flex min-h-full">
+      <nav className="flex w-60 flex-col gap-6 bg-navy px-4 py-6">
+        <div className="px-2">
+          <Wordmark variant="dark" />
+        </div>
+        <AppNav />
+        <div className="mt-auto space-y-3 border-t border-cream/10 px-2 pt-4 text-sm">
+          <p className="truncate text-cream/70">{user.email}</p>
           <form action={logOutAction}>
-            <SubmitButton pendingText="Logging out…">Log out</SubmitButton>
+            <SubmitButton variant="outline-on-dark" pendingText="Logging out…" className="w-full">
+              Log out
+            </SubmitButton>
           </form>
         </div>
       </nav>
-      <main style={{ flex: 1, padding: "2rem" }}>{children}</main>
+      <main className="flex-1 bg-cream px-10 py-10">{children}</main>
     </div>
   );
 }

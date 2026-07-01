@@ -1,8 +1,10 @@
+import { EmptyState } from "@/components/ui/EmptyState";
+
 export default function PipelinePage() {
   return (
-    <>
-      <h1>Pipeline</h1>
-      <p>Nothing in your pipeline yet. The progress dashboard math ships in Phase 4.</p>
-    </>
+    <EmptyState
+      title="Pipeline"
+      body="Nothing in your pipeline yet. The progress dashboard math ships in Phase 4."
+    />
   );
 }

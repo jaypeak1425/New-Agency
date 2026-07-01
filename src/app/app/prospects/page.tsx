@@ -1,8 +1,10 @@
+import { EmptyState } from "@/components/ui/EmptyState";
+
 export default function ProspectsPage() {
   return (
-    <>
-      <h1>Prospects</h1>
-      <p>No prospects yet. The prospecting list and weekly call queue ship in Phase 4.</p>
-    </>
+    <EmptyState
+      title="Prospects"
+      body="No prospects yet. The prospecting list and weekly call queue ship in Phase 4."
+    />
   );
 }

@@ -6,7 +6,7 @@ import { classifyAvatars } from "@/lib/avatars";
 import { recommendStrategies } from "@/lib/recommendations";
 import { getLifeUnderwritingIntake } from "@/lib/underwriting";
 import { buildHandoffPreview } from "@/lib/wholesaler";
-import { computeExpectedCommission } from "@/lib/commission";
+import { computeExpectedCommission, computeExpectedCommissionValue } from "@/lib/commission";
 import {
   completeIntakeAction,
   notifyWholesalerAction,
@@ -288,6 +288,33 @@ export default async function IntakePage({
                     className={radioClass}
                   />
                   {value === "existing" ? "Existing relationship" : "New prospect"}
+                </label>
+              ))}
+            </div>
+
+            <p className="mt-3 text-xs text-charcoal/50">
+              Optional — for the pipeline math: which close-rate category is this closest to?
+            </p>
+            <div className="mt-1 space-y-2">
+              {(
+                [
+                  ["existing_strong", "Existing client / strong relationship (40%)"],
+                  ["existing_first_meeting", "Existing prospect, first meeting (25%)"],
+                  ["existing_second_meeting", "Existing prospect, second meeting (40%)"],
+                  ["cold_first_meeting", "Cold lead, first meeting (15%)"],
+                  ["cold_second_meeting", "Cold lead, second meeting (30%)"],
+                  ["referral_warm", "Warm referral (35%)"],
+                ] as const
+              ).map(([value, label]) => (
+                <label key={value} className={optionLabelClass}>
+                  <input
+                    type="radio"
+                    name="relationshipType"
+                    value={value}
+                    defaultChecked={scenario.relationshipType === value}
+                    className={radioClass}
+                  />
+                  {label}
                 </label>
               ))}
             </div>
@@ -699,6 +726,9 @@ async function RecommendationCard({ scenario }: { scenario: Scenario }) {
     ? null
     : await computeExpectedCommission(scenario.userId, scenario.id);
   const estimateBySlug = new Map(commission?.lines.map((l) => [l.strategy.id, l]) ?? []);
+  const pipelineValue = pivot.triggered
+    ? null
+    : await computeExpectedCommissionValue(scenario.userId, scenario);
 
   return (
     <Card className="mt-6 max-w-2xl">
@@ -809,6 +839,18 @@ async function RecommendationCard({ scenario }: { scenario: Scenario }) {
               {commission.overridePercent !== null && (
                 <span className="ml-1 text-xs text-charcoal/60">
                   (using your {Math.round(commission.overridePercent * 1000) / 10}% override rate)
+                </span>
+              )}
+              {pipelineValue?.expectedCommissionValue !== null &&
+                pipelineValue?.expectedCommissionValue !== undefined && (
+                  <span className="mt-1 block text-xs text-charcoal/70">
+                    Expected commission value (× {Math.round((pipelineValue.closeRate ?? 0) * 1000) / 10}%
+                    close rate): ${pipelineValue.expectedCommissionValue.toLocaleString()}
+                  </span>
+                )}
+              {commission.total > 0 && pipelineValue?.expectedCommissionValue === null && (
+                <span className="mt-1 block text-xs text-charcoal/50">
+                  Set the close-rate category above (near Q9) to see the pipeline value.
                 </span>
               )}
             </p>

@@ -13,6 +13,7 @@ import type {
   MaritalStatus,
   NetWorthEstimate,
   QualifiedFundsEstimate,
+  RelationshipType,
   TobaccoUse,
   UrgencyDriver,
 } from "@/generated/prisma/client";
@@ -77,6 +78,7 @@ export interface IntakeAnswers {
   primaryGoals: IntakeGoal[];
   goalsNotes: string | null;
   existingRelationship: ExistingRelationship | null;
+  relationshipType: RelationshipType | null;
   incomeRevenueRange: IncomeRevenueRange | null;
   netWorthEstimate: NetWorthEstimate | null;
   qualifiedFundsEstimate: QualifiedFundsEstimate | null;

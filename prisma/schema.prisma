@@ -134,6 +134,19 @@ enum ExistingRelationship {
   new_prospect
 }
 
+// docs/07-progress-dashboard-math.md section 3's close-rate table needs a
+// finer relationship category than Q9's existing/new_prospect split. Kept as
+// a separate optional field rather than redefining Q9, since Q9 is one of
+// the fixed 10 questions.
+enum RelationshipType {
+  existing_strong
+  existing_first_meeting
+  existing_second_meeting
+  cold_first_meeting
+  cold_second_meeting
+  referral_warm
+}
+
 enum IncomeRevenueRange {
   under_250k
   range_250k_1m
@@ -304,6 +317,9 @@ model AgentProfile {
   // "everywhere" — a real per-carrier/per-product override table is a
   // future refinement, not what the doc's own edge case describes.
   commissionRateOverridePercent Float?
+  // docs/07-progress-dashboard-math.md edge case 2 — same pattern for the
+  // close rate table.
+  closeRateOverridePercent      Float?
   completedAt                   DateTime?
   createdAt                     DateTime  @default(now())
   updatedAt                     DateTime  @updatedAt
@@ -404,6 +420,9 @@ model Scenario {
   existingRelationship ExistingRelationship? // Q9
   incomeRevenueRange   IncomeRevenueRange? // Q10
   intakeCompletedAt    DateTime?
+
+  // Optional pipeline-math follow-up (docs/07-progress-dashboard-math.md section 3)
+  relationshipType RelationshipType?
 
   // Optional avatar-classification follow-ups (docs/03-intake-flow.md section 3)
   netWorthEstimate       NetWorthEstimate?

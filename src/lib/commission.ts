@@ -1,6 +1,12 @@
 import { prisma } from "@/lib/prisma";
 import { getScenarioForUser } from "@/lib/scenarios";
-import type { ProductType, ScenarioStrategyEstimate, Strategy } from "@/generated/prisma/client";
+import type {
+  ProductType,
+  RelationshipType,
+  Scenario,
+  ScenarioStrategyEstimate,
+  Strategy,
+} from "@/generated/prisma/client";
 
 // docs/07-progress-dashboard-math.md section 2's default commission rate
 // table. COLI is a percentage of face amount; every other product type is a
@@ -89,4 +95,51 @@ export async function computeExpectedCommission(userId: string, scenarioId: stri
   const total = lines.reduce((sum, line) => sum + line.amount, 0);
 
   return { lines, total, overridePercent };
+}
+
+// docs/07-progress-dashboard-math.md section 3's default close-rate table.
+export const DEFAULT_CLOSE_RATES: Record<RelationshipType, number> = {
+  existing_strong: 0.4,
+  existing_first_meeting: 0.25,
+  existing_second_meeting: 0.4,
+  cold_first_meeting: 0.15,
+  cold_second_meeting: 0.3,
+  referral_warm: 0.35,
+};
+
+export function closeRateFor(
+  relationshipType: RelationshipType,
+  overridePercent: number | null,
+): number {
+  // docs/07 edge case 2: same flat-override pattern as the commission rate.
+  return overridePercent ?? DEFAULT_CLOSE_RATES[relationshipType];
+}
+
+export interface PipelineValueResult {
+  expectedCommission: number;
+  closeRate: number | null;
+  expectedCommissionValue: number | null;
+}
+
+// docs/07-progress-dashboard-math.md section 3's "Expected Commission Value
+// Formula": Expected Commission Value = Expected Commission x Close Rate.
+export async function computeExpectedCommissionValue(
+  userId: string,
+  scenario: Scenario,
+): Promise<PipelineValueResult> {
+  const [{ total: expectedCommission }, agentProfile] = await Promise.all([
+    computeExpectedCommission(userId, scenario.id),
+    prisma.agentProfile.findUnique({ where: { userId } }),
+  ]);
+
+  if (!scenario.relationshipType) {
+    return { expectedCommission, closeRate: null, expectedCommissionValue: null };
+  }
+
+  const closeRate = closeRateFor(scenario.relationshipType, agentProfile?.closeRateOverridePercent ?? null);
+  return {
+    expectedCommission,
+    closeRate,
+    expectedCommissionValue: Math.round(expectedCommission * closeRate),
+  };
 }

@@ -315,7 +315,13 @@ This document is the staged build plan for the Insurance Strategy Engine. Each p
    `src/lib/commission.ts`'s rate table + agent-level override. Verified end-to-end: a $50,000
    permanent-life premium against an eligible ILIT correctly computes $27,500 (55%), persists, and
    rehydrates on reload.
-5. **Session 5:** Build the close rate baseline + pipeline value calculation
+5. **Session 5:** Build the close rate baseline + pipeline value calculation — done. Q9's
+   existing/new_prospect answer is too coarse for the doc's 6-category close-rate table, so added
+   an optional `relationshipType` field (kept separate from Q9, which is one of the fixed 10
+   questions) plus an agent-level flat-rate override, mirroring Session 4's commission override
+   pattern. `computeExpectedCommissionValue()` = expected commission × close rate. Verified: a
+   $27,500 expected commission at the "existing prospect, second meeting" (40%) rate correctly
+   computes an $11,000 expected commission value.
 6. **Session 6:** Build the progress dashboard (this week, this year, book, closed)
 7. **Session 7:** Build the prospecting list + weekly call queue
 8. **Session 8:** Build the video recommender (strategy → video mapping)

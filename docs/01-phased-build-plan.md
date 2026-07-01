@@ -179,6 +179,13 @@ This document is the staged build plan for the Insurance Strategy Engine. Each p
    the engine is coded to only ever surface `documented` strategies, so it will simply have a
    thinner core library until then, never a fabricated one.
 4. **Session 4:** Build the "I've got a guy" intake flow (10 questions, conversational voice)
+   — **done with a caveat:** shipped as a structured step-by-step form (real fields, Atlas's exact
+   question wording, all 10 answers persisted on the Scenario record) rather than the doc's
+   "type a paragraph, Atlas parses it" free-text NLP experience — that needs an AI backend behind
+   CLAUDE.md's `callModel(complexity, messages)` abstraction, which hasn't been chosen/wired up yet
+   (no provider, no API key). **Action item for Jay:** confirm the AI backend (OpenAI / Anthropic /
+   open-source, per docs/21-final-handoff.md's first-week checklist) so a later session can add
+   free-text parsing on top of this same schema — the structured intake underneath doesn't change.
 5. **Session 5:** Build the avatar matching engine (classify prospect into 1+ of 4 avatars)
 6. **Session 6:** Build the strategy recommendation engine (draw from Part 5 mapping tables)
 7. **Session 7:** Build the pivot-to-alternative logic (age/health/structure/time/ownership checks)

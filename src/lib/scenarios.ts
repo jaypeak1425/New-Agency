@@ -1,4 +1,13 @@
 import { prisma } from "@/lib/prisma";
+import type {
+  BusinessOwnerStatus,
+  BusinessStructure,
+  ExistingRelationship,
+  HealthRating,
+  IncomeRevenueRange,
+  IntakeGoal,
+  TobaccoUse,
+} from "@/generated/prisma/client";
 
 export class ScenarioError extends Error {}
 
@@ -32,4 +41,57 @@ export async function listScenariosForUser(userId: string) {
     where: { userId },
     orderBy: { createdAt: "desc" },
   });
+}
+
+export async function getScenarioForUser(userId: string, scenarioId: string) {
+  const scenario = await prisma.scenario.findUnique({ where: { id: scenarioId } });
+  if (!scenario || scenario.userId !== userId) {
+    throw new ScenarioError("Case not found.");
+  }
+  return scenario;
+}
+
+// docs/03-intake-flow.md section 2 — the 10-question "I've got a guy" intake,
+// captured as structured form fields (see the schema comment on Scenario for
+// why this isn't free-text NLP parsing yet).
+export interface IntakeAnswers {
+  clientDescription: string | null;
+  primaryAge: number | null;
+  healthRating: HealthRating | null;
+  healthNotes: string | null;
+  tobaccoUse: TobaccoUse | null;
+  tobaccoNotes: string | null;
+  businessOwnerStatus: BusinessOwnerStatus | null;
+  businessStructure: BusinessStructure | null;
+  coOwnersNotes: string | null;
+  keyEmployeesCount: number | null;
+  keyEmployeesNotes: string | null;
+  primaryGoals: IntakeGoal[];
+  goalsNotes: string | null;
+  existingRelationship: ExistingRelationship | null;
+  incomeRevenueRange: IncomeRevenueRange | null;
+}
+
+export async function saveIntakeAnswers(
+  userId: string,
+  scenarioId: string,
+  answers: IntakeAnswers,
+) {
+  await getScenarioForUser(userId, scenarioId);
+
+  const scenario = await prisma.scenario.update({
+    where: { id: scenarioId },
+    data: { ...answers, intakeCompletedAt: new Date() },
+  });
+
+  await prisma.auditLog.create({
+    data: {
+      actorId: userId,
+      action: "scenario.intake_completed",
+      target: scenarioId,
+      metadata: {},
+    },
+  });
+
+  return scenario;
 }

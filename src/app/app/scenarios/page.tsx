@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { getCurrentUser } from "@/lib/auth";
 import { listScenariosForUser } from "@/lib/scenarios";
 import { createScenarioAction, notifyWholesalerAction } from "./actions";
@@ -19,8 +20,8 @@ export default async function ScenariosPage({
     <div>
       <h1 className="text-3xl">Scenarios</h1>
       <p className="mt-2 text-sm text-charcoal/60">
-        The full &ldquo;I&rsquo;ve got a guy&rdquo; intake ships later in Phase 3. For now, log a
-        case and notify your wholesaler when you&rsquo;re ready to talk it through.
+        Log a case, walk through Atlas&rsquo;s 10-question intake, and notify your wholesaler when
+        you&rsquo;re ready to talk it through.
       </p>
 
       {error && (
@@ -69,18 +70,26 @@ export default async function ScenariosPage({
                   </p>
                 )}
               </div>
-              {hasWholesaler && (
-                <form action={notifyWholesalerAction}>
-                  <input type="hidden" name="scenarioId" value={scenario.id} />
-                  <SubmitButton
-                    variant="outline"
-                    pendingText="Notifying…"
-                    className="whitespace-nowrap px-3 py-1.5 text-xs"
-                  >
-                    {scenario.wholesalerNotifiedAt ? "Notify again" : "Notify my wholesaler"}
-                  </SubmitButton>
-                </form>
-              )}
+              <div className="flex flex-shrink-0 flex-col items-end gap-2">
+                <Link
+                  href={`/app/scenarios/${scenario.id}/intake`}
+                  className="whitespace-nowrap text-xs text-navy hover:text-gold"
+                >
+                  {scenario.intakeCompletedAt ? "Review intake" : "Complete intake"}
+                </Link>
+                {hasWholesaler && (
+                  <form action={notifyWholesalerAction}>
+                    <input type="hidden" name="scenarioId" value={scenario.id} />
+                    <SubmitButton
+                      variant="outline"
+                      pendingText="Notifying…"
+                      className="whitespace-nowrap px-3 py-1.5 text-xs"
+                    >
+                      {scenario.wholesalerNotifiedAt ? "Notify again" : "Notify my wholesaler"}
+                    </SubmitButton>
+                  </form>
+                )}
+              </div>
             </div>
           </Card>
         ))}

@@ -80,6 +80,61 @@ enum Avatar {
   family_legacy
 }
 
+// docs/03-intake-flow.md section 2 — the 10-question "I've got a guy" intake.
+// Modeled as a structured wizard for now rather than free-text NLP parsing:
+// the doc's "type a paragraph, Atlas parses it" experience needs an AI
+// backend (CLAUDE.md's callModel(complexity, messages) abstraction), which
+// hasn't been chosen/wired up yet. These fields capture the same 10 answers
+// through real form fields so avatar classification (Session 5) has
+// structured data to work with; the free-text layer can be added later
+// without changing this schema.
+enum HealthRating {
+  good
+  average
+  health_issues
+}
+
+enum TobaccoUse {
+  none
+  occasional
+  regular
+}
+
+enum BusinessOwnerStatus {
+  business_owner
+  employee
+  neither
+}
+
+enum BusinessStructure {
+  c_corp
+  s_corp
+  partnership
+  llc
+  sole_prop
+}
+
+enum IntakeGoal {
+  retirement_income
+  business_continuity
+  key_employee_retention
+  estate_planning
+  legacy
+  other
+}
+
+enum ExistingRelationship {
+  existing
+  new_prospect
+}
+
+enum IncomeRevenueRange {
+  under_250k
+  range_250k_1m
+  range_1m_5m
+  over_5m
+}
+
 // docs/00-developer-brief.md: "a locked library of 9 core + 8 supporting
 // strategies." core vs. supporting per the enumeration in
 // docs/21-final-handoff.md section 7 (the only place the 9 core strategies
@@ -241,9 +296,11 @@ model WebhookEvent {
   @@map("webhook_events")
 }
 
-// Minimal case record for now — a bridge until Phase 3's real 10-question
-// intake, avatar classification, and recommendation engine exist (see
-// docs/03-intake-flow.md). label/notes stand in for the structured intake.
+// label/notes are the minimal case record from Phase 3 Session 3 (still used
+// for the wholesaler-notify bridge action). The intake* fields below are the
+// structured 10-question "I've got a guy" answers (docs/03-intake-flow.md
+// section 2) — avatar classification (Session 5) and the recommendation
+// engine (Session 6) still need to be wired up to read from them.
 model Scenario {
   id                   String    @id @default(cuid())
   userId               String
@@ -252,8 +309,27 @@ model Scenario {
   notes                String?
   status               String    @default("draft")
   wholesalerNotifiedAt DateTime?
-  createdAt            DateTime  @default(now())
-  updatedAt            DateTime  @updatedAt
+
+  // Q1-Q10 answers
+  clientDescription    String? // opening line: "Tell me about this person..."
+  primaryAge           Int? // Q1
+  healthRating         HealthRating? // Q2
+  healthNotes          String?
+  tobaccoUse           TobaccoUse? // Q3
+  tobaccoNotes         String?
+  businessOwnerStatus  BusinessOwnerStatus? // Q4
+  businessStructure    BusinessStructure? // Q5 (if business owner)
+  coOwnersNotes        String? // Q6 (if business owner): ages/ownership %
+  keyEmployeesCount    Int? // Q7 (if business owner)
+  keyEmployeesNotes    String?
+  primaryGoals         IntakeGoal[]          @default([]) // Q8
+  goalsNotes           String?
+  existingRelationship ExistingRelationship? // Q9
+  incomeRevenueRange   IncomeRevenueRange? // Q10
+  intakeCompletedAt    DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@map("scenarios")
 }

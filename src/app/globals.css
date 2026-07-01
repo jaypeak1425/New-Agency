@@ -35,25 +35,30 @@
   --font-sans: var(--font-sans);
 }
 
-body {
-  background: var(--color-background);
-  color: var(--color-foreground);
-  font-family: var(--font-sans);
-}
+/* Tailwind's utilities live in @layer utilities; without @layer base here,
+   these bare-element rules sit in the (higher-priority) implicit layer and
+   would beat utility classes like text-cream regardless of specificity. */
+@layer base {
+  body {
+    background: var(--color-background);
+    color: var(--color-foreground);
+    font-family: var(--font-sans);
+  }
 
-h1,
-h2,
-h3 {
-  font-family: var(--font-serif);
-  color: var(--color-navy);
-  letter-spacing: -0.01em;
-}
+  h1,
+  h2,
+  h3 {
+    font-family: var(--font-serif);
+    color: var(--color-navy);
+    letter-spacing: -0.01em;
+  }
 
-a {
-  color: var(--color-navy);
-  text-underline-offset: 2px;
-}
+  a {
+    color: var(--color-navy);
+    text-underline-offset: 2px;
+  }
 
-a:hover {
-  color: var(--color-gold);
+  a:hover {
+    color: var(--color-gold);
+  }
 }

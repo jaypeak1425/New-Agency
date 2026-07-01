@@ -1,4 +1,5 @@
 import type { InputHTMLAttributes } from "react";
+import { cn } from "@/lib/cn";
 
 export function Input({
   label,
@@ -11,14 +12,12 @@ export function Input({
       {label}
       <input
         name={name}
-        className={[
+        className={cn(
           "mt-1 block w-full rounded-md border border-border bg-surface px-3 py-2 text-sm",
           "text-charcoal placeholder:text-charcoal/40",
           "focus:border-gold focus:outline-none focus:ring-1 focus:ring-gold",
           className,
-        ]
-          .filter(Boolean)
-          .join(" ")}
+        )}
         {...props}
       />
     </label>

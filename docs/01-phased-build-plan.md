@@ -243,7 +243,18 @@ This document is the staged build plan for the Insurance Strategy Engine. Each p
     is standalone infrastructure — no documented strategy is annuity-funded yet, so nothing
     triggers from it automatically, but it's ready the moment Session 3's content gap closes.
 11. **Session 11:** Build the wholesaler handoff template trigger (fires the wholesaler
-    notification from Sessions 1-2 in addition to the illustration-request email)
+    notification from Sessions 1-2 in addition to the illustration-request email) — done. The
+    manual "Notify my wholesaler" bridge from Session 3 is now gated on the real eligibility gates
+    (Sessions 6/7/9): it refuses with a clear reason if a pivot is pending or no strategy is fully
+    eligible yet, matching docs/06-wholesaler-handoff.md section 1 ("the handoff only happens on a
+    viable strategy"). `src/lib/handoff.ts` builds the real illustration-request content (client
+    profile, business context, scenario summary, strategy requested, COI note) from the
+    recommendation engine and underwriting data, shown to the agent as a preview before they send —
+    Atlas still never auto-sends. Deliberately out of scope: commission math (explicitly Phase 4
+    per CLAUDE.md's own layer breakdown) and the full A/B/C/D variation handling (Variations C/D
+    need annuity/QWT strategies that are still pending_content — only A/B are reachable today).
+    Verified end-to-end: the handoff is blocked pre-gate, then fires with real content once ILIT
+    becomes eligible, and the wholesaler receives the rich email.
 12. **Session 12:** End-to-end testing with 5-10 real scenarios, fix any bugs
 
 ---

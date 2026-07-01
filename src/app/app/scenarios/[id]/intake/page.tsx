@@ -5,10 +5,11 @@ import { getScenarioForUser, ScenarioError } from "@/lib/scenarios";
 import { classifyAvatars } from "@/lib/avatars";
 import { recommendStrategies } from "@/lib/recommendations";
 import { getLifeUnderwritingIntake } from "@/lib/underwriting";
-import { completeIntakeAction } from "../../actions";
+import { buildHandoffPreview } from "@/lib/wholesaler";
+import { completeIntakeAction, notifyWholesalerAction } from "../../actions";
 import { Card } from "@/components/ui/Card";
 import { SubmitButton } from "@/components/SubmitButton";
-import type { Scenario } from "@/generated/prisma/client";
+import type { Scenario, User } from "@/generated/prisma/client";
 
 const AVATAR_LABELS: Record<string, string> = {
   business_owner: "Business Owner",
@@ -634,6 +635,9 @@ export default async function IntakePage({
 
       {scenario.intakeCompletedAt && <AvatarClassificationCard scenario={scenario} />}
       {scenario.intakeCompletedAt && <RecommendationCard scenario={scenario} />}
+      {scenario.intakeCompletedAt && Boolean(user.assignedWholesalerId) && (
+        <HandoffPreviewCard user={user} scenario={scenario} />
+      )}
     </div>
   );
 }
@@ -737,6 +741,71 @@ async function RecommendationCard({ scenario }: { scenario: Scenario }) {
               Could also fit, pending more info: {needsMoreInfo.map((r) => r.strategy.name).join(", ")}.
             </p>
           )}
+        </>
+      )}
+    </Card>
+  );
+}
+
+async function HandoffPreviewCard({ user, scenario }: { user: User; scenario: Scenario }) {
+  const preview = await buildHandoffPreview(user, scenario.id);
+
+  return (
+    <Card className="mt-6 max-w-2xl">
+      <h2 className="text-lg font-medium text-navy">Wholesaler handoff</h2>
+      <p className="mt-1 text-xs text-charcoal/50">
+        docs/06-wholesaler-handoff.md: fires once all the eligibility gates pass. Review before
+        sending — Atlas never auto-sends.
+      </p>
+
+      {!preview.ready ? (
+        <p className="mt-3 text-sm text-charcoal/70">{preview.reason}</p>
+      ) : (
+        <>
+          <div className="mt-3 space-y-3 text-sm text-charcoal/80">
+            <div>
+              <p className="font-medium text-navy">Strategy requested</p>
+              {preview.content.strategyRequestedLines.map((line) => (
+                <p key={line}>{line}</p>
+              ))}
+            </div>
+            <div>
+              <p className="font-medium text-navy">Client profile</p>
+              {preview.content.clientProfileLines.map((line) => (
+                <p key={line}>{line}</p>
+              ))}
+            </div>
+            {preview.content.businessContextLines.length > 0 && (
+              <div>
+                <p className="font-medium text-navy">Business context</p>
+                {preview.content.businessContextLines.map((line) => (
+                  <p key={line}>{line}</p>
+                ))}
+              </div>
+            )}
+            <div>
+              <p className="font-medium text-navy">Scenario summary</p>
+              {preview.content.scenarioSummaryLines.map((line) => (
+                <p key={line}>{line}</p>
+              ))}
+            </div>
+            {preview.content.coiNotes.length > 0 && (
+              <div>
+                <p className="font-medium text-navy">COI notes</p>
+                {preview.content.coiNotes.map((line) => (
+                  <p key={line}>{line}</p>
+                ))}
+              </div>
+            )}
+            <p className="text-xs text-charcoal/50">{preview.content.complianceNote}</p>
+          </div>
+
+          <form action={notifyWholesalerAction} className="mt-4">
+            <input type="hidden" name="scenarioId" value={scenario.id} />
+            <SubmitButton pendingText="Sending…">
+              {scenario.wholesalerNotifiedAt ? "Send again" : "Send to wholesaler"}
+            </SubmitButton>
+          </form>
         </>
       )}
     </Card>

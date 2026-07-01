@@ -3,6 +3,7 @@ import { passwordResetEmail } from "./emails/password-reset";
 import { billingAlertEmail, type BillingAlertType } from "./emails/billing-alert";
 import { wholesalerInviteEmail } from "./emails/wholesaler-invite";
 import { wholesalerCaseNotificationEmail } from "./emails/wholesaler-case-notification";
+import type { HandoffContent } from "./handoff";
 
 // No email provider is wired up yet — swap the body of this function for a
 // real provider (Resend, Postmark, Supabase, etc.) when one is chosen.
@@ -42,7 +43,13 @@ export async function sendWholesalerInviteEmail(
 
 export async function sendWholesalerCaseNotificationEmail(
   to: string,
-  params: { wholesalerName: string | null; agentName: string; caseLabel: string; portalUrl: string },
+  params: {
+    wholesalerName: string | null;
+    agentName: string;
+    caseLabel: string;
+    portalUrl: string;
+    handoffContent?: HandoffContent;
+  },
 ) {
   const { subject, html } = wholesalerCaseNotificationEmail(params);
   await sendEmail(to, subject, html);

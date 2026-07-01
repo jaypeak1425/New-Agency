@@ -3,6 +3,10 @@ import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/prisma";
 import { issuePasswordResetToken } from "@/lib/auth";
 import { sendWholesalerInviteEmail, sendWholesalerCaseNotificationEmail } from "@/lib/email";
+import { classifyAvatars } from "@/lib/avatars";
+import { recommendStrategies } from "@/lib/recommendations";
+import { getLifeUnderwritingIntake, estimateUnderwritingClass } from "@/lib/underwriting";
+import { buildHandoffContent } from "@/lib/handoff";
 import type { User } from "@/generated/prisma/client";
 
 export class WholesalerActionError extends Error {}
@@ -145,10 +149,48 @@ export async function listCasesForWholesaler(wholesalerUserId: string) {
   });
 }
 
-// docs/23-wholesaler-assignment.md section 2: stands in for the automatic
-// wholesaler-handoff trigger until the real eligibility-gate/recommendation
-// engine exists — the agent explicitly notifies their assigned wholesaler
-// about a case they're working.
+// docs/06-wholesaler-handoff.md section 1: "Atlas triggers a wholesaler
+// handoff when all five eligibility gates pass." Builds the real
+// illustration-request content (client profile, business context, strategy
+// requested, COI note) from the recommendation engine — this is what
+// replaces docs/23-wholesaler-assignment.md's bridge "Notify my wholesaler"
+// button now that the real eligibility-gate/recommendation engine exists.
+// Still requires the agent to click send (docs/06 section 9: "Atlas never
+// auto-sends without the agent's approval") — this function IS that send.
+export async function buildHandoffPreview(agent: User, scenarioId: string) {
+  const scenario = await prisma.scenario.findUnique({ where: { id: scenarioId } });
+  if (!scenario || scenario.userId !== agent.id) {
+    throw new WholesalerActionError("Case not found.");
+  }
+
+  const lifeUnderwritingIntake = await getLifeUnderwritingIntake(agent.id, scenarioId);
+  const { pivot, recommendations } = await recommendStrategies(scenario, lifeUnderwritingIntake);
+  const eligible = recommendations.filter((r) => r.eligibility === "eligible").map((r) => r.strategy);
+  const classification = classifyAvatars(scenario);
+  const underwritingEstimate = estimateUnderwritingClass(scenario, lifeUnderwritingIntake);
+
+  if (pivot.triggered) {
+    return { ready: false as const, reason: pivot.message ?? "This case needs a pivot to an alternative strategy first.", content: null };
+  }
+  if (eligible.length === 0) {
+    return {
+      ready: false as const,
+      reason: "No strategy is fully eligible yet — complete more of the intake before notifying your wholesaler.",
+      content: null,
+    };
+  }
+
+  const content = buildHandoffContent(
+    scenario,
+    classification,
+    eligible,
+    lifeUnderwritingIntake,
+    underwritingEstimate,
+    agent,
+  );
+  return { ready: true as const, reason: null, content };
+}
+
 export async function notifyWholesalerForScenario(
   agent: User,
   scenarioId: string,
@@ -172,6 +214,11 @@ export async function notifyWholesalerForScenario(
     );
   }
 
+  const preview = await buildHandoffPreview(agent, scenarioId);
+  if (!preview.ready) {
+    throw new WholesalerActionError(preview.reason);
+  }
+
   await prisma.$transaction([
     prisma.scenario.update({ where: { id: scenarioId }, data: { wholesalerNotifiedAt: new Date() } }),
     prisma.auditLog.create({
@@ -179,7 +226,10 @@ export async function notifyWholesalerForScenario(
         actorId: agent.id,
         action: "wholesaler.notified",
         target: scenarioId,
-        metadata: { wholesalerUserId: wholesaler.id },
+        metadata: {
+          wholesalerUserId: wholesaler.id,
+          strategyRequested: preview.content.strategyRequestedLines,
+        },
       },
     }),
   ]);
@@ -189,5 +239,6 @@ export async function notifyWholesalerForScenario(
     agentName: agent.name ?? agent.email,
     caseLabel: scenario.label,
     portalUrl: `${appBaseUrl}/wholesaler`,
+    handoffContent: preview.content,
   });
 }

@@ -4,6 +4,7 @@ import { getCurrentUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { hasActiveAccess } from "@/lib/billing";
 import { logOutAction } from "../(auth)/actions";
+import { SubmitButton } from "@/components/SubmitButton";
 
 const NAV_ITEMS = [
   { href: "/app", label: "Dashboard" },
@@ -53,7 +54,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
         <div style={{ marginTop: "auto", fontSize: "0.85rem" }}>
           <p>{user.email}</p>
           <form action={logOutAction}>
-            <button type="submit">Log out</button>
+            <SubmitButton pendingText="Logging out…">Log out</SubmitButton>
           </form>
         </div>
       </nav>

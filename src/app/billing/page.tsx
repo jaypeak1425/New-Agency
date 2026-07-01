@@ -3,6 +3,7 @@ import { getCurrentUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { hasActiveAccess } from "@/lib/billing";
 import { startCheckoutAction, openBillingPortalAction } from "./actions";
+import { SubmitButton } from "@/components/SubmitButton";
 
 export default async function BillingPage() {
   const user = await getCurrentUser();
@@ -18,7 +19,7 @@ export default async function BillingPage() {
           <p>Your subscription is {subscription?.status}. $97/month.</p>
           {subscription?.stripeCustomerId ? (
             <form action={openBillingPortalAction}>
-              <button type="submit">Manage billing</button>
+              <SubmitButton pendingText="Opening…">Manage billing</SubmitButton>
             </form>
           ) : (
             <p>Access was granted by an admin — there&rsquo;s no Stripe billing portal for this account.</p>
@@ -28,7 +29,7 @@ export default async function BillingPage() {
         <>
           <p>Subscribe for $97/month to unlock the dashboard.</p>
           <form action={startCheckoutAction}>
-            <button type="submit">Subscribe — $97/month</button>
+            <SubmitButton pendingText="Redirecting…">Subscribe — $97/month</SubmitButton>
           </form>
         </>
       )}

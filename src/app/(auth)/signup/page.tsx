@@ -1,4 +1,5 @@
 import { signUpAction } from "../actions";
+import { SubmitButton } from "@/components/SubmitButton";
 
 export default async function SignupPage({
   searchParams,
@@ -39,7 +40,7 @@ export default async function SignupPage({
             />
           </label>
         </div>
-        <button type="submit">Create account</button>
+        <SubmitButton pendingText="Creating account…">Create account</SubmitButton>
       </form>
       <p>
         Already have an account? <a href="/login">Log in</a>

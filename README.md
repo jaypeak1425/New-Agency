@@ -42,3 +42,15 @@ index and per-phase "what I can build" map is in `docs/BUILD_PLAN_reconciled.md`
 5. `npm run dev` — app runs at `http://localhost:3000`; `/api/health` checks DB connectivity.
 
 Deploy target is Railway; `railway.json` runs `prisma migrate deploy` before `next start`.
+
+## Testing
+
+- `npm test` — Vitest, server-side logic that isn't reachable via the browser (the password
+  reset cycle in `tests/auth.test.ts`, the Stripe webhook handler in `tests/stripe-webhooks.test.ts`).
+  Needs a working `DATABASE_URL`; no live Stripe keys required (webhook signatures are
+  self-signed with a local `STRIPE_WEBHOOK_SECRET` for the test).
+- `npm run test:e2e` — Playwright, full browser flows (signup → billing gate → login → dashboard
+  → logout, wrong-password/forgot-password, the full admin suspend/reactivate/grant/revoke
+  cycle). Builds and starts the production server itself (see `playwright.config.ts`); uses the
+  pre-installed Chromium at `/opt/pw-browsers/chromium`. Test data is prefixed `e2e-` and
+  cleaned up automatically after the run.

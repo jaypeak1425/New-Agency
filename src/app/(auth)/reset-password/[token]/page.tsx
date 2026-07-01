@@ -1,4 +1,5 @@
 import { resetPasswordAction } from "../../actions";
+import { SubmitButton } from "@/components/SubmitButton";
 
 export default async function ResetPasswordPage({
   params,
@@ -29,7 +30,7 @@ export default async function ResetPasswordPage({
             />
           </label>
         </div>
-        <button type="submit">Reset password</button>
+        <SubmitButton pendingText="Resetting…">Reset password</SubmitButton>
       </form>
     </main>
   );

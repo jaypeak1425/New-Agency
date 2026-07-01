@@ -1,4 +1,5 @@
 import { requestPasswordResetAction } from "../actions";
+import { SubmitButton } from "@/components/SubmitButton";
 
 export default async function ForgotPasswordPage({
   searchParams,
@@ -21,7 +22,7 @@ export default async function ForgotPasswordPage({
               <input type="email" name="email" required autoComplete="email" />
             </label>
           </div>
-          <button type="submit">Send reset link</button>
+          <SubmitButton pendingText="Sending…">Send reset link</SubmitButton>
         </form>
       )}
       <p>

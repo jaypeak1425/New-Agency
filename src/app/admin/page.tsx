@@ -6,6 +6,7 @@ import {
   grantAccessAction,
   revokeAccessAction,
 } from "./actions";
+import { SubmitButton } from "@/components/SubmitButton";
 
 export default async function AdminPage({
   searchParams,
@@ -44,23 +45,23 @@ export default async function AdminPage({
                   {user.status === "active" ? (
                     <form action={suspendUserAction}>
                       <input type="hidden" name="userId" value={user.id} />
-                      <button type="submit">Suspend</button>
+                      <SubmitButton pendingText="Suspending…">Suspend</SubmitButton>
                     </form>
                   ) : (
                     <form action={reactivateUserAction}>
                       <input type="hidden" name="userId" value={user.id} />
-                      <button type="submit">Reactivate</button>
+                      <SubmitButton pendingText="Reactivating…">Reactivate</SubmitButton>
                     </form>
                   )}
                   {active ? (
                     <form action={revokeAccessAction}>
                       <input type="hidden" name="userId" value={user.id} />
-                      <button type="submit">Revoke access</button>
+                      <SubmitButton pendingText="Revoking…">Revoke access</SubmitButton>
                     </form>
                   ) : (
                     <form action={grantAccessAction}>
                       <input type="hidden" name="userId" value={user.id} />
-                      <button type="submit">Grant access</button>
+                      <SubmitButton pendingText="Granting…">Grant access</SubmitButton>
                     </form>
                   )}
                 </td>

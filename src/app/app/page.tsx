@@ -1,16 +1,11 @@
-import { getCurrentUser } from "@/lib/auth";
-import { logOutAction } from "../(auth)/actions";
-
-export default async function AppHomePage() {
-  const user = await getCurrentUser();
-
+export default function DashboardPage() {
   return (
-    <main style={{ maxWidth: 480, margin: "4rem auto", fontFamily: "sans-serif" }}>
+    <>
       <h1>Dashboard</h1>
-      <p>Logged in as {user?.email}.</p>
-      <form action={logOutAction}>
-        <button type="submit">Log out</button>
-      </form>
-    </main>
+      <p>
+        No scenarios yet. Once the Brain ships (Phase 3), this page fills in with your pipeline,
+        book-of-business opportunity, and closed commissions.
+      </p>
+    </>
   );
 }

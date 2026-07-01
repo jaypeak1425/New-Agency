@@ -255,7 +255,21 @@ This document is the staged build plan for the Insurance Strategy Engine. Each p
     need annuity/QWT strategies that are still pending_content — only A/B are reachable today).
     Verified end-to-end: the handoff is blocked pre-gate, then fires with real content once ILIT
     becomes eligible, and the wholesaler receives the rich email.
-12. **Session 12:** End-to-end testing with 5-10 real scenarios, fix any bugs
+12. **Session 12:** End-to-end testing with 5-10 real scenarios, fix any bugs — done. Ran 6
+    scenarios spanning every mechanism built in Phase 3: Business Owner + REBA, an HNW estate
+    stack (Survivorship + ILIT + SLAT + Dynasty all firing together), a pure Family/Legacy case
+    (correctly returns the honest "none of the standard strategies are a clean fit" message — no
+    documented strategy is tagged for that avatar yet), an elderly/impaired pivot case, an ILIT
+    hard-rule-4 violation, and a Qualified-Fund-Heavy case hitting the AMT-trap diagnostic. Zero
+    console/page errors across the batch; every gate check, pivot, and recommendation logged to
+    audit_log as required. No bugs found — no fixes needed this session.
+
+    **Phase 3 close-out:** all 12 sessions complete. Two real content gaps carried forward rather
+    than papered over — (1) 7 of the 17 locked strategies are `pending_content` pending the real
+    brain doc from Jay/Luke (Session 3/6/7 note), and (2) the AI backend for free-text NLP intake
+    parsing hasn't been chosen yet (Session 4 note). Everything built works honestly within those
+    limits: the engine never fabricates a strategy or a class estimate, and clearly labels what it
+    doesn't know yet.
 
 ---
 

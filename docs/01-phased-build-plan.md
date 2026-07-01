@@ -481,7 +481,25 @@ This document is the staged build plan for the Insurance Strategy Engine. Each p
    a create-then-redirect, a Next.js router-cache staleness issue — fixed with an explicit fresh
    page load before the next form interaction, matching the same class of fix used earlier this
    session for same-page server-action forms.)
-5. **Session 5:** Build the compliance review pipeline
+5. **Session 5:** Build the compliance review pipeline — done, scoped to
+   docs/08-master-dashboard.md section 4's Compliance Flag Queue (the model/queue/resolution
+   workflow), not docs/09-prelaunch-validation.md's much larger 9-step conversational validation
+   process (12-question AI interview, document upload/indexing, 3-path review) — that's its own
+   epic needing the same missing AI backend and missing object storage flagged in earlier
+   sessions. Built `/admin/compliance`: a `ComplianceFlag` model (trigger type, status, content,
+   optional scenario/strategy link) and clear/reject/escalate resolution actions. Of the doc's 3
+   triggers, 2 are real and wired to actual data: **pre-launch** flags a `pending_content` strategy
+   from `/admin/strategies` for review (clearing it records the sign-off but doesn't flip the
+   strategy to `documented` — that still needs real content, a separate step, per Brain Lock);
+   **periodic audit** samples 5% of scenarios with a real sent wholesaler handoff and snapshots the
+   actual handoff content into the flag. **Filter-caught** flags have no live pipeline to fire from
+   — confirmed again that no client-facing output exists anywhere in this app (Phase 3 Session 8's
+   finding still holds), so nothing creates one automatically, though the model/queue fully support
+   it once one exists. No cron runner exists, so the periodic audit is admin-triggered rather than
+   scheduled (same limitation as the weekly call queue). Verified end-to-end: sending a real
+   wholesaler handoff, running the audit, and resolving the resulting flag all persisted correctly
+   in the database (confirmed directly, since two of the checks hit the same `textContent()`
+   whitespace quirk documented earlier this session).
 6. **Session 6:** Build per-seat usage tracking
 7. **Session 7:** Build IMO-level reporting
 8. **Session 8:** End-to-end testing with a pilot IMO

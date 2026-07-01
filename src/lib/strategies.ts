@@ -12,6 +12,7 @@ export async function listDocumentedStrategies() {
 
 export async function listAllStrategiesForAdmin() {
   return prisma.strategy.findMany({
+    include: { complianceFlags: { where: { status: "open" } } },
     orderBy: [{ tier: "asc" }, { status: "asc" }, { name: "asc" }],
   });
 }

@@ -260,6 +260,7 @@ model Strategy {
   updatedAt            DateTime       @updatedAt
 
   scenarioEstimates ScenarioStrategyEstimate[]
+  complianceFlags   ComplianceFlag[]
 
   @@map("strategies")
 }
@@ -275,14 +276,15 @@ model User {
   createdAt    DateTime   @default(now())
   updatedAt    DateTime   @updatedAt
 
-  subscription           Subscription?
-  scenarios              Scenario[]
-  adminActionsTaken      AdminAction[]          @relation("AdminActionsTaken")
-  adminActionsOn         AdminAction[]          @relation("AdminActionsReceived")
-  auditLogEntries        AuditLog[]
-  passwordResetTokens    PasswordResetToken[]
-  agentProfile           AgentProfile?
-  weeklyCallQueueEntries WeeklyCallQueueEntry[]
+  subscription            Subscription?
+  scenarios               Scenario[]
+  adminActionsTaken       AdminAction[]          @relation("AdminActionsTaken")
+  adminActionsOn          AdminAction[]          @relation("AdminActionsReceived")
+  auditLogEntries         AuditLog[]
+  passwordResetTokens     PasswordResetToken[]
+  agentProfile            AgentProfile?
+  weeklyCallQueueEntries  WeeklyCallQueueEntry[]
+  complianceFlagsResolved ComplianceFlag[]       @relation("ComplianceFlagResolver")
 
   // One wholesaler per agent (docs/23-wholesaler-assignment.md). Only
   // meaningful when this user's role is "user" (an agent); assignedWholesaler
@@ -532,6 +534,7 @@ model Scenario {
   annuityIntake          AnnuityIntake?
   strategyEstimates      ScenarioStrategyEstimate[]
   weeklyCallQueueEntries WeeklyCallQueueEntry[]
+  complianceFlags        ComplianceFlag[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -691,4 +694,46 @@ model ScenarioStrategyEstimate {
 
   @@unique([scenarioId, strategyId])
   @@map("scenario_strategy_estimates")
+}
+
+// docs/08-master-dashboard.md section 4 — the Compliance Flag Queue. The
+// doc's Trigger 1 (a live compliance-filter catch on client-facing output)
+// has no real client-facing pipeline to fire from yet — every text output
+// this repo currently generates (the wholesaler handoff email) is agent/
+// wholesaler-facing internal tooling, not client copy (see Phase 3 Session 8's
+// note in docs/01-phased-build-plan.md) — so `filter_caught` flags exist in
+// the model/queue but nothing creates one automatically yet. Trigger 2
+// (pre-launch new strategy) and Trigger 3 (periodic audit of generated
+// outputs) are both real and wired up: Trigger 2 against the 7
+// `pending_content` strategies awaiting real content, Trigger 3 sampling real
+// sent wholesaler handoffs.
+enum ComplianceFlagTrigger {
+  filter_caught
+  pre_launch
+  periodic_audit
+}
+
+enum ComplianceFlagStatus {
+  open
+  cleared
+  rejected
+  escalated
+}
+
+model ComplianceFlag {
+  id              String                @id @default(cuid())
+  triggerType     ComplianceFlagTrigger
+  status          ComplianceFlagStatus  @default(open)
+  content         String
+  scenarioId      String?
+  scenario        Scenario?             @relation(fields: [scenarioId], references: [id], onDelete: Cascade)
+  strategyId      String?
+  strategy        Strategy?             @relation(fields: [strategyId], references: [id], onDelete: Cascade)
+  resolverId      String?
+  resolver        User?                 @relation("ComplianceFlagResolver", fields: [resolverId], references: [id])
+  resolutionNotes String?
+  createdAt       DateTime              @default(now())
+  resolvedAt      DateTime?
+
+  @@map("compliance_flags")
 }

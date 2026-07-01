@@ -46,6 +46,9 @@ export default async function AdminPage({
           <Link href="/admin/dashboard" className="text-sm text-navy hover:text-gold">
             Master dashboard &rarr;
           </Link>
+          <Link href="/admin/imos" className="text-sm text-navy hover:text-gold">
+            IMOs &rarr;
+          </Link>
           <Link href="/admin/strategies" className="text-sm text-navy hover:text-gold">
             Strategy library &rarr;
           </Link>

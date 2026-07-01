@@ -292,7 +292,47 @@ model User {
   assignedWholesaler   User?   @relation("AgentWholesalerAssignment", fields: [assignedWholesalerId], references: [id])
   assignedAgents       User[]  @relation("AgentWholesalerAssignment")
 
+  // docs/08-master-dashboard.md section 7 — an agent occupying a seat on an
+  // IMO's white-label contract. A seated agent gets dashboard access via the
+  // IMO's contract rather than their own Stripe Subscription (see
+  // src/lib/imo.ts's hasImoSeatAccess).
+  imoId String?
+  imo   Imo?    @relation(fields: [imoId], references: [id])
+
   @@map("users")
+}
+
+// docs/08-master-dashboard.md section 7's `imos` table + docs/20-business-plan.md's
+// "$75/seat/month, tiered by seat count (50/100/500+)" — the 50/100/500+
+// figures are illustrative typical contract sizes (small/mid/large IMO), not
+// a discount schedule; the doc gives no per-tier rate, so every seat bills
+// flat at $75/mo regardless of `seatsPurchased`.
+enum ImoOrgType {
+  imo
+  fmo
+  bga
+  ga
+}
+
+model Imo {
+  id                  String     @id @default(cuid())
+  name                String
+  organizationType    ImoOrgType
+  primaryContactName  String?
+  primaryContactEmail String?
+  seatsPurchased      Int
+  // docs/08-master-dashboard.md section 5: IMO contracts are sold, not
+  // self-serve Stripe checkouts — "your contract" sets the pricing. No IMO
+  // billing integration exists yet; seat changes are logged to audit_log as
+  // the "billing event" the doc describes, for the sales/ops team to invoice
+  // against manually.
+  contractTerms       String?
+  createdAt           DateTime   @default(now())
+  updatedAt           DateTime   @updatedAt
+
+  agents User[]
+
+  @@map("imos")
 }
 
 // Onboarding profile per docs/03-intake-flow.md section 11 and

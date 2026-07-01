@@ -33,19 +33,25 @@ export default async function MasterDashboardPage() {
           <Link href="/admin" className="text-sm text-navy hover:text-gold">
             Clients &amp; actions &rarr;
           </Link>
+          <Link href="/admin/imos" className="text-sm text-navy hover:text-gold">
+            IMOs &rarr;
+          </Link>
           <Link href="/admin/strategies" className="text-sm text-navy hover:text-gold">
             Strategy library &rarr;
           </Link>
         </div>
       </div>
       <p className="mt-2 text-sm text-charcoal/60">
-        docs/08-master-dashboard.md — Module 1 (Clients/Agents tab) lives on the{" "}
+        docs/08-master-dashboard.md — Module 1&rsquo;s Agents tab lives on the{" "}
         <Link href="/admin" className="underline hover:text-gold">
           Clients &amp; actions
         </Link>{" "}
-        page. The IMOs tab, Support module, and Compliance Flag Queue aren&rsquo;t built yet — no
-        IMO data model, ticketing system, or compliance-flag schema exists in this repo yet
-        (separate sessions).
+        page; the IMOs tab lives on the{" "}
+        <Link href="/admin/imos" className="underline hover:text-gold">
+          IMOs
+        </Link>{" "}
+        page. The Support module and Compliance Flag Queue aren&rsquo;t built yet — no ticketing
+        system or compliance-flag schema exists in this repo yet (separate sessions).
       </p>
 
       <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">

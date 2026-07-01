@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { hasActiveAccess } from "@/lib/billing";
+import { hasImoSeatAccess } from "@/lib/imo";
 import { needsOnboarding } from "@/lib/onboarding";
 import { logOutAction } from "../(auth)/actions";
 import { SubmitButton } from "@/components/SubmitButton";
@@ -25,10 +26,11 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   }
 
   // Admins operate through /admin, not as paying customers — everyone else
-  // needs an active (or trialing) subscription to reach the dashboard.
+  // needs an active (or trialing) subscription, or an active IMO seat
+  // (docs/08-master-dashboard.md section 7), to reach the dashboard.
   if (user.role !== "admin") {
     const subscription = await prisma.subscription.findUnique({ where: { userId: user.id } });
-    if (!hasActiveAccess(subscription?.status)) {
+    if (!hasActiveAccess(subscription?.status) && !hasImoSeatAccess(user)) {
       redirect("/billing");
     }
     if (await needsOnboarding(user.id, user.role)) {

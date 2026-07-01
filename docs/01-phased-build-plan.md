@@ -450,7 +450,22 @@ This document is the staged build plan for the Insurance Strategy Engine. Each p
    verified by writing a subscription row directly (bypassing Stripe), confirming $970/yr displays
    correctly and contributes $81/mo (rounded) to Total MRR. A real Price ID needs to be created and
    set in `.env` before this can process a live annual purchase.
-3. **Session 3:** Build the IMO pricing tier system (50/100/500+)
+3. **Session 3:** Build the IMO pricing tier system (50/100/500+) — done. Added the `Imo` model
+   (docs/08-master-dashboard.md section 7's `imos` table: name, org type imo/fmo/bga/ga, primary
+   contact, seats purchased, contract terms) and `User.imoId` — a seated agent gets dashboard
+   access via the IMO's contract instead of their own Stripe Subscription (`hasImoSeatAccess` in
+   `src/lib/imo.ts`, wired into `src/app/app/layout.tsx`'s access gate). $75/seat/month is flat
+   regardless of tier — docs/20-business-plan.md's 50/100/500+ figures are typical contract sizes
+   (small/mid/large IMO), not a discount schedule, and no doc gives a per-tier rate. IMO contracts
+   are sold and invoiced manually (section 5's "your contract" language) — no self-serve Stripe
+   flow exists for IMOs; adding/removing seats just logs an audit event as the "billing event" the
+   doc describes, for the sales/ops team to invoice against. Built `/admin/imos` (create IMOs,
+   update seat counts, assign/remove agent seats) and completed Module 1's IMOs tab and the master
+   dashboard's IMO revenue segment, both explicitly deferred in Session 1's note. Verified
+   end-to-end: a fresh agent with no subscription is redirected to `/billing`; once seated on a
+   5-seat IMO contract they reach `/app` directly; the IMO page shows "1 active / 5 purchased seats
+   (4 unfilled) — $75/mo"; the master dashboard's Total MRR correctly sums $194 (2 monthly) + $81
+   (1 annual) + $75 (1 IMO seat) = $350; and removing the seat immediately revokes dashboard access.
 4. **Session 4:** Build the white-label branding engine
 5. **Session 5:** Build the compliance review pipeline
 6. **Session 6:** Build per-seat usage tracking

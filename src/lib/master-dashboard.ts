@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { AGENT_MONTHLY_PLAN, AGENT_ANNUAL_PLAN } from "@/lib/stripe";
 import { hasActiveAccess } from "@/lib/billing";
+import { imoSeatSummary } from "@/lib/imo";
 import type { User, Subscription, AgentProfile } from "@/generated/prisma/client";
 
 const DAY_MS = 24 * 60 * 60 * 1000;
@@ -117,47 +118,56 @@ export interface RevenueMetrics {
   // month's current total plus what churned out of it this month — a
   // reasonable stand-in, not a stored time series.
   churnRatePercent: number | null;
-  // docs/08-master-dashboard.md section 2, Widget 4 "MRR by segment." IMO
-  // seats aren't a segment yet — no IMO data model exists (Session 3).
+  // docs/08-master-dashboard.md section 2, Widget 4 "MRR by segment."
   segments: RevenueSegment[];
 }
 
-// docs/08-master-dashboard.md section 2, Module 2.
+// docs/08-master-dashboard.md section 2, Module 2. IMO seats contribute to
+// total MRR and their own segment, but not to "new/churned MRR this month" —
+// IMO contracts are managed as a single seatsPurchased count (src/lib/imo.ts),
+// with no per-seat history log, so there's no reliable "seat added/removed
+// this month" signal the way there is for a Stripe subscription's
+// createdAt/canceled event.
 export async function getRevenueMetrics(): Promise<RevenueMetrics> {
   const monthStart = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
 
-  const [activeMonthly, activeAnnual, newMonthly, newAnnual, churnedMonthly, churnedAnnual] = await Promise.all([
-    prisma.subscription.findMany({
-      where: { plan: AGENT_MONTHLY_PLAN, status: { in: ["active", "trialing"] } },
-    }),
-    prisma.subscription.findMany({
-      where: { plan: AGENT_ANNUAL_PLAN, status: { in: ["active", "trialing"] } },
-    }),
-    prisma.subscription.findMany({
-      where: {
-        plan: AGENT_MONTHLY_PLAN,
-        status: { in: ["active", "trialing"] },
-        createdAt: { gte: monthStart },
-      },
-    }),
-    prisma.subscription.findMany({
-      where: {
-        plan: AGENT_ANNUAL_PLAN,
-        status: { in: ["active", "trialing"] },
-        createdAt: { gte: monthStart },
-      },
-    }),
-    prisma.subscription.findMany({
-      where: { plan: AGENT_MONTHLY_PLAN, status: "canceled", updatedAt: { gte: monthStart } },
-    }),
-    prisma.subscription.findMany({
-      where: { plan: AGENT_ANNUAL_PLAN, status: "canceled", updatedAt: { gte: monthStart } },
-    }),
-  ]);
+  const [activeMonthly, activeAnnual, newMonthly, newAnnual, churnedMonthly, churnedAnnual, imos] =
+    await Promise.all([
+      prisma.subscription.findMany({
+        where: { plan: AGENT_MONTHLY_PLAN, status: { in: ["active", "trialing"] } },
+      }),
+      prisma.subscription.findMany({
+        where: { plan: AGENT_ANNUAL_PLAN, status: { in: ["active", "trialing"] } },
+      }),
+      prisma.subscription.findMany({
+        where: {
+          plan: AGENT_MONTHLY_PLAN,
+          status: { in: ["active", "trialing"] },
+          createdAt: { gte: monthStart },
+        },
+      }),
+      prisma.subscription.findMany({
+        where: {
+          plan: AGENT_ANNUAL_PLAN,
+          status: { in: ["active", "trialing"] },
+          createdAt: { gte: monthStart },
+        },
+      }),
+      prisma.subscription.findMany({
+        where: { plan: AGENT_MONTHLY_PLAN, status: "canceled", updatedAt: { gte: monthStart } },
+      }),
+      prisma.subscription.findMany({
+        where: { plan: AGENT_ANNUAL_PLAN, status: "canceled", updatedAt: { gte: monthStart } },
+      }),
+      prisma.imo.findMany({ include: { agents: true } }),
+    ]);
 
   const monthlyMRR = activeMonthly.length * MONTHLY_PRICE;
   const annualMRR = Math.round(activeAnnual.length * ANNUAL_MONTHLY_EQUIVALENT);
-  const totalMRR = monthlyMRR + annualMRR;
+  const imoSeatTotals = imos.map((imo) => imoSeatSummary(imo));
+  const imoMRR = imoSeatTotals.reduce((sum, s) => sum + s.mrr, 0);
+  const imoActiveSeats = imoSeatTotals.reduce((sum, s) => sum + s.seatsActive, 0);
+  const totalMRR = monthlyMRR + annualMRR + imoMRR;
 
   const newMRRThisMonth =
     newMonthly.length * MONTHLY_PRICE + Math.round(newAnnual.length * ANNUAL_MONTHLY_EQUIVALENT);
@@ -167,7 +177,7 @@ export async function getRevenueMetrics(): Promise<RevenueMetrics> {
 
   return {
     totalMRR,
-    activePayingCount: activeMonthly.length + activeAnnual.length,
+    activePayingCount: activeMonthly.length + activeAnnual.length + imoActiveSeats,
     newMRRThisMonth,
     newSubscriptionsThisMonth: newMonthly.length + newAnnual.length,
     churnedMRRThisMonth,
@@ -176,6 +186,7 @@ export async function getRevenueMetrics(): Promise<RevenueMetrics> {
     segments: [
       { label: "Individual agents (monthly)", count: activeMonthly.length, mrr: monthlyMRR },
       { label: "Individual agents (annual)", count: activeAnnual.length, mrr: annualMRR },
+      { label: "IMOs (active seats)", count: imoActiveSeats, mrr: imoMRR },
     ],
   };
 }

@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth";
+import { prisma } from "@/lib/prisma";
+import { hasActiveAccess } from "@/lib/billing";
 import { logOutAction } from "../(auth)/actions";
 
 const NAV_ITEMS = [
@@ -19,6 +21,15 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   // row to render here — bounce to login rather than crash.
   if (!user) {
     redirect("/login");
+  }
+
+  // Admins operate through /admin, not as paying customers — everyone else
+  // needs an active (or trialing) subscription to reach the dashboard.
+  if (user.role !== "admin") {
+    const subscription = await prisma.subscription.findUnique({ where: { userId: user.id } });
+    if (!hasActiveAccess(subscription?.status)) {
+      redirect("/billing");
+    }
   }
 
   return (

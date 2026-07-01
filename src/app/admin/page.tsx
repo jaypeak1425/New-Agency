@@ -12,6 +12,7 @@ import {
 import { SubmitButton } from "@/components/SubmitButton";
 import { Input } from "@/components/ui/Input";
 import { cn } from "@/lib/cn";
+import Link from "next/link";
 
 function Badge({ tone, children }: { tone: "positive" | "neutral" | "negative"; children: React.ReactNode }) {
   const tones = {
@@ -39,7 +40,12 @@ export default async function AdminPage({
 
   return (
     <main className="mx-auto max-w-5xl px-6 py-12">
-      <h1 className="text-3xl">Admin</h1>
+      <div className="flex items-center justify-between">
+        <h1 className="text-3xl">Admin</h1>
+        <Link href="/admin/strategies" className="text-sm text-navy hover:text-gold">
+          Strategy library &rarr;
+        </Link>
+      </div>
       {error && (
         <p role="alert" className="mt-4 rounded-md bg-red-50 px-3 py-2 text-sm text-red-700">
           {error}

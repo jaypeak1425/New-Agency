@@ -168,6 +168,16 @@ This document is the staged build plan for the Insurance Strategy Engine. Each p
    — built first since it doesn't need the strategy library; see docs/23-wholesaler-assignment.md)
 2. **Session 2:** Wholesaler portal (role-based routing, case list view, notification wiring)
 3. **Session 3:** Ingest the strategy library into the database (9 core + 8 supporting, with all fields)
+   — **done with a caveat:** the canonical brain doc referenced throughout these docs was never
+   delivered into this repo (see docs/21-final-handoff.md section 7 — "provided in the source
+   conversation"). Schema + seed shipped with the 10 strategies that *are* fully documented in
+   docs/advanced-case-design-framework.md (2 core: Survivorship, Premium Financing; all 8
+   supporting) as `status: documented`, and the other 7 core strategies named across the docs but
+   never given mechanics/legal-basis (Estate Funding, GRATs, QWT, RMD Repositioning, Roth+Life,
+   Annuity Rescue, Qualified LTC) as `status: pending_content` placeholders. **Action item for
+   Jay:** supply the real brain doc content for these 7 before Session 6 (recommendation engine) —
+   the engine is coded to only ever surface `documented` strategies, so it will simply have a
+   thinner core library until then, never a fabricated one.
 4. **Session 4:** Build the "I've got a guy" intake flow (10 questions, conversational voice)
 5. **Session 5:** Build the avatar matching engine (classify prospect into 1+ of 4 avatars)
 6. **Session 6:** Build the strategy recommendation engine (draw from Part 5 mapping tables)

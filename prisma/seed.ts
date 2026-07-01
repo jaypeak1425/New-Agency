@@ -1,6 +1,7 @@
 import "dotenv/config";
 import bcrypt from "bcryptjs";
 import { prisma } from "../src/lib/prisma";
+import { strategyLibrarySeed } from "./strategy-library-data";
 
 async function main() {
   const email = process.env.SEED_ADMIN_EMAIL ?? "admin@example.com";
@@ -29,6 +30,16 @@ async function main() {
   });
 
   console.log(`Seeded admin user: ${email}`);
+
+  for (const strategy of strategyLibrarySeed) {
+    await prisma.strategy.upsert({
+      where: { slug: strategy.slug },
+      update: strategy,
+      create: strategy,
+    });
+  }
+
+  console.log(`Seeded strategy library: ${strategyLibrarySeed.length} strategies`);
 }
 
 main()

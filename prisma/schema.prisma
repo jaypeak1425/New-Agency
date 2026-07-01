@@ -80,6 +80,51 @@ enum Avatar {
   family_legacy
 }
 
+// docs/00-developer-brief.md: "a locked library of 9 core + 8 supporting
+// strategies." core vs. supporting per the enumeration in
+// docs/21-final-handoff.md section 7 (the only place the 9 core strategies
+// are named as a complete set); supporting = the 8 HNW estate-planning
+// strategies fully detailed in docs/advanced-case-design-framework.md.
+enum StrategyTier {
+  core
+  supporting
+}
+
+// The canonical brain doc (README + Knowledge Base + Quick Reference Index)
+// referenced throughout the docs was never delivered into this repo — it's
+// noted in docs/21-final-handoff.md as "provided in the source conversation."
+// Only 10 of the 17 locked strategies have real mechanics/legal-basis content
+// (from docs/advanced-case-design-framework.md). The other 7 are named in the
+// docs but undocumented. `pending_content` strategies exist as a placeholder
+// row so the schema and admin view are complete, but per the Brain Lock rule
+// (CLAUDE.md) the recommendation engine (Phase 3 Session 6+) must never
+// surface a pending_content strategy to an agent — only `documented` ones.
+enum StrategyStatus {
+  documented
+  pending_content
+}
+
+model Strategy {
+  id                   String         @id @default(cuid())
+  slug                 String         @unique
+  name                 String
+  tier                 StrategyTier
+  status               StrategyStatus @default(pending_content)
+  avatarTags           Avatar[]       @default([])
+  clientTriggerProfile String? // plain-language "who this is for"
+  legalBasis           String? // IRC citations / legal grounding
+  mechanics            String? // how the strategy works
+  whyUsed              String? // rationale for when it's chosen
+  matchingParameters   Json? // structured trigger-condition flags (docs/advanced-case-design-framework.md section 5)
+  uplineQuestions      String[]       @default([])
+  sourceDoc            String? // which doc this content was ingested from, for traceability
+  notes                String? // known ambiguities, e.g. possible overlap with another strategy
+  createdAt            DateTime       @default(now())
+  updatedAt            DateTime       @updatedAt
+
+  @@map("strategies")
+}
+
 model User {
   id           String     @id @default(cuid())
   email        String     @unique

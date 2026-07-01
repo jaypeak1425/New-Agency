@@ -2,7 +2,7 @@ import { randomBytes } from "crypto";
 import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/prisma";
 import { issuePasswordResetToken } from "@/lib/auth";
-import { sendWholesalerInviteEmail } from "@/lib/email";
+import { sendWholesalerInviteEmail, sendWholesalerCaseNotificationEmail } from "@/lib/email";
 import type { User } from "@/generated/prisma/client";
 
 export class WholesalerActionError extends Error {}
@@ -142,5 +142,52 @@ export async function listCasesForWholesaler(wholesalerUserId: string) {
     where: { role: "user", assignedWholesalerId: wholesalerUserId },
     include: { scenarios: { orderBy: { createdAt: "desc" } } },
     orderBy: { name: "asc" },
+  });
+}
+
+// docs/23-wholesaler-assignment.md section 2: stands in for the automatic
+// wholesaler-handoff trigger until the real eligibility-gate/recommendation
+// engine exists — the agent explicitly notifies their assigned wholesaler
+// about a case they're working.
+export async function notifyWholesalerForScenario(
+  agent: User,
+  scenarioId: string,
+  appBaseUrl: string,
+) {
+  const scenario = await prisma.scenario.findUnique({ where: { id: scenarioId } });
+  if (!scenario || scenario.userId !== agent.id) {
+    throw new WholesalerActionError("Case not found.");
+  }
+
+  if (!agent.assignedWholesalerId) {
+    throw new WholesalerActionError(
+      "No wholesaler is assigned to your account. Ask an admin to assign one.",
+    );
+  }
+
+  const wholesaler = await prisma.user.findUnique({ where: { id: agent.assignedWholesalerId } });
+  if (!wholesaler) {
+    throw new WholesalerActionError(
+      "No wholesaler is assigned to your account. Ask an admin to assign one.",
+    );
+  }
+
+  await prisma.$transaction([
+    prisma.scenario.update({ where: { id: scenarioId }, data: { wholesalerNotifiedAt: new Date() } }),
+    prisma.auditLog.create({
+      data: {
+        actorId: agent.id,
+        action: "wholesaler.notified",
+        target: scenarioId,
+        metadata: { wholesalerUserId: wholesaler.id },
+      },
+    }),
+  ]);
+
+  await sendWholesalerCaseNotificationEmail(wholesaler.email, {
+    wholesalerName: wholesaler.name,
+    agentName: agent.name ?? agent.email,
+    caseLabel: scenario.label,
+    portalUrl: `${appBaseUrl}/wholesaler`,
   });
 }

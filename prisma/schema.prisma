@@ -135,6 +135,24 @@ enum IncomeRevenueRange {
   over_5m
 }
 
+// docs/03-intake-flow.md section 3's avatar classification table needs net
+// worth and qualified-fund balance, which aren't among the fixed 10
+// questions — the doc's own worked example has Atlas ask about these as a
+// natural follow-up ("I don't have visibility into their qualified
+// balances..."). These are optional supplementary fields for that follow-up,
+// not an 11th/12th required question.
+enum NetWorthEstimate {
+  under_500k
+  range_500k_2m
+  range_2m_5m
+  over_5m
+}
+
+enum QualifiedFundsEstimate {
+  under_500k
+  over_500k
+}
+
 // docs/00-developer-brief.md: "a locked library of 9 core + 8 supporting
 // strategies." core vs. supporting per the enumeration in
 // docs/21-final-handoff.md section 7 (the only place the 9 core strategies
@@ -327,6 +345,11 @@ model Scenario {
   existingRelationship ExistingRelationship? // Q9
   incomeRevenueRange   IncomeRevenueRange? // Q10
   intakeCompletedAt    DateTime?
+
+  // Optional avatar-classification follow-ups (docs/03-intake-flow.md section 3)
+  netWorthEstimate       NetWorthEstimate?
+  qualifiedFundsEstimate QualifiedFundsEstimate?
+  hasDependentsUnder18   Boolean?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

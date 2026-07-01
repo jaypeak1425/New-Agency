@@ -12,6 +12,8 @@ import type {
   HealthRating,
   IncomeRevenueRange,
   IntakeGoal,
+  NetWorthEstimate,
+  QualifiedFundsEstimate,
   TobaccoUse,
 } from "@/generated/prisma/client";
 
@@ -56,6 +58,13 @@ function optionalEnum<T extends string>(formData: FormData, name: string) {
   return (value || null) as T | null;
 }
 
+function optionalBoolean(formData: FormData, name: string) {
+  const value = String(formData.get(name) ?? "").trim();
+  if (value === "true") return true;
+  if (value === "false") return false;
+  return null;
+}
+
 export async function completeIntakeAction(formData: FormData) {
   const user = await getCurrentUser();
   if (!user) redirect("/login");
@@ -78,6 +87,9 @@ export async function completeIntakeAction(formData: FormData) {
     goalsNotes: optionalString(formData, "goalsNotes"),
     existingRelationship: optionalEnum<ExistingRelationship>(formData, "existingRelationship"),
     incomeRevenueRange: optionalEnum<IncomeRevenueRange>(formData, "incomeRevenueRange"),
+    netWorthEstimate: optionalEnum<NetWorthEstimate>(formData, "netWorthEstimate"),
+    qualifiedFundsEstimate: optionalEnum<QualifiedFundsEstimate>(formData, "qualifiedFundsEstimate"),
+    hasDependentsUnder18: optionalBoolean(formData, "hasDependentsUnder18"),
   };
 
   try {

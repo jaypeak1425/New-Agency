@@ -2,9 +2,17 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth";
 import { getScenarioForUser, ScenarioError } from "@/lib/scenarios";
+import { classifyAvatars } from "@/lib/avatars";
 import { completeIntakeAction } from "../../actions";
 import { Card } from "@/components/ui/Card";
 import { SubmitButton } from "@/components/SubmitButton";
+
+const AVATAR_LABELS: Record<string, string> = {
+  business_owner: "Business Owner",
+  high_net_worth: "High Net Worth",
+  qualified_fund_heavy: "Qualified Fund Heavy",
+  family_legacy: "Family / Legacy",
+};
 
 const radioClass = "h-4 w-4 border-border text-navy focus:ring-gold";
 const checkboxClass = "h-4 w-4 rounded border-border text-navy focus:ring-gold";
@@ -294,11 +302,124 @@ export default async function IntakePage({
             </div>
           </fieldset>
 
+          <fieldset className="border-t border-border pt-6">
+            <legend className="text-sm font-medium text-navy">
+              Optional — helps Atlas classify the avatar stack
+            </legend>
+            <p className="mt-1 text-xs text-charcoal/50">
+              Not one of the 10 fixed questions, but worth asking when a strategy hinges on it
+              (e.g. &ldquo;Worth asking if they have IRAs or 401(k)s with significant
+              balances&rdquo;).
+            </p>
+
+            <p className="mt-4 text-sm text-charcoal">Roughly what&rsquo;s their net worth?</p>
+            <div className="mt-2 space-y-2">
+              {(
+                [
+                  ["under_500k", "Under $500K"],
+                  ["range_500k_2m", "$500K–$2M"],
+                  ["range_2m_5m", "$2M–$5M"],
+                  ["over_5m", "Above $5M"],
+                ] as const
+              ).map(([value, label]) => (
+                <label key={value} className={optionLabelClass}>
+                  <input
+                    type="radio"
+                    name="netWorthEstimate"
+                    value={value}
+                    defaultChecked={scenario.netWorthEstimate === value}
+                    className={radioClass}
+                  />
+                  {label}
+                </label>
+              ))}
+            </div>
+
+            <p className="mt-4 text-sm text-charcoal">
+              Do they have $500K+ in qualified funds (IRA, 401(k), etc.)?
+            </p>
+            <div className="mt-2 space-y-2">
+              {(["over_500k", "under_500k"] as const).map((value) => (
+                <label key={value} className={optionLabelClass}>
+                  <input
+                    type="radio"
+                    name="qualifiedFundsEstimate"
+                    value={value}
+                    defaultChecked={scenario.qualifiedFundsEstimate === value}
+                    className={radioClass}
+                  />
+                  {value === "over_500k" ? "Yes, $500K+" : "No, under $500K"}
+                </label>
+              ))}
+            </div>
+
+            <p className="mt-4 text-sm text-charcoal">Do they have dependents under 18?</p>
+            <div className="mt-2 space-y-2">
+              {(["true", "false"] as const).map((value) => (
+                <label key={value} className={optionLabelClass}>
+                  <input
+                    type="radio"
+                    name="hasDependentsUnder18"
+                    value={value}
+                    defaultChecked={
+                      scenario.hasDependentsUnder18 !== null &&
+                      String(scenario.hasDependentsUnder18) === value
+                    }
+                    className={radioClass}
+                  />
+                  {value === "true" ? "Yes" : "No"}
+                </label>
+              ))}
+            </div>
+          </fieldset>
+
           <div className="flex items-center gap-4 pt-2">
             <SubmitButton pendingText="Saving…">Save intake answers</SubmitButton>
           </div>
         </form>
       </Card>
+
+      {scenario.intakeCompletedAt && <AvatarClassificationCard scenario={scenario} />}
     </div>
+  );
+}
+
+function AvatarClassificationCard({
+  scenario,
+}: {
+  scenario: Parameters<typeof classifyAvatars>[0];
+}) {
+  const classification = classifyAvatars(scenario);
+
+  return (
+    <Card className="mt-6 max-w-2xl">
+      <h2 className="text-lg font-medium text-navy">Avatar classification</h2>
+      {classification.activated.length === 0 ? (
+        <p className="mt-2 text-sm text-charcoal/70">
+          No avatar activated yet from the answers given.
+        </p>
+      ) : (
+        <div className="mt-2 flex flex-wrap gap-2">
+          {classification.activated.map((avatar) => (
+            <span
+              key={avatar}
+              className="inline-block rounded-full bg-gold/20 px-2.5 py-0.5 text-xs font-medium text-navy"
+            >
+              {AVATAR_LABELS[avatar]}
+            </span>
+          ))}
+        </div>
+      )}
+      {classification.needsMoreInfo.length > 0 && (
+        <p className="mt-3 text-xs text-charcoal/50">
+          Need more info to rule in or out: {classification.needsMoreInfo.map((a) => AVATAR_LABELS[a]).join(", ")}.
+        </p>
+      )}
+      {classification.amtTrapFlag && (
+        <p className="mt-3 rounded-md bg-cream px-3 py-2 text-xs text-charcoal/70">
+          {classification.amtTrapNote}
+        </p>
+      )}
+    </Card>
   );
 }

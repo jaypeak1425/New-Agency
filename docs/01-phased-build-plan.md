@@ -186,7 +186,13 @@ This document is the staged build plan for the Insurance Strategy Engine. Each p
    (no provider, no API key). **Action item for Jay:** confirm the AI backend (OpenAI / Anthropic /
    open-source, per docs/21-final-handoff.md's first-week checklist) so a later session can add
    free-text parsing on top of this same schema — the structured intake underneath doesn't change.
-5. **Session 5:** Build the avatar matching engine (classify prospect into 1+ of 4 avatars)
+5. **Session 5:** Build the avatar matching engine (classify prospect into 1+ of 4 avatars) — done.
+   Section 3's classification table needs net worth and qualified-fund data the fixed 10 questions
+   don't collect; added 3 optional follow-up fields (net worth estimate, qualified-funds estimate,
+   dependents under 18) per the doc's own worked example ("worth asking if they have IRAs..."). The
+   engine returns `needsMoreInfo` for HNW/Qualified-Fund-Heavy when those follow-ups are unanswered
+   rather than guessing. The AMT-trap flag is band-level (from Q10's income/revenue bucket), not a
+   precise trigger — noted on the output.
 6. **Session 6:** Build the strategy recommendation engine (draw from Part 5 mapping tables)
 7. **Session 7:** Build the pivot-to-alternative logic (age/health/structure/time/ownership checks)
 8. **Session 8:** Wire the existing compliance filter module into real recommendation/handoff output

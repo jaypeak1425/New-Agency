@@ -6,6 +6,8 @@ import type {
   HealthRating,
   IncomeRevenueRange,
   IntakeGoal,
+  NetWorthEstimate,
+  QualifiedFundsEstimate,
   TobaccoUse,
 } from "@/generated/prisma/client";
 
@@ -70,6 +72,9 @@ export interface IntakeAnswers {
   goalsNotes: string | null;
   existingRelationship: ExistingRelationship | null;
   incomeRevenueRange: IncomeRevenueRange | null;
+  netWorthEstimate: NetWorthEstimate | null;
+  qualifiedFundsEstimate: QualifiedFundsEstimate | null;
+  hasDependentsUnder18: boolean | null;
 }
 
 export async function saveIntakeAnswers(

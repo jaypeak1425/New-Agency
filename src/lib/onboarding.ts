@@ -22,7 +22,7 @@ export interface OnboardingInput {
 }
 
 export async function needsOnboarding(userId: string, role: string): Promise<boolean> {
-  if (role === "admin") return false;
+  if (role !== "user") return false;
   const profile = await prisma.agentProfile.findUnique({ where: { userId } });
   return !profile?.completedAt;
 }

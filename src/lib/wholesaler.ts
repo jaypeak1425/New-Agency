@@ -134,3 +134,13 @@ export async function listWholesalersForAdmin() {
     orderBy: { createdAt: "desc" },
   });
 }
+
+// docs/23-wholesaler-assignment.md section 3: the portal is scoped to the
+// wholesaler's assigned agents and is read-only.
+export async function listCasesForWholesaler(wholesalerUserId: string) {
+  return prisma.user.findMany({
+    where: { role: "user", assignedWholesalerId: wholesalerUserId },
+    include: { scenarios: { orderBy: { createdAt: "desc" } } },
+    orderBy: { name: "asc" },
+  });
+}

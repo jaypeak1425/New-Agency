@@ -12,6 +12,7 @@ const optionLabelClass = "flex items-center gap-2 text-sm text-charcoal";
 export default async function OnboardingPage() {
   const user = await getCurrentUser();
   if (!user) redirect("/login");
+  if (user.role === "wholesaler") redirect("/wholesaler");
 
   return (
     <main className="flex min-h-full flex-col items-center bg-cream px-6 py-16">

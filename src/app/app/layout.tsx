@@ -18,6 +18,12 @@ export default async function AppLayout({ children }: { children: React.ReactNod
     redirect("/login");
   }
 
+  // Wholesalers operate through /wholesaler — they're not paying customers
+  // and don't go through onboarding (docs/23-wholesaler-assignment.md).
+  if (user.role === "wholesaler") {
+    redirect("/wholesaler");
+  }
+
   // Admins operate through /admin, not as paying customers — everyone else
   // needs an active (or trialing) subscription to reach the dashboard.
   if (user.role !== "admin") {

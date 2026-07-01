@@ -8,7 +8,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
     redirect("/login");
   }
   if (user.role !== "admin") {
-    redirect("/app");
+    redirect(user.role === "wholesaler" ? "/wholesaler" : "/app");
   }
 
   return <>{children}</>;

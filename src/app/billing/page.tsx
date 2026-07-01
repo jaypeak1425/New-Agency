@@ -11,6 +11,7 @@ import { Card } from "@/components/ui/Card";
 export default async function BillingPage() {
   const user = await getCurrentUser();
   if (!user) redirect("/login");
+  if (user.role === "wholesaler") redirect("/wholesaler");
 
   const subscription = await prisma.subscription.findUnique({ where: { userId: user.id } });
 

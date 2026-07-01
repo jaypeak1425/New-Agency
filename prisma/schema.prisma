@@ -108,6 +108,16 @@ model AuditLog {
   @@map("audit_log")
 }
 
+// Records every processed Stripe webhook event by its Stripe event id, so a
+// retried/duplicate delivery is a no-op instead of double-applying the event.
+model WebhookEvent {
+  id          String   @id
+  type        String
+  processedAt DateTime @default(now())
+
+  @@map("webhook_events")
+}
+
 // Stub only — fleshed out in Phase 3 (The Brain).
 model Scenario {
   id        String   @id @default(cuid())

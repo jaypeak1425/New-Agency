@@ -3,6 +3,7 @@ import { passwordResetEmail } from "./emails/password-reset";
 import { billingAlertEmail, type BillingAlertType } from "./emails/billing-alert";
 import { wholesalerInviteEmail } from "./emails/wholesaler-invite";
 import { wholesalerCaseNotificationEmail } from "./emails/wholesaler-case-notification";
+import { imoPrincipalInviteEmail } from "./emails/imo-principal-invite";
 import type { HandoffContent } from "./handoff";
 
 // No email provider is wired up yet — swap the body of this function for a
@@ -38,6 +39,16 @@ export async function sendWholesalerInviteEmail(
   setupUrl: string,
 ) {
   const { subject, html } = wholesalerInviteEmail({ name, setupUrl });
+  await sendEmail(to, subject, html);
+}
+
+export async function sendImoPrincipalInviteEmail(
+  to: string,
+  name: string | null,
+  imoName: string,
+  setupUrl: string,
+) {
+  const { subject, html } = imoPrincipalInviteEmail({ name, imoName, setupUrl });
   await sendEmail(to, subject, html);
 }
 

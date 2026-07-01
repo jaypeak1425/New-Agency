@@ -19,6 +19,7 @@ export default async function BillingPage() {
   const user = await getCurrentUser();
   if (!user) redirect("/login");
   if (user.role === "wholesaler") redirect("/wholesaler");
+  if (user.role === "imo_principal") redirect("/imo-principal");
 
   const subscription = await prisma.subscription.findUnique({ where: { userId: user.id } });
 

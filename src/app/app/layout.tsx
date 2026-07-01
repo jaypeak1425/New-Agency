@@ -24,6 +24,11 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   if (user.role === "wholesaler") {
     redirect("/wholesaler");
   }
+  // IMO principals operate through /imo-principal — a filtered view of their
+  // own contract, not a seated agent (docs/08-master-dashboard.md section 5).
+  if (user.role === "imo_principal") {
+    redirect("/imo-principal");
+  }
 
   // Admins operate through /admin, not as paying customers — everyone else
   // needs an active (or trialing) subscription, or an active IMO seat

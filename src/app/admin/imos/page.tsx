@@ -6,6 +6,7 @@ import {
   updateImoSeatsAction,
   updateImoBrandingAction,
   assignAgentToImoAction,
+  createImoPrincipalAccountAction,
 } from "./actions";
 import { SubmitButton } from "@/components/SubmitButton";
 import { Input } from "@/components/ui/Input";
@@ -150,6 +151,26 @@ export default async function AdminImosPage({
                     Save branding
                   </SubmitButton>
                 </form>
+              </div>
+
+              <div className="mt-4 border-t border-border pt-4">
+                <p className="text-xs font-medium uppercase tracking-wide text-charcoal/50">
+                  IMO principal login
+                </p>
+                {imo.principal ? (
+                  <p className="mt-2 text-sm text-charcoal/70">
+                    {imo.principal.name ?? imo.principal.email} ({imo.principal.email})
+                  </p>
+                ) : (
+                  <form action={createImoPrincipalAccountAction} className="mt-2 flex flex-wrap items-end gap-2">
+                    <input type="hidden" name="imoId" value={imo.id} />
+                    <Input label="Principal name" name="principalName" type="text" className="w-48" />
+                    <Input label="Principal email" name="principalEmail" type="email" required className="w-56" />
+                    <SubmitButton variant="outline" pendingText="Creating…" className="px-3 py-1.5 text-xs">
+                      Create principal login
+                    </SubmitButton>
+                  </form>
+                )}
               </div>
 
               <div className="mt-4 border-t border-border pt-4">

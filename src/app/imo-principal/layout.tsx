@@ -4,16 +4,14 @@ import { logOutAction } from "../(auth)/actions";
 import { SubmitButton } from "@/components/SubmitButton";
 import { Wordmark } from "@/components/ui/Wordmark";
 
-export default async function WholesalerLayout({ children }: { children: React.ReactNode }) {
+export default async function ImoPrincipalLayout({ children }: { children: React.ReactNode }) {
   const user = await getCurrentUser();
 
   if (!user) {
     redirect("/login");
   }
-  if (user.role !== "wholesaler") {
-    if (user.role === "admin") redirect("/admin");
-    if (user.role === "imo_principal") redirect("/imo-principal");
-    redirect("/app");
+  if (user.role !== "imo_principal") {
+    redirect(user.role === "admin" ? "/admin" : user.role === "wholesaler" ? "/wholesaler" : "/app");
   }
 
   return (

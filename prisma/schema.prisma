@@ -15,6 +15,9 @@ enum UserRole {
   user
   admin
   wholesaler
+  // docs/08-master-dashboard.md section 5 — the IMO principal login, scoped
+  // to their own agents/MRR/seats via User.principalOfImoId below.
+  imo_principal
 }
 
 enum UserStatus {
@@ -301,6 +304,12 @@ model User {
   imoId String?
   imo   Imo?    @relation(fields: [imoId], references: [id])
 
+  // docs/08-master-dashboard.md section 5 — the IMO principal login. Distinct
+  // from imoId/imo above (a seated agent): the principal isn't a seat, they
+  // own/view the contract. One principal per IMO.
+  principalOfImoId String? @unique
+  principalOfImo   Imo?    @relation("ImoPrincipal", fields: [principalOfImoId], references: [id])
+
   @@map("users")
 }
 
@@ -342,7 +351,8 @@ model Imo {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  agents User[]
+  agents    User[]
+  principal User?  @relation("ImoPrincipal")
 
   @@map("imos")
 }

@@ -1,6 +1,11 @@
+import { randomBytes } from "crypto";
+import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/prisma";
+import { issuePasswordResetToken } from "@/lib/auth";
+import { sendImoPrincipalInviteEmail } from "@/lib/email";
 import { engagementScoreFor, type EngagementScore } from "@/lib/engagement";
-import type { User, ImoOrgType } from "@/generated/prisma/client";
+import { computeExpectedCommission } from "@/lib/commission";
+import type { User, ImoOrgType, Scenario } from "@/generated/prisma/client";
 
 export class ImoActionError extends Error {}
 
@@ -55,6 +60,61 @@ export async function createImo(admin: User, input: CreateImoInput) {
   });
 
   return imo;
+}
+
+// docs/08-master-dashboard.md section 5 — the IMO principal login, one per
+// IMO. Same pattern as src/lib/wholesaler.ts's createWholesalerAccount: admin
+// creates the account, no self-serve signup, unusable random password until
+// the invite's password-reset-as-invite link is used.
+export async function createImoPrincipalAccount(
+  admin: User,
+  imoId: string,
+  email: string,
+  name: string | undefined,
+  appBaseUrl: string,
+) {
+  assertAdmin(admin);
+
+  const imo = await prisma.imo.findUnique({ where: { id: imoId } });
+  if (!imo) {
+    throw new ImoActionError("IMO not found.");
+  }
+
+  const normalizedEmail = email.trim().toLowerCase();
+  if (!normalizedEmail) {
+    throw new ImoActionError("Email is required.");
+  }
+
+  const existing = await prisma.user.findUnique({ where: { email: normalizedEmail } });
+  if (existing) {
+    throw new ImoActionError("An account with this email already exists.");
+  }
+
+  const passwordHash = await bcrypt.hash(randomBytes(32).toString("hex"), 12);
+  const principal = await prisma.user.create({
+    data: {
+      email: normalizedEmail,
+      passwordHash,
+      name,
+      role: "imo_principal",
+      principalOfImoId: imoId,
+    },
+  });
+
+  await prisma.auditLog.create({
+    data: {
+      actorId: admin.id,
+      action: "imo.principal_created",
+      target: principal.id,
+      metadata: { imoId, email: normalizedEmail },
+    },
+  });
+
+  const rawToken = await issuePasswordResetToken(principal.id);
+  const setupUrl = `${appBaseUrl}/reset-password/${rawToken}`;
+  await sendImoPrincipalInviteEmail(principal.email, principal.name, imo.name, setupUrl);
+
+  return principal;
 }
 
 // docs/08-master-dashboard.md section 5: "Add seats (which triggers a
@@ -160,7 +220,7 @@ export async function unassignAgentFromImo(admin: User, agentUserId: string) {
 
 export async function listImosForAdmin() {
   return prisma.imo.findMany({
-    include: { agents: true },
+    include: { agents: true, principal: true },
     orderBy: { createdAt: "desc" },
   });
 }
@@ -221,4 +281,79 @@ export async function getImoSeatUsage(imoId: string): Promise<SeatUsageRow[]> {
       };
     }),
   );
+}
+
+export interface OpportunityFlowRow {
+  scenario: Scenario;
+  agentName: string;
+  expectedCommission: number;
+}
+
+export interface ImoPrincipalView {
+  imoId: string;
+  imoName: string;
+  seatsPurchased: number;
+  seatsActive: number;
+  seatsChurning: number;
+  mrr: number;
+  seatUsage: SeatUsageRow[];
+  opportunityFlow: OpportunityFlowRow[];
+}
+
+export class ImoPrincipalAccessError extends Error {}
+
+// docs/08-master-dashboard.md section 5 — "a filtered version of the
+// internal team view, scoped to their organization." Built: their agents +
+// activity, their MRR, their seat utilization, their agents' Opportunity
+// Flow (read-only — no verify/modify/flag actions, which docs/08 section 3
+// reserves for the internal team). Not built: their own compliance flags
+// (filter_caught never fires — see Session 5's note; pre_launch is
+// strategy-level, not IMO-scoped) and support tickets (no ticketing system
+// exists anywhere in this repo) — both explicit gaps, not omissions.
+export async function getImoPrincipalView(principal: User): Promise<ImoPrincipalView> {
+  if (principal.role !== "imo_principal" || !principal.principalOfImoId) {
+    throw new ImoPrincipalAccessError("This account isn't an IMO principal.");
+  }
+
+  const imo = await prisma.imo.findUnique({
+    where: { id: principal.principalOfImoId },
+    include: { agents: true },
+  });
+  if (!imo) {
+    throw new ImoPrincipalAccessError("IMO not found.");
+  }
+
+  const [summary, seatUsage] = await Promise.all([
+    Promise.resolve(imoSeatSummary(imo)),
+    getImoSeatUsage(imo.id),
+  ]);
+
+  const scenarios = await prisma.scenario.findMany({
+    where: { userId: { in: imo.agents.map((a) => a.id) } },
+    orderBy: { updatedAt: "desc" },
+    take: 50,
+  });
+
+  const agentNameById = new Map(imo.agents.map((a) => [a.id, a.name ?? a.email]));
+  const opportunityFlow = await Promise.all(
+    scenarios.map(async (scenario) => {
+      const { total } = await computeExpectedCommission(scenario.userId, scenario.id);
+      return {
+        scenario,
+        agentName: agentNameById.get(scenario.userId) ?? "Unknown agent",
+        expectedCommission: total,
+      };
+    }),
+  );
+
+  return {
+    imoId: imo.id,
+    imoName: imo.name,
+    seatsPurchased: imo.seatsPurchased,
+    seatsActive: summary.seatsActive,
+    seatsChurning: summary.seatsChurning,
+    mrr: summary.mrr,
+    seatUsage,
+    opportunityFlow,
+  };
 }

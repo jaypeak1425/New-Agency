@@ -1,6 +1,7 @@
 "use server";
 
 import { redirect } from "next/navigation";
+import { headers } from "next/headers";
 import { getCurrentUser } from "@/lib/auth";
 import {
   ImoActionError,
@@ -9,8 +10,17 @@ import {
   updateImoBranding,
   assignAgentToImo,
   unassignAgentFromImo,
+  createImoPrincipalAccount,
 } from "@/lib/imo";
 import type { ImoOrgType } from "@/generated/prisma/client";
+
+async function getAppBaseUrl() {
+  if (process.env.APP_BASE_URL) return process.env.APP_BASE_URL;
+  const h = await headers();
+  const host = h.get("host");
+  const protocol = host?.startsWith("localhost") ? "http" : "https";
+  return `${protocol}://${host}`;
+}
 
 async function requireAdmin() {
   const admin = await getCurrentUser();
@@ -62,6 +72,22 @@ export async function updateImoBrandingAction(formData: FormData) {
       accentColor: String(formData.get("accentColor") ?? ""),
       byline: String(formData.get("byline") ?? ""),
     });
+  } catch (error) {
+    const message = error instanceof ImoActionError ? error.message : "Something went wrong.";
+    redirect(`/admin/imos?error=${encodeURIComponent(message)}`);
+  }
+  redirect("/admin/imos");
+}
+
+export async function createImoPrincipalAccountAction(formData: FormData) {
+  const admin = await requireAdmin();
+  const imoId = String(formData.get("imoId") ?? "");
+  const email = String(formData.get("principalEmail") ?? "");
+  const name = String(formData.get("principalName") ?? "") || undefined;
+  const appBaseUrl = await getAppBaseUrl();
+
+  try {
+    await createImoPrincipalAccount(admin, imoId, email, name, appBaseUrl);
   } catch (error) {
     const message = error instanceof ImoActionError ? error.message : "Something went wrong.";
     redirect(`/admin/imos?error=${encodeURIComponent(message)}`);

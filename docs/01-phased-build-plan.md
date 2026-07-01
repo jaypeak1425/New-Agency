@@ -508,7 +508,23 @@ This document is the staged build plan for the Insurance Strategy Engine. Each p
    circular import between `master-dashboard.ts` and `imo.ts`, both of which now depend on it).
    Verified visually: seated agents across several test IMO contracts each show their real
    engagement level, scenario count, and last-login date.
-7. **Session 7:** Build IMO-level reporting
+7. **Session 7:** Build IMO-level reporting — done. Added the `imo_principal` role and
+   `User.principalOfImoId` (one login per IMO, distinct from a seated agent's `imoId`), created the
+   same way wholesaler accounts are (admin-created, password-set via invite link — added
+   `createImoPrincipalAccount` + an invite email). Built `/imo-principal`: docs/08-master-dashboard.md
+   section 5's filtered view — their own seated agents with engagement/activity (reusing Session
+   6's seat usage), their own MRR contribution, their own seat utilization, and a read-only
+   Opportunity Flow (their agents' scenarios + expected commission, via the existing commission
+   engine — no verify/modify/flag actions, which the doc reserves for the internal team). Not
+   built, and explicitly flagged: their own compliance flags (filter_caught never fires; pre_launch
+   is strategy-level, not IMO-scoped) and support tickets (no ticketing system exists anywhere in
+   this repo). Updated every role-based redirect in the app (`/app`, `/admin`, `/wholesaler`,
+   `/billing`, `/onboarding` layouts/pages, plus `session.ts`'s JWT role validation, which would
+   otherwise have silently rejected every IMO principal's session) so the new role routes
+   correctly. Verified end-to-end: creating an IMO, assigning a seat, creating a principal login,
+   setting their password via the invite link, and logging in all correctly landed them on
+   `/imo-principal` showing $75 MRR, 1/3 seats, and their one seated agent's engagement data — and
+   confirmed they're bounced back from `/app` and `/admin` rather than let through.
 8. **Session 8:** End-to-end testing with a pilot IMO
 
 ---

@@ -351,7 +351,13 @@ This document is the staged build plan for the Insurance Strategy Engine. Each p
    commission correctly rank in that order on the full list, the top 3 are queued with the ILIT
    pitch, the 4th is excluded, and adding a 5th, higher-value scenario mid-week does not reshuffle
    the already-generated queue.
-8. **Session 8:** Build the video recommender (strategy → video mapping)
+8. **Session 8:** Build the video recommender (strategy → video mapping) — **blocked, not
+   started:** the only mention of this feature anywhere in the docs is the one-line description in
+   docs/00-developer-brief.md ("relevant training video surfaces when a strategy is recommended")
+   and a placeholder field name in docs/09-prelaunch-validation.md. No training video library, no
+   video URLs, no strategy-to-video mapping exists in this repo or its docs — same shape of gap as
+   the pitch deck (Sessions 1-3). Building this would mean inventing video content/links, which
+   CLAUDE.md's Brain Lock principle (no fabrication) rules out. Skipped in favor of Session 10.
 9. **Session 9:** Build the book-of-business opportunity calculation — done, built ahead of
    Session 6 (dashboard) since the dashboard needs this number. Added the 5 per-avatar client
    counts to AgentProfile and a Settings-page form (kept editable outside the one-time onboarding
@@ -361,7 +367,24 @@ This document is the staged build plan for the Insurance Strategy Engine. Each p
    doc's "data the agent provides" list aren't modeled — the doc's own calculation and worked
    example never use them, only the per-avatar counts do. Verified against the doc's exact worked
    example (40/15/25/30/50 clients): $2,085,000 total, $312,750 addressable at 15%.
-10. **Session 10:** End-to-end testing, fix bugs, polish UX
+10. **Session 10:** End-to-end testing, fix bugs, polish UX — done. Ran a real agent through a
+    full week against a production build: set up book-of-business (the doc's own worked example),
+    logged two cases (one closed-won this week, one still open, different relationship types and
+    premiums), then checked the dashboard, prospecting list, and call queue together. All four
+    dashboard numbers reconciled exactly ($2,475 this week's pipeline, $15,675 this year's = $13,200
+    closed-won expected value + $2,475 open, $312,750 addressable book, $33,000 closed this year —
+    the raw commission, not close-rate-adjusted, matching the doc's "actual commissions earned"
+    definition), the closed-won case correctly dropped out of the open prospecting list, and the
+    remaining open case appeared in both the full list and the call queue with the correct value
+    and an ILIT pitch. Swept every Phase 4 page (`/app`, `/app/scenarios`, `/app/prospects`,
+    `/app/pipeline`, `/app/settings`) for console/page errors — zero found. No bugs found this
+    session — all 54 Vitest tests, ESLint, and `tsc --noEmit` pass clean.
+
+    **Phase 4 close-out:** 5 of 10 sessions done (4, 5, 6, 7, 9) plus this one; 4 sessions (1-3
+    pitch deck, 8 video recommender) remain explicitly blocked on real content gaps that don't
+    exist anywhere in this repo's docs — no slide-by-slide pitch deck spec and no training video
+    library, matching the same "don't fabricate" principle as Phase 3's brain-doc gap. Everything
+    built works honestly within that limit.
 
 ---
 

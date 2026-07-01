@@ -61,8 +61,8 @@ export async function createCheckoutSession(user: User, appBaseUrl: string) {
 
 export async function createPortalSession(user: User, appBaseUrl: string) {
   const subscription = await prisma.subscription.findUnique({ where: { userId: user.id } });
-  if (!subscription) {
-    throw new Error("No billing account found for this user yet.");
+  if (!subscription?.stripeCustomerId) {
+    throw new Error("This account doesn't have a Stripe billing portal to manage.");
   }
 
   const stripe = getStripe();

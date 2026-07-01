@@ -16,9 +16,13 @@ export default async function BillingPage() {
       {hasActiveAccess(subscription?.status) ? (
         <>
           <p>Your subscription is {subscription?.status}. $97/month.</p>
-          <form action={openBillingPortalAction}>
-            <button type="submit">Manage billing</button>
-          </form>
+          {subscription?.stripeCustomerId ? (
+            <form action={openBillingPortalAction}>
+              <button type="submit">Manage billing</button>
+            </form>
+          ) : (
+            <p>Access was granted by an admin — there&rsquo;s no Stripe billing portal for this account.</p>
+          )}
         </>
       ) : (
         <>

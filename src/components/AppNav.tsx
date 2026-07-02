@@ -9,6 +9,7 @@ const NAV_ITEMS = [
   { href: "/app/scenarios", label: "Scenarios" },
   { href: "/app/pipeline", label: "Pipeline" },
   { href: "/app/prospects", label: "Prospects" },
+  { href: "/app/tax-reference", label: "Tax reference" },
   { href: "/app/settings", label: "Settings" },
 ];
 

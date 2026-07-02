@@ -1,6 +1,7 @@
 import type { LifeUnderwritingIntake, Scenario, Strategy, User } from "@/generated/prisma/client";
 import type { AvatarClassification } from "@/lib/avatars";
 import type { UnderwritingEstimate } from "@/lib/underwriting";
+import { CPA_SCRUTINY, TIER_LABELS } from "@/lib/cpa-scrutiny";
 
 // docs/06-wholesaler-handoff.md section 2's full template needs commission
 // math (explicitly Phase 4 — CLAUDE.md's "Progress tracker + revenue
@@ -39,6 +40,10 @@ export interface HandoffContent {
   scenarioSummaryLines: string[];
   strategyRequestedLines: string[];
   coiNotes: string[];
+  // The CPA-readiness block (owner directive 2026-07-02): the wholesaler —
+  // and ultimately the client's CPA — sees the documentation the case will
+  // need before implementation, from src/lib/cpa-scrutiny.ts.
+  documentationLines: string[];
   complianceNote: string;
   agentContactLines: string[];
 }
@@ -113,6 +118,20 @@ export function buildHandoffContent(
     );
   }
 
+  // CPA-readiness: tier + documentation checklist for the primary strategy
+  // stack (capped at the first three — the primary case design), so the
+  // wholesaler ships the case with the substance file the client's CPA will
+  // ask for.
+  const documentationLines: string[] = [];
+  for (const strategy of eligibleStrategies.slice(0, 3)) {
+    const scrutiny = CPA_SCRUTINY[strategy.slug];
+    if (!scrutiny) continue;
+    documentationLines.push(`${strategy.name} — ${TIER_LABELS[scrutiny.tier]}: ${scrutiny.verdict}`);
+    for (const item of scrutiny.checklist) {
+      documentationLines.push(`• ${item}`);
+    }
+  }
+
   const complianceNote =
     "For internal illustration purposes only. Final strategy subject to underwriting, full case " +
     "review, and client decision. All benefit claims non-taxable while the policy remains in force.";
@@ -129,6 +148,7 @@ export function buildHandoffContent(
     scenarioSummaryLines,
     strategyRequestedLines,
     coiNotes,
+    documentationLines,
     complianceNote,
     agentContactLines,
   };

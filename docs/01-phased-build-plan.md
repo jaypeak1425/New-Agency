@@ -740,6 +740,28 @@ This document is the staged build plan for the Insurance Strategy Engine. Each p
    refused, generation audit-logged, print view clean. 80 Vitest tests green (narratives for all
    26 documented slugs, zero filter holds, titles pass clean).
 
+   **Post-close-out update — the CPA scrutiny layer + 2026/2027 federal tax reference.** Per the
+   owner's directive ("look at this from the lens of an advanced planning CPA... make sure you
+   have the 2026 and 2027 tax tables... federal only"), two additions. (1)
+   `src/lib/cpa-scrutiny.ts`: every one of the 26 strategies carries a CPA tier (1 = signs off
+   same-day / 2 = passes with documentation / 3 = substance-dependent audit battleground — FLP,
+   IDGT, PPLI), a verdict, and the documentation checklist the client's CPA will request.
+   Surfaced three places: a collapsible "CPA scrutiny & documentation" panel on every eligible
+   recommendation (tier chip, verdict, checklist, and the 2026 figures that case keys off), a
+   "CPA readiness" section in the wholesaler handoff preview AND notification email (the case
+   ships with its substance file), and the tests pin the tier assignments. (2)
+   `src/lib/tax-reference.ts` + `/app/tax-reference` (in the agent nav): 2026 federal actuals
+   verified against Rev. Proc. 2025-32 — ordinary brackets (single/MFJ incl. OBBBA's extra
+   low-bracket adjustment), $16,100/$32,200/$24,150 standard deduction, $15M estate/gift/GST,
+   $19,000 annual exclusion ($194,000 non-citizen spouse), LTCG thresholds, §1411 NIIT, the OBBBA
+   AMT trap ($90,100/$140,200 exemptions phasing out at $500K/$1M AMTI at 50¢ per dollar — the
+   CLAUDE.md diagnostic now has real numbers), $430/day LTC per-diem, RMD age 73, 21% corporate.
+   The 2027 column is honest: rates and statutory thresholds law-locked, everything else marked
+   pending until the fall-2026 revenue procedure publishes — the file header documents the update
+   protocol. One figure flagged as unconfirmed (single-filer 20% LTCG threshold — marked "confirm
+   §3.03 before quoting"). Federal only per the directive; state is out of scope. Verified with a
+   9-point Playwright flow; 88 Vitest tests green.
+
 ---
 
 ## What the Dev Needs From You at the Start of Each Phase

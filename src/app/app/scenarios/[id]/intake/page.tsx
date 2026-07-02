@@ -19,6 +19,9 @@ import { Card } from "@/components/ui/Card";
 import { SubmitButton } from "@/components/SubmitButton";
 import { IntakeForm } from "@/components/IntakeForm";
 import { AtlasReveal, type RevealStep } from "@/components/AtlasReveal";
+import { CPA_SCRUTINY, TIER_LABELS } from "@/lib/cpa-scrutiny";
+import { taxRef } from "@/lib/tax-reference";
+import { cn } from "@/lib/cn";
 import type { Scenario, User } from "@/generated/prisma/client";
 
 const AVATAR_LABELS: Record<string, string> = {
@@ -348,6 +351,8 @@ async function RecommendationCard({ scenario }: { scenario: Scenario }) {
                       </div>
                     )}
 
+                    <CpaScrutinyPanel slug={strategy.slug} />
+
                     <form
                       action={saveStrategyEstimateAction}
                       className="mt-3 flex flex-wrap items-end gap-2 border-t border-border pt-3"
@@ -458,6 +463,70 @@ async function RecommendationCard({ scenario }: { scenario: Scenario }) {
   );
 }
 
+// The CPA lens per recommendation (owner directive 2026-07-02): tier,
+// verdict, the documentation checklist the client's CPA will request, and
+// the current-year federal figures the case math keys off — so the agent
+// walks in already holding the answers.
+function CpaScrutinyPanel({ slug }: { slug: string }) {
+  const scrutiny = CPA_SCRUTINY[slug];
+  if (!scrutiny) return null;
+  const figures = scrutiny.taxRefKeys
+    .map((key) => taxRef(key))
+    .filter((entry): entry is NonNullable<typeof entry> => Boolean(entry));
+
+  return (
+    <details className="group mt-2 rounded-md bg-cream px-3 py-2">
+      <summary className="flex cursor-pointer list-none items-center gap-2 text-xs font-medium text-navy [&::-webkit-details-marker]:hidden">
+        <span className="inline-block text-gold transition-transform group-open:rotate-90">
+          &#9656;
+        </span>
+        CPA scrutiny &amp; documentation
+        <span
+          className={cn(
+            "ml-1 rounded-full px-2 py-0.5 text-[10px] font-medium",
+            scrutiny.tier === 1 && "bg-gold/25 text-navy",
+            scrutiny.tier === 2 && "bg-charcoal/10 text-charcoal",
+            scrutiny.tier === 3 && "bg-red-50 text-red-700",
+          )}
+        >
+          {TIER_LABELS[scrutiny.tier]}
+        </span>
+      </summary>
+      <p className="mt-2 text-xs text-charcoal/80">{scrutiny.verdict}</p>
+      <p className="mt-2 text-[10px] font-medium uppercase tracking-wide text-charcoal/50">
+        The file the CPA will ask for
+      </p>
+      <ul className="mt-1 list-inside list-disc space-y-0.5">
+        {scrutiny.checklist.map((item) => (
+          <li key={item} className="text-xs text-charcoal/70">
+            {item}
+          </li>
+        ))}
+      </ul>
+      {figures.length > 0 && (
+        <>
+          <p className="mt-2 text-[10px] font-medium uppercase tracking-wide text-charcoal/50">
+            2026 federal figures this case keys off
+          </p>
+          <ul className="mt-1 space-y-0.5">
+            {figures.map((entry) => (
+              <li key={entry.key} className="text-xs text-charcoal/70">
+                <span className="font-medium text-charcoal">{entry.label}:</span> {entry.y2026}
+              </li>
+            ))}
+          </ul>
+          <p className="mt-1.5 text-[10px] text-charcoal/50">
+            Full 2026/2027 table:{" "}
+            <Link href="/app/tax-reference" className="text-navy underline hover:text-gold">
+              federal tax reference
+            </Link>
+          </p>
+        </>
+      )}
+    </details>
+  );
+}
+
 async function HandoffPreviewCard({ user, scenario }: { user: User; scenario: Scenario }) {
   const preview = await buildHandoffPreview(user, scenario.id);
 
@@ -505,6 +574,18 @@ async function HandoffPreviewCard({ user, scenario }: { user: User; scenario: Sc
                 <p className="font-medium text-navy">COI notes</p>
                 {preview.content.coiNotes.map((line) => (
                   <p key={line}>{line}</p>
+                ))}
+              </div>
+            )}
+            {preview.content.documentationLines.length > 0 && (
+              <div>
+                <p className="font-medium text-navy">
+                  CPA readiness — documentation this case will need
+                </p>
+                {preview.content.documentationLines.map((line) => (
+                  <p key={line} className={line.startsWith("•") ? "pl-3 text-xs" : "mt-1"}>
+                    {line}
+                  </p>
                 ))}
               </div>
             )}

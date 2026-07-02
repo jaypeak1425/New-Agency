@@ -32,12 +32,17 @@ const AVATAR_LABELS: Record<string, string> = {
 // can link straight to the section that unlocks it instead of leaving the
 // agent to guess. Slugs not listed default to the estate section (all the
 // HNW estate-planning gates read from there).
-const UNLOCK_SECTION: Record<string, "avatar" | "estate" | "annuity"> = {
+const UNLOCK_SECTION: Record<string, "avatar" | "estate" | "annuity" | "business"> = {
   "quiet-wealth-transfer": "avatar",
   "rmd-repositioning": "avatar",
   "roth-plus-life": "avatar",
+  ppli: "avatar",
+  "family-income-legacy": "avatar",
   "annuity-rescue": "annuity",
   "qualified-ltc": "annuity",
+  "buy-sell-life-insurance": "business",
+  "key-person-life-insurance": "business",
+  "coli-corporate-reserve": "business",
 };
 
 function unlockLink(scenarioId: string, slug: string) {
@@ -46,6 +51,12 @@ function unlockLink(scenarioId: string, slug: string) {
     return {
       href: `/app/scenarios/${scenarioId}/underwriting/annuity`,
       label: "complete the annuity intake",
+    };
+  }
+  if (section === "business") {
+    return {
+      href: `/app/scenarios/${scenarioId}/intake?edit=1#intake-edit`,
+      label: "answer the business owner questions",
     };
   }
   return {

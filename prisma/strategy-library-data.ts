@@ -508,4 +508,280 @@ export const strategyLibrarySeed: Array<
     ],
     sourceDoc: "docs/advanced-case-design-framework.md",
   },
+
+  // ---- Supporting (library additions, 2026-07-02) ----
+  // The CLU/CFP expansion beyond the original 9-core/8-supporting roster:
+  // buy-sell and executive-benefit designs for the Business Owner avatar,
+  // trust structures + PPLI for HNW, and the Family/Legacy avatar's first
+  // strategy. Authored from primary sources (Connelly v. United States, 602
+  // U.S. 257 (2024); §101(j); §409A; Treas. Reg. §1.61-22; §2702; §817(h))
+  // and seeded pending_content — new strategies enter the locked library
+  // ONLY through the docs/09 validation sign-off ("Approve & go live").
+  {
+    slug: "buy-sell-life-insurance",
+    name: "Buy-Sell Agreement Funding (Cross-Purchase / Entity / Insurance LLC)",
+    tier: "supporting",
+    status: "pending_content",
+    avatarTags: ["business_owner"],
+    clientTriggerProfile:
+      "Co-owned business (partnership, S-Corp, C-Corp, LLC with multiple members) with no funded succession plan — at an owner's death the survivors need to buy the interest and the family needs to be bought out, at a price everyone agreed to in advance.",
+    legalBasis:
+      "§2703(b): a buy-sell fixes estate-tax value only if it's a bona fide business arrangement, not a device to transfer to family below value, and comparable to arm's-length terms. Connelly v. United States, 602 U.S. 257 (2024), unanimous: in an ENTITY-REDEMPTION design the corporate-owned death benefit increases the company's value for estate tax with NO offset for the redemption obligation — the estate can be taxed on insurance bought to buy it out. Cross-purchase (or a special-purpose insurance LLC) avoids that inclusion. §101(j) notice-and-consent applies to any entity-owned policy before issue. §101(a)(2) transfer-for-value trap when existing policies are shuffled between owners — the partner/partnership exceptions are the usual cure.",
+    mechanics:
+      "Cross-purchase: each owner owns and is beneficiary of a policy on each other owner (n×(n−1) policies); survivors buy the decedent's interest directly and get a cost-basis step-up in the purchased interest. Entity redemption: the company owns one policy per owner and redeems the decedent's interest — administratively simple but post-Connelly carries estate-tax inclusion risk and no survivor basis step-up. Insurance-only LLC: a separate LLC (taxed as a partnership) holds all the policies, consolidating cross-purchase mechanics, dodging transfer-for-value via the partner exception, and keeping proceeds out of the operating company's valuation. Wait-and-see hybrids defer the choice until death.",
+    whyUsed:
+      "The cornerstone case for every co-owned business — it converts a valuation fight and a forced fire-sale into a funded, pre-priced transaction, and post-Connelly every EXISTING redemption-style agreement in an agent's book is a review opportunity.",
+    matchingParameters: [
+      "business_owner = true",
+      "co_owners_present = true (Q6)",
+      "business_continuity_goal = true",
+      "owners_insurable (docs/04 gives buy-sell its own age gate: > 75 fails)",
+    ],
+    uplineQuestions: [
+      "Post-Connelly: if the existing agreement is entity-redemption, should it be restructured to cross-purchase or an insurance LLC before the next owner death locks in the inclusion?",
+      "Does the valuation formula satisfy §2703(b), and when was the price/valuation last certified against the funding amount?",
+      "Are any existing policies being transferred between owners or the entity — and if so, which transfer-for-value exception covers each transfer?",
+    ],
+    sourceDoc:
+      "AI-researched (Connelly v. United States, 602 U.S. 257 (2024); §2703(b); §101(a)(2); §101(j)); named in docs/03's own intake example (\"set up a buy-sell\")",
+    notes:
+      "AI-researched draft pending human sign-off (docs/09 validation workflow for new library entries). docs/04-field-underwriting.md's section 5 lists a buy-sell-specific age gate (> 75) — stricter than the global 80 ceiling; flagged in matchingParameters until a per-strategy age-gate override exists in the engine.",
+  },
+  {
+    slug: "key-person-life-insurance",
+    name: "Key Person Life Insurance",
+    tier: "supporting",
+    status: "pending_content",
+    avatarTags: ["business_owner"],
+    clientTriggerProfile:
+      "Business whose revenue, lending relationships, or operations depend heavily on one or a few people (rainmaker, founder, technical lead) — the death of that person would cost the company money it can't replace from cash flow.",
+    legalBasis:
+      "§101(j) (PPA 2006) governs all employer-owned life insurance: death proceeds above premiums paid are TAXABLE to the employer unless (a) written notice and consent are obtained from the insured BEFORE issue and (b) the insured falls in an exception class (director or highly compensated — top 35% — or employee within 12 months of death). Form 8925 annual reporting required. Premiums are non-deductible under §264(a)(1); proceeds, when §101(j) is satisfied, are received non-taxable.",
+    mechanics:
+      "The business applies for, owns, pays for, and is beneficiary of a policy on the key person. Face amount sized by a multiple-of-compensation method (commonly 5–10×) or a contribution-to-earnings method (the person's share of profits × years to replace them). Permanent designs add a balance-sheet asset (cash value) and can later be repurposed into an executive benefit for the same person.",
+    whyUsed:
+      "The simplest business sale in the library and frequently the first policy a business ever buys — it also opens every retention conversation (§162, REBA, split-dollar, NQDC) about the same key people.",
+    matchingParameters: [
+      "business_owner = true",
+      "key_employees_count > 0 (Q7)",
+      "revenue_dependency_on_key_person = true",
+      "101j_notice_and_consent_before_issue (hard rule 5)",
+    ],
+    uplineQuestions: [
+      "Is the §101(j) notice-and-consent paperwork in the carrier's application package, and is it signed BEFORE issue — and who is tracking the Form 8925 filing annually?",
+      "What sizing method (multiple of compensation vs. contribution to earnings) supports the face amount if the IRS or a lender asks?",
+      "Term or permanent — and if permanent, is the cash value earmarked to convert into a retention benefit for this same key person later?",
+    ],
+    sourceDoc: "AI-researched (§101(j), §264(a)(1), PPA 2006) — pending human sign-off",
+    notes:
+      "AI-researched draft pending human sign-off (docs/09 validation workflow for new library entries).",
+  },
+  {
+    slug: "coli-corporate-reserve",
+    name: "COLI Corporate Reserve",
+    tier: "supporting",
+    status: "pending_content",
+    avatarTags: ["business_owner"],
+    clientTriggerProfile:
+      "Profitable business (any entity except a sole prop) accumulating retained earnings in taxable instruments, looking for a tax-advantaged place to warehouse reserve capital that stays on the balance sheet and can informally back benefit promises.",
+    legalBasis:
+      "Corporate-owned permanent life insurance: inside buildup is non-taxable while the policy remains in force (§7702-compliant design), and the death benefit is received non-taxable when §101(j) notice-and-consent is satisfied before issue (hard rule 5). §264(f) pro-rata interest-expense disallowance can bite leveraged businesses holding unborrowed cash value — model it. §7702A 7-pay testing: overfunding into MEC status is irrevocable (hard rule 6). C-Corp AMT/E&P and S-Corp AAA/basis effects differ — coordinate with the CPA.",
+    mechanics:
+      "The company owns high-cash-value permanent policies (often on owners or key people, with §101(j) consent), funding them from retained earnings at or near — but below — the MEC limit. Cash value grows non-taxable while in force, is accessible via withdrawals-to-basis and policy loans, sits on the balance sheet as an asset, and the death benefit provides cost recovery. The reserve informally backs whatever the business needs later: key-person exposure, buy-sell funding, NQDC promises, or an owner's exit.",
+    whyUsed:
+      "docs/03's own intake example asks for exactly this (\"put money aside in a company reserve\") — it's the business owner's version of the personal cash-value conversation, with the docs/07 COLI commission basis (0.5% of face) already wired into the app's math.",
+    matchingParameters: [
+      "business_owner = true",
+      "entity_structure != sole_prop",
+      "retained_earnings_to_reposition = true",
+      "mec_limit_respected (hard rule 6)",
+    ],
+    uplineQuestions: [
+      "What funding schedule keeps the design below the §7702A 7-pay MEC line while maximizing early cash value — and is the client clear that a MEC is irrevocable?",
+      "Does §264(f) interest disallowance apply given the company's debt, and has the CPA modeled the E&P (C-Corp) or AAA/basis (S-Corp) treatment?",
+      "Is §101(j) notice-and-consent complete for every insured before issue, with Form 8925 reporting assigned to someone specific?",
+    ],
+    sourceDoc:
+      "AI-researched (§7702/§7702A, §101(j), §264(f)) + docs/07-progress-dashboard-math.md's COLI commission basis — pending human sign-off",
+    notes:
+      "AI-researched draft pending human sign-off (docs/09 validation workflow for new library entries).",
+  },
+  {
+    slug: "nqdc-serp-coli",
+    name: "Nonqualified Deferred Compensation (SERP) Informally Funded with COLI",
+    tier: "supporting",
+    status: "pending_content",
+    avatarTags: ["business_owner"],
+    clientTriggerProfile:
+      "Business owner who wants to promise a select executive (or themselves, in a C-Corp) meaningful retirement income above qualified-plan limits, with golden-handcuffs vesting — without the nondiscrimination testing of a qualified plan.",
+    legalBasis:
+      "NQDC is an UNFUNDED contractual promise: no ERISA funding rules because it's a top-hat plan for a select group, but §409A rigidly controls deferral elections, distribution triggers, and acceleration (violations = immediate income + 20% penalty to the executive). The employer deducts benefits only when the executive includes them (§404(a)(5)). COLI informally funding the promise must clear §101(j) notice-and-consent (hard rule 5). A rabbi trust (Rev. Proc. 92-64) can secure the promise against a change of heart — but not against the employer's creditors, or the executive is taxed currently.",
+    mechanics:
+      "The company adopts a SERP/deferral agreement (fixed benefit or account balance, vesting tied to tenure) drafted to §409A's distribution rules. It then buys COLI on the executive sized so cash value and death benefit track the benefit liability: cash value grows non-taxable while the policy remains in force, benefit payments are made from corporate funds (deductible when paid), and the death benefit provides full cost recovery. A rabbi trust holds the policies when the executive wants protection from new ownership.",
+    whyUsed:
+      "The heavyweight retention tool when a §162 bonus isn't enough handcuff — the benefit is forfeitable until vesting, the company keeps the asset on its books, and it recovers every dollar at death; the natural upgrade path from the Key Person and Corporate Reserve conversations.",
+    matchingParameters: [
+      "business_owner = true",
+      "key_employees_count > 0",
+      "funding_preference = employer_funded",
+      "benefit_above_qualified_plan_limits = true",
+    ],
+    uplineQuestions: [
+      "Is the plan document §409A-clean (permissible distribution events only, no employer discretion to accelerate), and who reviewed it — this is drafting, not product?",
+      "Is the COLI sized to the benefit liability with cost recovery at death, and is §101(j) consent signed before issue?",
+      "Does the executive want a rabbi trust — and do they understand it protects against a change of control, not against corporate creditors?",
+    ],
+    sourceDoc:
+      "AI-researched (§409A, §404(a)(5), §101(j), Rev. Proc. 92-64) — pending human sign-off",
+    notes:
+      "AI-researched draft pending human sign-off (docs/09 validation workflow for new library entries).",
+  },
+  {
+    slug: "endorsement-split-dollar",
+    name: "Endorsement Split-Dollar (Economic Benefit Regime)",
+    tier: "supporting",
+    status: "pending_content",
+    avatarTags: ["business_owner"],
+    clientTriggerProfile:
+      "Business owner who wants to give a key executive substantial personal death benefit protection cheaply, while the company keeps ownership of the policy, its cash value, and full cost recovery — the control-retaining alternative to a §162 bonus.",
+    legalBasis:
+      "Treas. Reg. §1.61-22 (economic benefit regime): when the EMPLOYER owns the policy and endorses death benefit to the executive's beneficiary, the executive is taxed each year only on the economic benefit — the annual term cost of the endorsed coverage (Table 2001 rates or the carrier's lower published alternative term rates). No §7872 loan treatment (that's the loan regime, used in the private split-dollar card). Rollout (transferring the policy to the executive later) is a taxable event measured by policy value less what the executive pays.",
+    mechanics:
+      "The company owns and pays for a permanent policy on the executive and files an endorsement giving the executive's beneficiary a stated slice of the death benefit; the company keeps the rest (cost recovery) plus all cash value. The executive reports only the small annual term cost as income (or pays it to the company, eliminating the income). At retirement or vesting the arrangement either terminates (company keeps everything), or rolls the policy out to the executive as the final reward.",
+    whyUsed:
+      "Delivers 'the company buys you millions of personal coverage' at a taxable cost to the executive of a few hundred dollars a year — with handcuffs the §162/REBA design can't match, because the employer owns the policy until it decides otherwise.",
+    matchingParameters: [
+      "business_owner = true",
+      "key_employees_count > 0",
+      "funding_preference = employer_funded",
+      "employer_wants_control_and_cost_recovery = true",
+    ],
+    uplineQuestions: [
+      "Is the split-dollar agreement documented as economic-benefit regime with the endorsement filed at the carrier — and are Table 2001 (or alternative term) costs being reported on the executive's W-2 annually?",
+      "What is the planned exit — terminate with employer cost recovery, or roll out to the executive — and what's the projected taxable value at rollout?",
+      "How does this coordinate with the §162/REBA program for the same executive tier (endorsement for control, bonus for simplicity)?",
+    ],
+    sourceDoc:
+      "AI-researched (Treas. Reg. §1.61-22, Notice 2002-8/Table 2001) — pending human sign-off",
+    notes:
+      "AI-researched draft pending human sign-off (docs/09 validation workflow for new library entries). Complements — doesn't replace — private-split-dollar-loan-regime (family/ILIT context) and section-162-executive-bonus-reba (executive-owned context).",
+  },
+  {
+    slug: "qprt-insurance-hedge",
+    name: "Qualified Personal Residence Trust (QPRT) with Life Insurance Hedge",
+    tier: "supporting",
+    status: "pending_content",
+    avatarTags: ["high_net_worth"],
+    clientTriggerProfile:
+      "Client above the exemption with a valuable primary residence or vacation home they intend to keep in the family — the house is a large, appreciating, emotionally-held estate asset that's otherwise hard to gift.",
+    legalBasis:
+      "§2702(a)(3)(A)(ii): the personal-residence exception to the zero-value rule — the grantor's retained term of use is valued under §7520, so only the discounted remainder is a taxable gift. §2036(a) pulls the residence back into the estate if the grantor dies during the retained term — the classic QPRT mortality risk. Trade-off: the residence passes with carryover basis (no §1014 step-up), so QPRTs favor estates where the 40% estate tax dwarfs the heirs' capital-gains exposure. Post-term, the grantor must pay fair-market rent to remain — which is itself a further tax-free wealth transfer to the trust.",
+    mechanics:
+      "Grantor deeds the residence to a QPRT retaining the right to live in it for a fixed term (commonly 10–15 years); the taxable gift is only the actuarial remainder — a fraction of the home's value. If the grantor survives the term, the residence (plus all appreciation) is out of the estate and the grantor rents it back at market rates. An ILIT-owned policy hedges the §2036 risk: if the grantor dies mid-term the QPRT fails back into the estate, and the death benefit covers the estate tax the trust was built to avoid.",
+    whyUsed:
+      "One of the few §2702-sanctioned discounts left for the asset every HNW client owns and won't sell — and, like the GRAT, every QPRT manufactures a term-insurance need (the mortality hedge), which is why it belongs in a producer's library.",
+    matchingParameters: [
+      "estate_exceeds_exemption = true",
+      "illiquid_estate_assets = true (residence-heavy)",
+      "grantor_health_supports_surviving_term = true",
+      "heirs_intend_to_keep_residence = true",
+    ],
+    uplineQuestions: [
+      "What term length balances the remainder discount against realistic survival odds — and is an ILIT policy in place hedging the §2036 death-during-term failure?",
+      "Have the heirs weighed the lost §1014 basis step-up against the estate-tax saving for this residence's appreciation profile?",
+      "Is the post-term market-rent lease documented and actually paid (it's both the §2036 protection and a bonus wealth transfer)?",
+    ],
+    sourceDoc: "AI-researched (§2702(a)(3), §2036(a), §7520, §1014) — pending human sign-off",
+    notes:
+      "AI-researched draft pending human sign-off (docs/09 validation workflow for new library entries).",
+  },
+  {
+    slug: "ppli",
+    name: "Private Placement Life Insurance (PPLI)",
+    tier: "supporting",
+    status: "pending_content",
+    avatarTags: ["high_net_worth"],
+    clientTriggerProfile:
+      "Ultra-HNW client ($5M+ liquid, accredited investor / qualified purchaser) holding tax-inefficient alternatives — hedge funds, credit strategies, high-turnover portfolios — generating ordinary income taxed at top rates every year.",
+    legalBasis:
+      "A §7702-compliant variable universal life policy issued via private placement: inside buildup is non-taxable while the policy remains in force, and the death benefit passes under §101(a). §817(h) diversification rules bind the insurance-dedicated funds (no look-through to a non-diversified portfolio). The investor-control doctrine (Rev. Rul. 2003-91; Webber v. Commissioner, 144 T.C. 324 (2015)) is the live wire: the policyholder may allocate among insurance-dedicated funds but must NOT direct underlying investments, or the IRS taxes the client as the direct owner. Typically owned by a dynasty trust/ILIT so the wrapper is also estate- and GST-excluded.",
+    mechanics:
+      "The client (usually through an ILIT/dynasty trust) funds an institutionally-priced PPLI policy — low loads, no surrender charges — allocated among insurance-dedicated funds that mirror the alternatives the client already wanted. Annual tax drag on the strategies disappears while the policy remains in force; access comes via withdrawals-to-basis and loans; at death the entire account passes as non-taxable death benefit outside the estate. MEC testing (hard rule 6) governs the funding schedule.",
+    whyUsed:
+      "For the right client it's the single largest tax lever in the library — converting perpetual top-bracket ordinary income into a non-taxable, estate-excluded death benefit — and it positions the producer at the family-office table.",
+    matchingParameters: [
+      "net_worth > 5M (liquid, accredited/qualified purchaser)",
+      "tax_inefficient_alternatives_held = true",
+      "legacy_or_estate_planning_goal = true",
+      "no_investor_control (allocation only, never direction)",
+    ],
+    uplineQuestions: [
+      "Which carrier's insurance-dedicated fund platform covers the client's target strategies, and does every fund certify §817(h) diversification?",
+      "Is the ownership structure (ILIT/dynasty trust) and funding schedule MEC-tested — and is the client counseled, in writing, on the investor-control line (allocate, never direct)?",
+      "What are the all-in policy costs versus the portfolio's current annual tax drag — the case stands or falls on that spread?",
+    ],
+    sourceDoc:
+      "AI-researched (§7702, §817(h), Rev. Rul. 2003-91, Webber v. Comm'r, 144 T.C. 324 (2015)) — pending human sign-off",
+    notes:
+      "AI-researched draft pending human sign-off (docs/09 validation workflow for new library entries).",
+  },
+  {
+    slug: "clat-wealth-replacement",
+    name: "Charitable Lead Annuity Trust (CLAT) with Wealth Replacement",
+    tier: "supporting",
+    status: "pending_content",
+    avatarTags: ["high_net_worth"],
+    clientTriggerProfile:
+      "Charitably-inclined client above the exemption — often in a spike-income year (business sale, large bonus, Roth conversion) — who wants a large current deduction and to pass the remainder to heirs at a deeply discounted gift value.",
+    legalBasis:
+      "The mirror image of the CRT already in the library: charity gets the LEAD annuity stream, heirs get the remainder. Grantor CLAT: §170(f)(2)(B) gives an immediate income-tax deduction for the present value of the charity's stream (front-loaded into the high-income year), with the grantor then taxed on trust income (phantom income). Non-grantor CLAT: no upfront deduction, but the trust deducts its charitable payments (§642(c)). Either way §2522/§2055 removes the lead interest from gift/estate tax, and a zeroed-out (Walton-style) CLAT passes the remainder to heirs at a near-zero taxable gift. Low §7520 months favor CLATs — the opposite of CRTs.",
+    mechanics:
+      "Client funds the CLAT in the spike year; the trust pays a fixed annuity to charity (often the family's own foundation or donor-advised fund) for the term; whatever growth beats the §7520 hurdle passes to the heirs (or a trust for them) gift-tax-free. An ILIT-owned policy replaces the wealth committed to charity — or hedges a mid-term death / underperforming trust — so the family's inheritance doesn't depend on the market beating the hurdle.",
+    whyUsed:
+      "Completes the charitable pair with the CRT card: CRT for low-basis assets needing income, CLAT for high-income years needing deductions — both manufacture an ILIT wealth-replacement sale, and both keep the client's philanthropy and the family's inheritance from competing.",
+    matchingParameters: [
+      "estate_exceeds_exemption = true",
+      "charitable_intent = true",
+      "spike_income_year_or_deduction_need = true",
+      "wants_to_preserve_heir_inheritance = true",
+    ],
+    uplineQuestions: [
+      "Grantor or non-grantor CLAT — does the client need the §170(f)(2)(B) deduction this year badly enough to absorb the phantom income that follows?",
+      "Is the annuity zeroed-out against this month's §7520 rate, and what remainder do the projections show at conservative growth?",
+      "Is the wealth-replacement ILIT sized to the charity-bound value or to the full inheritance target — and does the client's cash flow carry both the CLAT gift and the premiums?",
+    ],
+    sourceDoc:
+      "AI-researched (§170(f)(2)(B), §642(c), §2522/§2055, §7520) — pending human sign-off",
+    notes:
+      "AI-researched draft pending human sign-off (docs/09 validation workflow for new library entries).",
+  },
+  {
+    slug: "family-income-legacy",
+    name: "Family Income Replacement & Legacy Blend",
+    tier: "supporting",
+    status: "pending_content",
+    avatarTags: ["family_legacy"],
+    clientTriggerProfile:
+      "Client with dependents under 18 (or clear family-legacy intent) and household net worth below the HNW tier — the estate problem isn't taxes, it's that the family's plans die with the breadwinner's income.",
+    legalBasis:
+      "§101(a): death benefit received by the family non-taxable. Needs-based sizing via DIME (Debt, Income replacement, Mortgage, Education) or human-life-value (income × working years, discounted). Term conversion privileges preserve insurability without new underwriting — contractual, carrier-specific. Beneficiary design (per stirpes, UTMA/trust for minors, contingent beneficiaries) does the estate-planning work at this tier; probate avoidance comes free with a named beneficiary.",
+    mechanics:
+      "Layered term ladder matched to the actual liabilities (20-year for the youngest child's dependency, 15-year for the mortgage balance, etc.) so coverage and premium step down as needs expire — plus a small permanent base policy for final expenses and a guaranteed legacy, structured to stay MEC-clean if cash value matters. Convertibility on every term layer keeps the door open to the permanent designs upstream in this library as the client's wealth grows.",
+    whyUsed:
+      "The Family/Legacy avatar's entry strategy and the app's door-opener case: the docs/07 model books $2.5K average Y1 commission per Family/Legacy client, and today's term ladder is routinely tomorrow's business owner or estate case — the conversion privilege IS the pipeline.",
+    matchingParameters: [
+      "has_dependents_under_18 = true OR legacy_goal = true",
+      "net_worth below HNW tier (over_5m routes to the estate strategies instead)",
+      "income_replacement_need_uncovered = true",
+      "insured_underwritable",
+    ],
+    uplineQuestions: [
+      "What does the DIME calculation actually total, and how is the ladder layered so coverage steps down as the mortgage and dependency years burn off?",
+      "Which carrier's conversion privilege is strongest (period, product availability) — the conversion right is the long-term value in this sale?",
+      "Are minor-beneficiary mechanics handled (trust or UTMA, per stirpes contingents) so proceeds never land in a guardianship court?",
+    ],
+    sourceDoc: "AI-researched (§101(a), DIME/HLV methodology) — pending human sign-off",
+    notes:
+      "AI-researched draft pending human sign-off (docs/09 validation workflow for new library entries). First and only strategy tagged to the family_legacy avatar — before this, that avatar had zero library coverage.",
+  },
 ];

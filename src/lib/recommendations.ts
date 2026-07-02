@@ -32,8 +32,20 @@ const ILIT_CHASSIS_SLUGS = new Set([
   "estate-funding",
   "quiet-wealth-transfer",
   "rmd-repositioning",
+  "qprt-insurance-hedge",
+  "clat-wealth-replacement",
 ]);
 const SECTION_1035_SLUGS = new Set(["annuity-rescue", "qualified-ltc"]);
+// Employer-owned life insurance designs: §101(j) notice-and-consent must be
+// signed BEFORE issue (hard rule 5), and no scenario field can prove that
+// yet — so the rule surfaces as a standing pre-issue guardrail on every
+// EOLI recommendation rather than a conditional check.
+const EOLI_SLUGS = new Set([
+  "key-person-life-insurance",
+  "coli-corporate-reserve",
+  "nqdc-serp-coli",
+  "endorsement-split-dollar",
+]);
 
 function hardRuleViolationsFor(
   strategy: Strategy,
@@ -49,6 +61,9 @@ function hardRuleViolationsFor(
     return checkHardRules({
       exchange: { from: "annuity", to: "annuity", fundsQualified: true },
     }).violations;
+  }
+  if (EOLI_SLUGS.has(strategy.slug)) {
+    return checkHardRules({ coli: {} }).violations;
   }
   return [];
 }
@@ -225,6 +240,82 @@ export const GATES: Record<string, Gate> = {
     return s.qualifiedFundsEstimate === "over_500k" && s.primaryAge >= 60
       ? "eligible"
       : "not_eligible";
+  },
+
+  // ---- The 2026-07-02 library additions (business owner, HNW trust
+  // structures, and the Family/Legacy avatar's first strategy) ----
+
+  "buy-sell-life-insurance": (s) =>
+    // Q6 free-text is the co-owner signal: answered-and-empty means solo.
+    fromRequirements(
+      s,
+      [s.businessOwnerStatus, s.coOwnersNotes],
+      () => s.businessOwnerStatus === "business_owner" && Boolean(s.coOwnersNotes?.trim()),
+    ),
+
+  "key-person-life-insurance": (s) =>
+    fromRequirements(
+      s,
+      [s.businessOwnerStatus, s.keyEmployeesCount],
+      () => s.businessOwnerStatus === "business_owner" && (s.keyEmployeesCount ?? 0) > 0,
+    ),
+
+  "coli-corporate-reserve": (s) =>
+    fromRequirements(
+      s,
+      [s.businessOwnerStatus, s.businessStructure],
+      () => s.businessOwnerStatus === "business_owner" && s.businessStructure !== "sole_prop",
+    ),
+
+  "nqdc-serp-coli": (s) =>
+    fromRequirements(
+      s,
+      [s.businessOwnerStatus, s.keyEmployeesCount, s.fundingPreference],
+      () =>
+        s.businessOwnerStatus === "business_owner" &&
+        (s.keyEmployeesCount ?? 0) > 0 &&
+        s.fundingPreference === "employer_funded",
+    ),
+
+  "endorsement-split-dollar": (s) =>
+    fromRequirements(
+      s,
+      [s.businessOwnerStatus, s.keyEmployeesCount, s.fundingPreference],
+      () =>
+        s.businessOwnerStatus === "business_owner" &&
+        (s.keyEmployeesCount ?? 0) > 0 &&
+        s.fundingPreference === "employer_funded",
+    ),
+
+  "qprt-insurance-hedge": (s) =>
+    fromRequirements(
+      s,
+      [s.estateExceedsExemption, s.illiquidNetWorth],
+      () => s.estateExceedsExemption === true && s.illiquidNetWorth === true,
+    ),
+
+  ppli: (s) =>
+    fromRequirements(
+      s,
+      [s.netWorthEstimate],
+      () => s.netWorthEstimate === "over_5m" && hasLegacyGoal(s),
+    ),
+
+  "clat-wealth-replacement": (s) =>
+    fromRequirements(
+      s,
+      [s.estateExceedsExemption],
+      () => s.estateExceedsExemption === true && s.primaryGoals.includes("charitable_intent"),
+    ),
+
+  "family-income-legacy": (s) => {
+    // The door-opener tier: HNW net worth routes to the estate strategies
+    // instead, dependents under 18 is the strongest signal, legacy intent
+    // qualifies on its own.
+    if (s.netWorthEstimate === "over_5m") return "not_eligible";
+    if (s.hasDependentsUnder18 === true) return "eligible";
+    if (s.hasDependentsUnder18 === null) return "needs_more_info";
+    return s.primaryGoals.includes("legacy") ? "eligible" : "not_eligible";
   },
 };
 

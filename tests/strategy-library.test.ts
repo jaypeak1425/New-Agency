@@ -17,6 +17,12 @@ function scenario(overrides: Partial<Scenario> = {}): Scenario {
     existingStructures: [],
     primaryAge: null,
     qualifiedFundsEstimate: null,
+    hasDependentsUnder18: null,
+    netWorthEstimate: null,
+    coOwnersNotes: null,
+    keyEmployeesCount: null,
+    businessStructure: null,
+    fundingPreference: null,
     maritalStatus: null,
     estateExceedsExemption: null,
     illiquidNetWorth: null,
@@ -41,12 +47,11 @@ describe("strategy library seed (Brain content)", () => {
     }
   });
 
-  it("ships the full library live — owner signed off on all 7 researched cards (2026-07-02)", () => {
-    // Brain Lock still holds structurally: anything pending_content is never
-    // surfaced. As of the owner's "Go live with all" sign-off there simply
-    // isn't anything pending — and each formerly-pending card records the
-    // sign-off in its notes.
-    expect(strategyLibrarySeed.filter((s) => s.status !== "documented")).toEqual([]);
+  it("ships the original 17 live (owner sign-off 2026-07-02) with the 9 additions gated behind docs/09", () => {
+    // Brain Lock holds structurally: anything pending_content is never
+    // surfaced. The original 17 carry the owner's "Go live with all"
+    // sign-off; the 2026-07-02 CLU/CFP additions enter the locked library
+    // only through the Approve & go live workflow.
     const signedOff = strategyLibrarySeed.filter((s) =>
       s.notes?.includes("approved live by owner sign-off 2026-07-02"),
     );
@@ -59,6 +64,23 @@ describe("strategy library seed (Brain content)", () => {
       "rmd-repositioning",
       "roth-plus-life",
     ]);
+    expect(strategyLibrarySeed.filter((s) => s.status === "documented")).toHaveLength(17);
+
+    const pending = strategyLibrarySeed.filter((s) => s.status === "pending_content");
+    expect(pending.map((s) => s.slug).sort()).toEqual([
+      "buy-sell-life-insurance",
+      "clat-wealth-replacement",
+      "coli-corporate-reserve",
+      "endorsement-split-dollar",
+      "family-income-legacy",
+      "key-person-life-insurance",
+      "nqdc-serp-coli",
+      "ppli",
+      "qprt-insurance-hedge",
+    ]);
+    for (const s of pending) {
+      expect(s.notes, `sign-off note for ${s.slug}`).toContain("pending human sign-off");
+    }
   });
 
   it("has a recommendation gate for every seeded strategy (no silent needs_more_info fallbacks)", () => {
@@ -137,6 +159,46 @@ describe("gates for the 7 researched strategies", () => {
         annuityIntake({ existingAnnuityContractsNotes: "", sourceOfFunds: "non_qualified" }),
       ),
     ).toBe("not_eligible");
+  });
+
+  it("buy-sell keys off co-owners (Q6) and Connelly-era review applies to any co-owned business", () => {
+    const owner = { businessOwnerStatus: "business_owner" } as const;
+    expect(
+      GATES["buy-sell-life-insurance"](
+        scenario({ ...owner, coOwnersNotes: "50/50 split, ages 50 and 49" }),
+        null,
+      ),
+    ).toBe("eligible");
+    expect(GATES["buy-sell-life-insurance"](scenario({ ...owner, coOwnersNotes: "" }), null)).toBe(
+      "not_eligible",
+    );
+    expect(GATES["buy-sell-life-insurance"](scenario(owner), null)).toBe("needs_more_info");
+  });
+
+  it("ppli requires $5M+ net worth AND legacy intent", () => {
+    expect(
+      GATES["ppli"](scenario({ netWorthEstimate: "over_5m", primaryGoals: ["estate_planning"] }), null),
+    ).toBe("eligible");
+    expect(GATES["ppli"](scenario({ netWorthEstimate: "range_2m_5m", primaryGoals: ["legacy"] }), null)).toBe(
+      "not_eligible",
+    );
+  });
+
+  it("family-income-legacy is the door-opener tier — HNW routes to the estate strategies", () => {
+    expect(GATES["family-income-legacy"](scenario({ hasDependentsUnder18: true }), null)).toBe("eligible");
+    expect(
+      GATES["family-income-legacy"](
+        scenario({ hasDependentsUnder18: true, netWorthEstimate: "over_5m" }),
+        null,
+      ),
+    ).toBe("not_eligible");
+    expect(
+      GATES["family-income-legacy"](
+        scenario({ hasDependentsUnder18: false, primaryGoals: ["legacy"] }),
+        null,
+      ),
+    ).toBe("eligible");
+    expect(GATES["family-income-legacy"](scenario(), null)).toBe("needs_more_info");
   });
 
   it("qualified-ltc: existing annuity (PPA §1035 path) or 60+ with $500K+ qualified (distribution path)", () => {

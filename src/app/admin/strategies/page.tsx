@@ -100,7 +100,8 @@ export default async function AdminStrategiesPage({
       </div>
       <h1 className="mt-4 text-3xl">Strategy library</h1>
       <p className="mt-2 text-sm text-charcoal/60">
-        The locked strategy library (docs/00-developer-brief.md: 9 core + 8 supporting). Only
+        The locked strategy library (docs/00-developer-brief.md&rsquo;s original 9 core + 8
+        supporting, plus additions entering through the docs/09 validation workflow). Only
         &ldquo;Documented&rdquo; strategies are eligible for the recommendation engine — per the
         Brain Lock rule, a &ldquo;Pending content&rdquo; row is never surfaced to an agent. A fully
         drafted pending card goes live through &ldquo;Approve &amp; go live&rdquo; — the

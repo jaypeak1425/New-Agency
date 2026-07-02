@@ -694,6 +694,28 @@ This document is the staged build plan for the Insurance Strategy Engine. Each p
    to the case design. All server actions and field names unchanged; verified with a 15-point
    Playwright flow against the production build (73 Vitest tests green).
 
+   **Post-close-out update — the CLU/CFP library expansion (9 new strategies, pending sign-off).**
+   Per the owner's directive, the library grew beyond the original 9-core/8-supporting roster —
+   through the docs/09 validation workflow, exactly as CLAUDE.md's Brain Lock prescribes for new
+   strategies. Business owner suite: **Buy-Sell Agreement Funding** (cross-purchase vs. entity
+   redemption vs. insurance LLC, built around Connelly v. United States, 602 U.S. 257 (2024) —
+   every redemption-style agreement in an agent's book is now a review opportunity), **Key Person
+   Life Insurance** (§101(j)/Form 8925), **COLI Corporate Reserve** (the docs/03 "company
+   reserve", §264(f)/MEC-aware, using docs/07's 0.5%-of-face COLI commission), **NQDC/SERP
+   informally funded with COLI** (§409A, rabbi trust), and **Endorsement Split-Dollar** (economic
+   benefit regime, Treas. Reg. §1.61-22 — the control-retaining counterpart to the §162/REBA
+   card). HNW/trust suite: **QPRT with insurance hedge** (§2702(a)(3), §2036 mortality hedge),
+   **PPLI** (§817(h), investor-control doctrine per Webber v. Comm'r), and **CLAT with wealth
+   replacement** (the CRT's mirror image for spike-income years). Plus **Family Income
+   Replacement & Legacy Blend** — the first strategy tagged to the family_legacy avatar, which
+   previously had zero library coverage. All 9 have engine gates (26/26 slugs covered), the
+   employer-owned designs surface hard rule 5's §101(j) pre-issue guardrail on every
+   recommendation, and unlock links route to the business questions. Verified end-to-end: Brain
+   Lock confirmed (drafts invisible to agents pre-approval), a co-owned-business case recommends
+   buy-sell + key person with the rule-5 warning after sign-off, and a dependents-under-18 case
+   gets the family blend. 76 Vitest tests green. **Action item for Jay:** 9 new cards await your
+   "Approve & go live" review on `/admin/strategies`.
+
 ---
 
 ## What the Dev Needs From You at the Start of Each Phase

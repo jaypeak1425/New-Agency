@@ -82,6 +82,29 @@ export default async function PitchDeckPage({
                   </ul>
                 )}
 
+                {slide.comparison && slide.comparison.length > 0 && (
+                  <div className="mt-5 space-y-4">
+                    <div className="grid grid-cols-2 gap-4">
+                      <p className="text-xs font-semibold uppercase tracking-widest text-charcoal/50">
+                        Your current path
+                      </p>
+                      <p className="text-xs font-semibold uppercase tracking-widest text-gold">
+                        With this design
+                      </p>
+                    </div>
+                    {slide.comparison.map((row) => (
+                      <div key={row.today} className="grid grid-cols-2 gap-4">
+                        <div className="rounded-md bg-charcoal/5 p-4">
+                          <p className="text-sm leading-relaxed text-charcoal/70">{row.today}</p>
+                        </div>
+                        <div className="rounded-md border border-gold/40 bg-gold/10 p-4">
+                          <p className="text-sm leading-relaxed text-charcoal">{row.after}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
                 <p className="mt-8 text-[10px] text-charcoal/40">
                   Prepared by {user.name ?? user.email} · Peakbritt Financial Group · Educational
                   overview — not tax or legal advice.

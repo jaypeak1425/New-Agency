@@ -64,8 +64,16 @@ export function classifyAvatars(scenario: Scenario): AvatarClassification {
     scenario.incomeRevenueRange === "range_1m_5m"
   ) {
     amtTrapFlag = true;
+    // Real 2026 figures from src/lib/tax-reference.ts (Rev. Proc. 2025-32 +
+    // OBBBA): this is WHY the $500K–$1.5M band is a trap, not just a label.
     amtTrapNote =
-      "Income/revenue band overlaps the $500K-$1.5M OBBBA AMT-trap zone — confirm the exact figure before treating this as a hard trigger.";
+      "Income/revenue band overlaps the $500K–$1.5M OBBBA AMT-trap zone. The 2026 mechanics: " +
+      "the AMT exemption ($90,100 single / $140,200 joint) phases out at 50¢ per dollar of AMTI " +
+      "above $500K single / $1M joint — twice the pre-OBBBA speed — so a joint filer's exemption " +
+      "is fully gone by roughly $1.28M and the effective marginal AMT rate in the phase-out band " +
+      "runs ~35–42%. Deduction-timing, exercise-timing, and Roth-conversion sizing all interact " +
+      "with it. Confirm the exact income figure and run the AMT diagnostic with the client's CPA " +
+      "before quoting after-tax outcomes.";
   }
 
   return {

@@ -762,6 +762,23 @@ This document is the staged build plan for the Insurance Strategy Engine. Each p
    §3.03 before quoting"). Federal only per the directive; state is out of scope. Verified with a
    9-point Playwright flow; 88 Vitest tests green.
 
+   **Post-close-out update — sell-the-improvement comparisons + the AMT trap with real math.**
+   Per the owner's directive ("comparing their current situation to the situation after the
+   strategy is implemented... so we can sell the improvement"), every pitch deck now carries a
+   **"The difference this makes"** slide: side-by-side "Your current path" vs. "With this design"
+   rows for all 26 strategies (`beforeAfter` on each client narrative). The contrast is
+   deliberately STRUCTURAL — what changes about taxation, timing, control, and who bears the
+   risk — never quantified dollars, because the compliance filter (correctly) bans dollar-figure
+   outcome claims in client copy; every cell runs through the filter like every other deck
+   string. The avatar classifier's OBBBA AMT-trap note also grew teeth: instead of a vague
+   band-overlap warning it now states the 2026 mechanics (exemption $90,100/$140,200 phasing out
+   at 50¢ per dollar above $500K/$1M AMTI — twice the pre-OBBBA speed, fully gone by ~$1.28M
+   joint, effective marginal rates ~35–42% in the band) and tells the agent to run the diagnostic
+   with the client's CPA before quoting after-tax outcomes. Verified with a 6-point Playwright
+   flow (comparison slide renders two-column with compliant cells; AMT note shows the real
+   figures on a flagged case); 89 Vitest tests green (every narrative must carry before/after
+   rows, and every cell must clear the filter without a hold).
+
 ---
 
 ## What the Dev Needs From You at the Start of Each Phase

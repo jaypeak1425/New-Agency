@@ -24,6 +24,9 @@ export interface DeckSlide {
   title: string;
   paragraphs: string[];
   bullets: string[];
+  // The sell-the-improvement slide: current path vs. with the design,
+  // side by side. Structural contrast, never quantified outcomes.
+  comparison?: Array<{ today: string; after: string }>;
 }
 
 export type PitchDeckResult =
@@ -143,6 +146,14 @@ export async function buildPitchDeck(
     { title: "The approach", paragraphs: [narrative.approach], bullets: [] },
     { title: "How it works", paragraphs: [], bullets: narrative.howItWorks },
     {
+      title: "The difference this makes",
+      paragraphs: [
+        "Side by side: the path you're on today, and where this design leaves you.",
+      ],
+      bullets: [],
+      comparison: narrative.beforeAfter,
+    },
+    {
       title: "What to keep in mind",
       paragraphs: [],
       bullets: [
@@ -166,14 +177,29 @@ export async function buildPitchDeck(
   const holds: string[] = [];
   const slides: DeckSlide[] = [];
   for (const slide of rawSlides) {
+    // A comparison slide with no rows for this strategy is simply skipped.
+    if (slide.comparison && slide.comparison.length === 0) continue;
+
     const title = filterString(slide.title, fixes, holds);
     const paragraphs = slide.paragraphs.map((p) => filterString(p, fixes, holds));
     const bullets = slide.bullets.map((b) => filterString(b, fixes, holds));
-    if (title === null || paragraphs.includes(null) || bullets.includes(null)) continue;
+    const comparison = slide.comparison?.map((row) => ({
+      today: filterString(row.today, fixes, holds),
+      after: filterString(row.after, fixes, holds),
+    }));
+    if (
+      title === null ||
+      paragraphs.includes(null) ||
+      bullets.includes(null) ||
+      comparison?.some((row) => row.today === null || row.after === null)
+    ) {
+      continue;
+    }
     slides.push({
       title,
       paragraphs: paragraphs as string[],
       bullets: bullets as string[],
+      comparison: comparison as Array<{ today: string; after: string }> | undefined,
     });
   }
 

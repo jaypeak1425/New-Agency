@@ -18,6 +18,16 @@ describe("pitch deck client narratives", () => {
     }
   });
 
+  it("every narrative carries the sell-the-improvement comparison (before/after rows)", () => {
+    for (const [slug, narrative] of Object.entries(CLIENT_PITCH)) {
+      expect(narrative.beforeAfter.length, `beforeAfter rows for ${slug}`).toBeGreaterThan(0);
+      for (const row of narrative.beforeAfter) {
+        expect(row.today.length, `today cell for ${slug}`).toBeGreaterThan(20);
+        expect(row.after.length, `after cell for ${slug}`).toBeGreaterThan(20);
+      }
+    }
+  });
+
   it("every narrative string clears the compliance filter without a hold", () => {
     // pass = clean; rewrite = auto-fixable (the builder applies and records
     // the fix); hold would mean IRC/form/structure references, guarantees,
@@ -28,6 +38,7 @@ describe("pitch deck client narratives", () => {
         narrative.approach,
         ...narrative.howItWorks,
         ...narrative.whatToKnow,
+        ...narrative.beforeAfter.flatMap((row) => [row.today, row.after]),
       ];
       for (const text of strings) {
         const result = complianceFilter(text);

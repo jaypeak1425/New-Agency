@@ -19,11 +19,17 @@ export interface ClientPitchNarrative {
   approach: string;
   howItWorks: string[];
   whatToKnow: string[];
+  // The sell-the-improvement slide (owner directive 2026-07-02): the
+  // client's CURRENT path vs. where the design leaves them, side by side.
+  // Deliberately structural, never quantified — the compliance filter bans
+  // dollar-figure outcome claims in client copy, and the contrast sells
+  // without them. Each cell is filtered like every other deck string.
+  beforeAfter: Array<{ today: string; after: string }>;
 }
 
 const FORCE = "while the policy remains in force";
 
-export const CLIENT_PITCH: Record<string, ClientPitchNarrative> = {
+const RAW_NARRATIVES: Record<string, Omit<ClientPitchNarrative, "beforeAfter">> = {
   "survivorship-second-to-die": {
     clientTitle: "Estate Liquidity at the Second Death",
     approach:
@@ -389,3 +395,252 @@ export const CLIENT_PITCH: Record<string, ClientPitchNarrative> = {
     ],
   },
 };
+
+// The before/after rows, per strategy. "today" = the client's current path;
+// "after" = where the design leaves them. Structural contrast only — the
+// improvement is shown, never promised in dollars.
+const BEFORE_AFTER: Record<string, ClientPitchNarrative["beforeAfter"]> = {
+  "survivorship-second-to-die": [
+    {
+      today:
+        "Estate settlement costs at the second passing get paid by selling property or business interests — at whatever price a deadline allows.",
+      after:
+        "The trust delivers cash at exactly that moment, non-taxable and outside the estate — the assets stay in the family.",
+    },
+    {
+      today: "Two separate policies would cost more for the same protection.",
+      after:
+        "One policy covering both lives, priced on joint life expectancy, typically protects more per premium dollar.",
+    },
+  ],
+  "premium-financed-life-insurance": [
+    {
+      today:
+        "Funding major coverage means liquidating investments — and paying tax on the way out.",
+      after:
+        "Your capital stays invested; a lender funds the premiums against collateral, with a planned exit.",
+    },
+    {
+      today: "Large annual gifts would consume exemption you may want for other assets.",
+      after: "Financing preserves your exemption for the rest of the plan.",
+    },
+  ],
+  "estate-funding": [
+    {
+      today:
+        "The estate bill can arrive at the first passing while the estate is property-rich and cash-poor — a forced sale sets the price.",
+      after: "Cash arrives the same day the obligation does — non-taxable, from outside the estate.",
+    },
+    {
+      today: "Coverage you own personally makes the taxable estate bigger.",
+      after: "Trust ownership from day one keeps it out entirely.",
+    },
+  ],
+  grats: [
+    {
+      today: "The asset's future growth compounds inside your estate, growing tomorrow's tax bill.",
+      after: "Growth above a benchmark passes to your family at little or no gift cost.",
+    },
+    {
+      today: "An outright gift of the asset would consume a large slice of exemption now.",
+      after: "You get your principal back plus a return — mostly the upside moves.",
+    },
+  ],
+  "quiet-wealth-transfer": [
+    {
+      today:
+        "Your heirs must empty the inherited retirement account within ten years, taxed at their own peak rates.",
+      after:
+        "The account converts — over your lifetime, at your rates — into value your family receives non-taxable, outside the estate.",
+    },
+    {
+      today: "Required withdrawals pile up in a taxable account with no plan.",
+      after: "Every after-tax dollar has a destination and a multiplier.",
+    },
+  ],
+  "rmd-repositioning": [
+    {
+      today:
+        "Forced withdrawals you don't spend land in a taxable account — taxed going in, taxed as they grow, counted in the estate at the end.",
+      after:
+        "The same withdrawals fund protection your family receives non-taxable, outside the estate.",
+    },
+  ],
+  "roth-plus-life": [
+    {
+      today:
+        "Heirs inherit a pre-tax account and pay the tax at their own rates on a ten-year clock.",
+      after:
+        "Heirs inherit an account they draw non-taxable — and the coverage restores what you pre-paid to get there.",
+    },
+    {
+      today: "Future required withdrawals push your own bracket up in later years.",
+      after: "Converted funds have no required lifetime withdrawals at all.",
+    },
+  ],
+  "annuity-rescue": [
+    {
+      today:
+        "An old contract charges yesterday's costs for features you no longer use — with a locked-up gain you'd be taxed to touch.",
+      after:
+        "The value moves — gain intact and untriggered — into a design matched to what you actually want now.",
+    },
+  ],
+  "qualified-ltc": [
+    {
+      today:
+        "A long care event is self-insured: paid from savings, after tax, possibly by selling assets at the worst time.",
+      after:
+        "Care, if ever needed, is paid with benefits received non-taxable; if never needed, value returns to the family.",
+    },
+    {
+      today: "The gain in an old annuity becomes ordinary income the day you touch it.",
+      after: "That same gain can pay for care without ever appearing on your return.",
+    },
+  ],
+  "ilit-foundation-wrapper": [
+    {
+      today:
+        "Personally-owned coverage counts in the taxable estate — shrinking the very thing it was bought to protect.",
+      after:
+        "Trust-owned from day one, it stays entirely outside — every dollar arrives where you aimed it.",
+    },
+  ],
+  slat: [
+    {
+      today: "Using the exemption feels like a one-way door — assets fully given away.",
+      after:
+        "The gift leaves both estates, but the household keeps indirect access through your spouse.",
+    },
+    {
+      today: "Waiting risks planning around a smaller exemption if the law changes again.",
+      after:
+        "Today's exemption is locked in on the assets — and their growth — the day the trust is funded.",
+    },
+  ],
+  "dynasty-gst-trust": [
+    {
+      today: "Wealth is re-taxed at every generation it passes through.",
+      after:
+        "What you set aside benefits children, grandchildren, and beyond without the repeat toll.",
+    },
+  ],
+  "private-split-dollar-loan-regime": [
+    {
+      today: "Funding a large trust-owned policy by gift consumes exemption every single year.",
+      after:
+        "Premiums are advanced as a documented loan and come back — exemption stays for other assets.",
+    },
+  ],
+  "installment-sale-idgt": [
+    {
+      today: "A growing business compounds inside your estate at full throttle.",
+      after:
+        "Today's value is frozen at a note; the growth curve belongs to your family's trust.",
+    },
+  ],
+  "wealth-replacement-crt": [
+    {
+      today:
+        "Selling the appreciated asset yourself triggers the capital-gains tax immediately, shrinking what's left to reinvest.",
+      after:
+        "The trust sells without immediate tax, pays you for life, and the family's inheritance is replaced alongside the charitable gift.",
+    },
+  ],
+  "flp-fllc-discounted-gifting": [
+    {
+      today:
+        "Gifting the business or property outright transfers it dollar-for-dollar against your exemption — and hands over the keys.",
+      after:
+        "Appraised minority interests move at a documented discount while you keep management control.",
+    },
+  ],
+  "section-162-executive-bonus-reba": [
+    {
+      today:
+        "Extra cash compensation is taxed and spent — nothing ties your best people to the firm.",
+      after:
+        "The bonus builds an asset the executive owns but can't fully touch until your vesting terms are met.",
+    },
+  ],
+  "buy-sell-life-insurance": [
+    {
+      today:
+        "At an owner's death, the price, the buyer, and the money are all open questions — negotiated under grief and deadline.",
+      after: "All three are settled in advance, and the funding exists the day it's needed.",
+    },
+    {
+      today: "An unfunded agreement is an IOU the survivors may have to borrow against.",
+      after: "Coverage turns the promise into cash.",
+    },
+  ],
+  "key-person-life-insurance": [
+    {
+      today:
+        "Losing the rainmaker means lost revenue, nervous lenders, and an unfunded search for a replacement.",
+      after: "The company holds cash to absorb the hit, reassure creditors, and recruit.",
+    },
+  ],
+  "coli-corporate-reserve": [
+    {
+      today: "Retained earnings sit in instruments taxed every single year.",
+      after:
+        "The reserve compounds without annual tax while the policy remains in force — and stands behind succession, key-person, and benefit promises.",
+    },
+  ],
+  "nqdc-serp-coli": [
+    {
+      today:
+        "Qualified-plan caps limit what you can promise your most important executive — anything extra is just taxable salary.",
+      after:
+        "A vested promise pays meaningful retirement income later, and the company recovers its full cost.",
+    },
+  ],
+  "endorsement-split-dollar": [
+    {
+      today: "Personal coverage at this scale would cost the executive real after-tax money.",
+      after:
+        "The company funds it; the executive is taxed only on a small annual amount for the protection.",
+    },
+    {
+      today: "A plain bonus walks out the door with the employee.",
+      after: "The company keeps the asset until your terms are met.",
+    },
+  ],
+  "qprt-insurance-hedge": [
+    {
+      today: "The home — and every year of its appreciation — sits fully inside the taxable estate.",
+      after:
+        "The home passes at a fraction of today's value in gift terms; you keep living in it through the term.",
+    },
+  ],
+  ppli: [
+    {
+      today:
+        "The portfolio's ordinary income is taxed at top rates every year — compounding for the government first.",
+      after:
+        "The same strategies compound without annual tax while the policy remains in force, and pass to your family non-taxable.",
+    },
+  ],
+  "clat-wealth-replacement": [
+    {
+      today: "A spike-income year is taxed at the top bracket with nothing to show for it.",
+      after:
+        "A front-loaded deduction lands in your highest-rate year, charity receives a fixed stream, and the remainder reaches your family at little or no gift cost.",
+    },
+  ],
+  "family-income-legacy": [
+    {
+      today: "The mortgage, the groceries, and the college plans all rest on next month's paycheck.",
+      after:
+        "If the paycheck stops, the plan doesn't — coverage steps in, sized to the actual liabilities and stepping down as they shrink.",
+    },
+  ],
+};
+
+export const CLIENT_PITCH: Record<string, ClientPitchNarrative> = Object.fromEntries(
+  Object.entries(RAW_NARRATIVES).map(([slug, narrative]) => [
+    slug,
+    { ...narrative, beforeAfter: BEFORE_AFTER[slug] ?? [] },
+  ]),
+);

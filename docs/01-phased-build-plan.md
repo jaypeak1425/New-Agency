@@ -613,7 +613,19 @@ This document is the staged build plan for the Insurance Strategy Engine. Each p
 6. **Session 6:** Launch commercial production coordination — **blocked, external:**
    docs/14-launch-commercial.md is a video production brief (script, shot list) for a real video
    shoot, not a software feature. Nothing to build in this codebase.
-7. **Session 7:** Final QA pass
+7. **Session 7:** Final QA pass — done. One continuous sweep of the whole app against a
+   production build with console/page-error tracking throughout: every public page, an agent's
+   full golden path (signup → grant → onboarding skip → book-of-business save with the celebration
+   firing → case → intake → estimate → status change → all five agent pages → billing), and every
+   admin page. Zero console/page errors; all 60 Vitest tests, ESLint, and `tsc --noEmit` clean.
+
+   **Phase 6 close-out:** Sessions 1, 2, 4, and 7 built; Session 3 folded into earlier work;
+   Sessions 5 (help-doc content) and 6 (launch commercial video shoot) blocked on real-world
+   content/production that isn't a software deliverable in this repo. That completes the buildable
+   scope of all six phases. The standing cross-phase gaps for Jay remain: the brain doc content for
+   the 7 `pending_content` strategies, the AI backend choice for free-text intake, pitch-deck and
+   video-recommender content, an email provider, object storage, a cron/job runner, and the Stripe
+   annual Price ID — each documented inline at the session where it blocks.
 
 ---
 

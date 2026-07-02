@@ -3,14 +3,7 @@ import { getCurrentUser } from "@/lib/auth";
 import { rankProspects, getOrCreateWeeklyCallQueue } from "@/lib/prospecting";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { Card } from "@/components/ui/Card";
-
-const STATUS_LABELS = {
-  draft: "Draft",
-  active: "Active",
-  in_underwriting: "In underwriting",
-  closed_won: "Closed — won",
-  closed_lost: "Closed — lost",
-};
+import { SCENARIO_STATUS_LABELS as STATUS_LABELS } from "@/components/ScenarioStatusBadge";
 
 function money(amount: number) {
   return `$${amount.toLocaleString()}`;

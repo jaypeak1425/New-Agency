@@ -32,5 +32,8 @@ export async function updateBookOfBusinessAction(formData: FormData) {
   };
 
   await updateBookOfBusiness(user.id, input);
-  redirect("/app/settings");
+  // Phase 6 Session 1's on-screen celebration ("You just uncovered $X in
+  // opportunities") — the settings page renders the banner when this flag is
+  // present and the book actually computes to a number.
+  redirect("/app/settings?celebrate=1");
 }

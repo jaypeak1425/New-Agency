@@ -8,7 +8,12 @@ import { SubmitButton } from "@/components/SubmitButton";
 const inputClass =
   "mt-1 block w-32 rounded-md border border-border bg-surface px-3 py-2 text-sm text-charcoal focus:border-gold focus:outline-none focus:ring-1 focus:ring-gold";
 
-export default async function SettingsPage() {
+export default async function SettingsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ celebrate?: string }>;
+}) {
+  const { celebrate } = await searchParams;
   const user = await getCurrentUser();
   const agentProfile = user ? await getAgentProfile(user.id) : null;
   const opportunity = computeBookOfBusinessOpportunity(agentProfile);
@@ -16,6 +21,21 @@ export default async function SettingsPage() {
   return (
     <div>
       <h1 className="text-3xl">Settings</h1>
+
+      {celebrate && opportunity && (
+        <div className="mt-6 max-w-xl rounded-lg border border-gold/40 bg-gradient-to-r from-gold/15 to-gold/5 p-6 shadow-sm">
+          <p className="font-serif text-xl text-navy">
+            You just uncovered{" "}
+            <span className="font-semibold">${opportunity.totalOpportunity.toLocaleString()}</span>{" "}
+            in opportunities sitting in your book.
+          </p>
+          <p className="mt-2 text-sm text-charcoal/70">
+            ${opportunity.addressableOpportunity.toLocaleString()} of it is realistically
+            addressable in the next 12 months. Your dashboard is tracking it from here.
+          </p>
+        </div>
+      )}
+
       <Card className="mt-6 max-w-xl">
         <p className="text-sm text-charcoal">
           Email: <span className="font-medium">{user?.email}</span>

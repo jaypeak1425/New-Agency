@@ -2,6 +2,7 @@ import { getCurrentUser } from "@/lib/auth";
 import { listCasesForWholesaler } from "@/lib/wholesaler";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { Card } from "@/components/ui/Card";
+import { ScenarioStatusBadge } from "@/components/ScenarioStatusBadge";
 
 export default async function WholesalerPortalPage() {
   const user = await getCurrentUser();
@@ -43,7 +44,9 @@ export default async function WholesalerPortalPage() {
                       <tr key={scenario.id} className="border-t border-border">
                         <td className="px-4 py-2">{scenario.label}</td>
                         <td className="px-4 py-2 text-charcoal/70">{scenario.notes ?? "—"}</td>
-                        <td className="px-4 py-2">{scenario.status}</td>
+                        <td className="px-4 py-2">
+                          <ScenarioStatusBadge status={scenario.status} />
+                        </td>
                         <td className="px-4 py-2">
                           {scenario.wholesalerNotifiedAt
                             ? new Date(scenario.wholesalerNotifiedAt).toLocaleString()

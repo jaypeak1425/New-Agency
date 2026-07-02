@@ -116,7 +116,7 @@ export const strategyLibrarySeed: Array<
       "Has a §6166 installment-deferral comparison been run for the closely held business portion, including the interest cost and lien?",
     ],
     sourceDoc:
-      "docs/00-developer-brief.md, docs/21-final-handoff.md (named); mechanics/legal basis AI-researched (IRC §101(a)/§2042/§2035/§2056(d)/§2056A/§6166) — pending human sign-off",
+      "docs/00-developer-brief.md, docs/21-final-handoff.md (named); mechanics/legal basis AI-researched (IRC §101(a)/§2042/§2035/§2056(d)/§2056A/§6166) — owner sign-off 2026-07-02",
     notes:
       "AI-researched card, approved live by owner sign-off 2026-07-02. Differentiated from survivorship-second-to-die as the SINGLE-LIFE / first-death liquidity design (docs/03 and docs/15 use \"Estate Funding (Survivorship)\" as one label, docs/21 lists them separately) — Jay/Luke should confirm this split at sign-off, or merge the two records.",
   },
@@ -146,7 +146,7 @@ export const strategyLibrarySeed: Array<
       "Is the remainder passing to a grantor trust (so post-GRAT growth also compounds estate-tax-free), and has GST allocation been kept off this vehicle given the ETIP rule?",
     ],
     sourceDoc:
-      "docs/00-developer-brief.md, docs/21-final-handoff.md (named); mechanics/legal basis AI-researched (IRC §2702/§2036/§2642(f), Walton v. Comm'r, Treas. Reg. §25.2702-3) — pending human sign-off",
+      "docs/00-developer-brief.md, docs/21-final-handoff.md (named); mechanics/legal basis AI-researched (IRC §2702/§2036/§2642(f), Walton v. Comm'r, Treas. Reg. §25.2702-3) — owner sign-off 2026-07-02",
     notes: "AI-researched card, approved live by owner sign-off 2026-07-02 (docs/09 Path A).",
   },
   {
@@ -176,7 +176,7 @@ export const strategyLibrarySeed: Array<
       "Is the life policy new-issue with the ILIT as original applicant/owner — never a transfer or an attempted annuity-to-life exchange?",
     ],
     sourceDoc:
-      "docs/05-product-universe-life-vs-annuity.md (SPIA-bridge sketch), CLAUDE.md hard rules 1/2/4; expanded legal basis AI-researched (§72, §401(a)(9), SECURE §401(a)(9)(H), §101(a)) — pending human sign-off",
+      "docs/05-product-universe-life-vs-annuity.md (SPIA-bridge sketch), CLAUDE.md hard rules 1/2/4; expanded legal basis AI-researched (§72, §401(a)(9), SECURE §401(a)(9)(H), §101(a)) — owner sign-off 2026-07-02",
     notes: "AI-researched card, approved live by owner sign-off 2026-07-02 (docs/09 Path A).",
   },
   {
@@ -206,7 +206,7 @@ export const strategyLibrarySeed: Array<
       "Given the client's age, what product chassis (GUL vs. current-assumption UL vs. whole life) best matches a premium stream that ends at death?",
     ],
     sourceDoc:
-      "docs/00-developer-brief.md, docs/05-product-universe-life-vs-annuity.md (named); mechanics/legal basis AI-researched (§401(a)(9), SECURE 2.0 ages 73/75, §2503(b), §101(a)) — pending human sign-off",
+      "docs/00-developer-brief.md, docs/05-product-universe-life-vs-annuity.md (named); mechanics/legal basis AI-researched (§401(a)(9), SECURE 2.0 ages 73/75, §2503(b), §101(a)) — owner sign-off 2026-07-02",
     notes: "AI-researched card, approved live by owner sign-off 2026-07-02 (docs/09 Path A).",
   },
   {
@@ -236,7 +236,7 @@ export const strategyLibrarySeed: Array<
       "Is the funding pattern MEC-tested (§7702A 7-pay) — remembering MEC status is irrevocable once triggered?",
     ],
     sourceDoc:
-      "docs/00-developer-brief.md, docs/05-product-universe-life-vs-annuity.md (named); mechanics/legal basis AI-researched (§408A, TCJA recharacterization repeal, §408A(c)(5), §7702A) — pending human sign-off",
+      "docs/00-developer-brief.md, docs/05-product-universe-life-vs-annuity.md (named); mechanics/legal basis AI-researched (§408A, TCJA recharacterization repeal, §408A(c)(5), §7702A) — owner sign-off 2026-07-02",
     notes: "AI-researched card, approved live by owner sign-off 2026-07-02 (docs/09 Path A).",
   },
   {
@@ -265,7 +265,7 @@ export const strategyLibrarySeed: Array<
       "If the client's real goal is legacy, has the SPIA-bridge-to-ILIT design been quoted instead — and confirmed as new-issue life with the ILIT as original owner?",
     ],
     sourceDoc:
-      "docs/05-product-universe-life-vs-annuity.md, CLAUDE.md hard rules 1/2; expanded legal basis AI-researched (§1035(a)(3), PPA 2006 §844, §72(e)(11), §7702B) — pending human sign-off",
+      "docs/05-product-universe-life-vs-annuity.md, CLAUDE.md hard rules 1/2; expanded legal basis AI-researched (§1035(a)(3), PPA 2006 §844, §72(e)(11), §7702B) — owner sign-off 2026-07-02",
     notes: "AI-researched card, approved live by owner sign-off 2026-07-02 (docs/09 Path A).",
   },
   {
@@ -294,7 +294,7 @@ export const strategyLibrarySeed: Array<
       "What are the inflation rider, benefit period, and elimination period — and does the hybrid's return-of-value feature answer the client's use-it-or-lose-it objection?",
     ],
     sourceDoc:
-      "docs/05-product-universe-life-vs-annuity.md, CLAUDE.md hard rule 8; expanded legal basis AI-researched (§7702B, PPA 2006 §844, §72(e)(11), §7702B(d)) — pending human sign-off",
+      "docs/05-product-universe-life-vs-annuity.md, CLAUDE.md hard rule 8; expanded legal basis AI-researched (§7702B, PPA 2006 §844, §72(e)(11), §7702B(d)) — owner sign-off 2026-07-02",
     notes: "AI-researched card, approved live by owner sign-off 2026-07-02 (docs/09 Path A).",
   },
 
@@ -515,13 +515,16 @@ export const strategyLibrarySeed: Array<
   // trust structures + PPLI for HNW, and the Family/Legacy avatar's first
   // strategy. Authored from primary sources (Connelly v. United States, 602
   // U.S. 257 (2024); §101(j); §409A; Treas. Reg. §1.61-22; §2702; §817(h))
-  // and seeded pending_content — new strategies enter the locked library
-  // ONLY through the docs/09 validation sign-off ("Approve & go live").
+  // — new strategies enter the locked library ONLY through the docs/09
+  // validation sign-off ("Approve & go live"). The owner approved all 9 live
+  // on 2026-07-02 ("Go live"), so they seed as documented; the seed's
+  // promote-only status rule records the audit entry on databases that
+  // still hold them as pending.
   {
     slug: "buy-sell-life-insurance",
     name: "Buy-Sell Agreement Funding (Cross-Purchase / Entity / Insurance LLC)",
     tier: "supporting",
-    status: "pending_content",
+    status: "documented",
     avatarTags: ["business_owner"],
     clientTriggerProfile:
       "Co-owned business (partnership, S-Corp, C-Corp, LLC with multiple members) with no funded succession plan — at an owner's death the survivors need to buy the interest and the family needs to be bought out, at a price everyone agreed to in advance.",
@@ -545,13 +548,13 @@ export const strategyLibrarySeed: Array<
     sourceDoc:
       "AI-researched (Connelly v. United States, 602 U.S. 257 (2024); §2703(b); §101(a)(2); §101(j)); named in docs/03's own intake example (\"set up a buy-sell\")",
     notes:
-      "AI-researched draft pending human sign-off (docs/09 validation workflow for new library entries). docs/04-field-underwriting.md's section 5 lists a buy-sell-specific age gate (> 75) — stricter than the global 80 ceiling; flagged in matchingParameters until a per-strategy age-gate override exists in the engine.",
+      "AI-researched card, approved live by owner sign-off 2026-07-02 (docs/09 validation workflow for new library entries). docs/04-field-underwriting.md's section 5 lists a buy-sell-specific age gate (> 75) — stricter than the global 80 ceiling; flagged in matchingParameters until a per-strategy age-gate override exists in the engine.",
   },
   {
     slug: "key-person-life-insurance",
     name: "Key Person Life Insurance",
     tier: "supporting",
-    status: "pending_content",
+    status: "documented",
     avatarTags: ["business_owner"],
     clientTriggerProfile:
       "Business whose revenue, lending relationships, or operations depend heavily on one or a few people (rainmaker, founder, technical lead) — the death of that person would cost the company money it can't replace from cash flow.",
@@ -572,15 +575,15 @@ export const strategyLibrarySeed: Array<
       "What sizing method (multiple of compensation vs. contribution to earnings) supports the face amount if the IRS or a lender asks?",
       "Term or permanent — and if permanent, is the cash value earmarked to convert into a retention benefit for this same key person later?",
     ],
-    sourceDoc: "AI-researched (§101(j), §264(a)(1), PPA 2006) — pending human sign-off",
+    sourceDoc: "AI-researched (§101(j), §264(a)(1), PPA 2006) — owner sign-off 2026-07-02",
     notes:
-      "AI-researched draft pending human sign-off (docs/09 validation workflow for new library entries).",
+      "AI-researched card, approved live by owner sign-off 2026-07-02 (docs/09 validation workflow for new library entries).",
   },
   {
     slug: "coli-corporate-reserve",
     name: "COLI Corporate Reserve",
     tier: "supporting",
-    status: "pending_content",
+    status: "documented",
     avatarTags: ["business_owner"],
     clientTriggerProfile:
       "Profitable business (any entity except a sole prop) accumulating retained earnings in taxable instruments, looking for a tax-advantaged place to warehouse reserve capital that stays on the balance sheet and can informally back benefit promises.",
@@ -602,15 +605,15 @@ export const strategyLibrarySeed: Array<
       "Is §101(j) notice-and-consent complete for every insured before issue, with Form 8925 reporting assigned to someone specific?",
     ],
     sourceDoc:
-      "AI-researched (§7702/§7702A, §101(j), §264(f)) + docs/07-progress-dashboard-math.md's COLI commission basis — pending human sign-off",
+      "AI-researched (§7702/§7702A, §101(j), §264(f)) + docs/07-progress-dashboard-math.md's COLI commission basis — owner sign-off 2026-07-02",
     notes:
-      "AI-researched draft pending human sign-off (docs/09 validation workflow for new library entries).",
+      "AI-researched card, approved live by owner sign-off 2026-07-02 (docs/09 validation workflow for new library entries).",
   },
   {
     slug: "nqdc-serp-coli",
     name: "Nonqualified Deferred Compensation (SERP) Informally Funded with COLI",
     tier: "supporting",
-    status: "pending_content",
+    status: "documented",
     avatarTags: ["business_owner"],
     clientTriggerProfile:
       "Business owner who wants to promise a select executive (or themselves, in a C-Corp) meaningful retirement income above qualified-plan limits, with golden-handcuffs vesting — without the nondiscrimination testing of a qualified plan.",
@@ -632,15 +635,15 @@ export const strategyLibrarySeed: Array<
       "Does the executive want a rabbi trust — and do they understand it protects against a change of control, not against corporate creditors?",
     ],
     sourceDoc:
-      "AI-researched (§409A, §404(a)(5), §101(j), Rev. Proc. 92-64) — pending human sign-off",
+      "AI-researched (§409A, §404(a)(5), §101(j), Rev. Proc. 92-64) — owner sign-off 2026-07-02",
     notes:
-      "AI-researched draft pending human sign-off (docs/09 validation workflow for new library entries).",
+      "AI-researched card, approved live by owner sign-off 2026-07-02 (docs/09 validation workflow for new library entries).",
   },
   {
     slug: "endorsement-split-dollar",
     name: "Endorsement Split-Dollar (Economic Benefit Regime)",
     tier: "supporting",
-    status: "pending_content",
+    status: "documented",
     avatarTags: ["business_owner"],
     clientTriggerProfile:
       "Business owner who wants to give a key executive substantial personal death benefit protection cheaply, while the company keeps ownership of the policy, its cash value, and full cost recovery — the control-retaining alternative to a §162 bonus.",
@@ -662,15 +665,15 @@ export const strategyLibrarySeed: Array<
       "How does this coordinate with the §162/REBA program for the same executive tier (endorsement for control, bonus for simplicity)?",
     ],
     sourceDoc:
-      "AI-researched (Treas. Reg. §1.61-22, Notice 2002-8/Table 2001) — pending human sign-off",
+      "AI-researched (Treas. Reg. §1.61-22, Notice 2002-8/Table 2001) — owner sign-off 2026-07-02",
     notes:
-      "AI-researched draft pending human sign-off (docs/09 validation workflow for new library entries). Complements — doesn't replace — private-split-dollar-loan-regime (family/ILIT context) and section-162-executive-bonus-reba (executive-owned context).",
+      "AI-researched card, approved live by owner sign-off 2026-07-02 (docs/09 validation workflow for new library entries). Complements — doesn't replace — private-split-dollar-loan-regime (family/ILIT context) and section-162-executive-bonus-reba (executive-owned context).",
   },
   {
     slug: "qprt-insurance-hedge",
     name: "Qualified Personal Residence Trust (QPRT) with Life Insurance Hedge",
     tier: "supporting",
-    status: "pending_content",
+    status: "documented",
     avatarTags: ["high_net_worth"],
     clientTriggerProfile:
       "Client above the exemption with a valuable primary residence or vacation home they intend to keep in the family — the house is a large, appreciating, emotionally-held estate asset that's otherwise hard to gift.",
@@ -691,15 +694,15 @@ export const strategyLibrarySeed: Array<
       "Have the heirs weighed the lost §1014 basis step-up against the estate-tax saving for this residence's appreciation profile?",
       "Is the post-term market-rent lease documented and actually paid (it's both the §2036 protection and a bonus wealth transfer)?",
     ],
-    sourceDoc: "AI-researched (§2702(a)(3), §2036(a), §7520, §1014) — pending human sign-off",
+    sourceDoc: "AI-researched (§2702(a)(3), §2036(a), §7520, §1014) — owner sign-off 2026-07-02",
     notes:
-      "AI-researched draft pending human sign-off (docs/09 validation workflow for new library entries).",
+      "AI-researched card, approved live by owner sign-off 2026-07-02 (docs/09 validation workflow for new library entries).",
   },
   {
     slug: "ppli",
     name: "Private Placement Life Insurance (PPLI)",
     tier: "supporting",
-    status: "pending_content",
+    status: "documented",
     avatarTags: ["high_net_worth"],
     clientTriggerProfile:
       "Ultra-HNW client ($5M+ liquid, accredited investor / qualified purchaser) holding tax-inefficient alternatives — hedge funds, credit strategies, high-turnover portfolios — generating ordinary income taxed at top rates every year.",
@@ -721,15 +724,15 @@ export const strategyLibrarySeed: Array<
       "What are the all-in policy costs versus the portfolio's current annual tax drag — the case stands or falls on that spread?",
     ],
     sourceDoc:
-      "AI-researched (§7702, §817(h), Rev. Rul. 2003-91, Webber v. Comm'r, 144 T.C. 324 (2015)) — pending human sign-off",
+      "AI-researched (§7702, §817(h), Rev. Rul. 2003-91, Webber v. Comm'r, 144 T.C. 324 (2015)) — owner sign-off 2026-07-02",
     notes:
-      "AI-researched draft pending human sign-off (docs/09 validation workflow for new library entries).",
+      "AI-researched card, approved live by owner sign-off 2026-07-02 (docs/09 validation workflow for new library entries).",
   },
   {
     slug: "clat-wealth-replacement",
     name: "Charitable Lead Annuity Trust (CLAT) with Wealth Replacement",
     tier: "supporting",
-    status: "pending_content",
+    status: "documented",
     avatarTags: ["high_net_worth"],
     clientTriggerProfile:
       "Charitably-inclined client above the exemption — often in a spike-income year (business sale, large bonus, Roth conversion) — who wants a large current deduction and to pass the remainder to heirs at a deeply discounted gift value.",
@@ -751,15 +754,15 @@ export const strategyLibrarySeed: Array<
       "Is the wealth-replacement ILIT sized to the charity-bound value or to the full inheritance target — and does the client's cash flow carry both the CLAT gift and the premiums?",
     ],
     sourceDoc:
-      "AI-researched (§170(f)(2)(B), §642(c), §2522/§2055, §7520) — pending human sign-off",
+      "AI-researched (§170(f)(2)(B), §642(c), §2522/§2055, §7520) — owner sign-off 2026-07-02",
     notes:
-      "AI-researched draft pending human sign-off (docs/09 validation workflow for new library entries).",
+      "AI-researched card, approved live by owner sign-off 2026-07-02 (docs/09 validation workflow for new library entries).",
   },
   {
     slug: "family-income-legacy",
     name: "Family Income Replacement & Legacy Blend",
     tier: "supporting",
-    status: "pending_content",
+    status: "documented",
     avatarTags: ["family_legacy"],
     clientTriggerProfile:
       "Client with dependents under 18 (or clear family-legacy intent) and household net worth below the HNW tier — the estate problem isn't taxes, it's that the family's plans die with the breadwinner's income.",
@@ -780,8 +783,8 @@ export const strategyLibrarySeed: Array<
       "Which carrier's conversion privilege is strongest (period, product availability) — the conversion right is the long-term value in this sale?",
       "Are minor-beneficiary mechanics handled (trust or UTMA, per stirpes contingents) so proceeds never land in a guardianship court?",
     ],
-    sourceDoc: "AI-researched (§101(a), DIME/HLV methodology) — pending human sign-off",
+    sourceDoc: "AI-researched (§101(a), DIME/HLV methodology) — owner sign-off 2026-07-02",
     notes:
-      "AI-researched draft pending human sign-off (docs/09 validation workflow for new library entries). First and only strategy tagged to the family_legacy avatar — before this, that avatar had zero library coverage.",
+      "AI-researched card, approved live by owner sign-off 2026-07-02 (docs/09 validation workflow for new library entries). First and only strategy tagged to the family_legacy avatar — before this, that avatar had zero library coverage.",
   },
 ];

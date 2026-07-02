@@ -47,40 +47,36 @@ describe("strategy library seed (Brain content)", () => {
     }
   });
 
-  it("ships the original 17 live (owner sign-off 2026-07-02) with the 9 additions gated behind docs/09", () => {
+  it("ships the full 26-strategy library live — every researched card carries the owner's recorded sign-off", () => {
     // Brain Lock holds structurally: anything pending_content is never
-    // surfaced. The original 17 carry the owner's "Go live with all"
-    // sign-off; the 2026-07-02 CLU/CFP additions enter the locked library
-    // only through the Approve & go live workflow.
+    // surfaced. As of the owner's 2026-07-02 sign-offs ("Go live with all"
+    // for the original 7 researched cores, "Go live" for the 9 CLU/CFP
+    // additions) nothing is pending — and every AI-researched card records
+    // the sign-off in its notes.
+    expect(strategyLibrarySeed.filter((s) => s.status !== "documented")).toEqual([]);
+    expect(strategyLibrarySeed).toHaveLength(26);
+
     const signedOff = strategyLibrarySeed.filter((s) =>
       s.notes?.includes("approved live by owner sign-off 2026-07-02"),
     );
     expect(signedOff.map((s) => s.slug).sort()).toEqual([
       "annuity-rescue",
+      "buy-sell-life-insurance",
+      "clat-wealth-replacement",
+      "coli-corporate-reserve",
+      "endorsement-split-dollar",
       "estate-funding",
+      "family-income-legacy",
       "grats",
+      "key-person-life-insurance",
+      "nqdc-serp-coli",
+      "ppli",
+      "qprt-insurance-hedge",
       "qualified-ltc",
       "quiet-wealth-transfer",
       "rmd-repositioning",
       "roth-plus-life",
     ]);
-    expect(strategyLibrarySeed.filter((s) => s.status === "documented")).toHaveLength(17);
-
-    const pending = strategyLibrarySeed.filter((s) => s.status === "pending_content");
-    expect(pending.map((s) => s.slug).sort()).toEqual([
-      "buy-sell-life-insurance",
-      "clat-wealth-replacement",
-      "coli-corporate-reserve",
-      "endorsement-split-dollar",
-      "family-income-legacy",
-      "key-person-life-insurance",
-      "nqdc-serp-coli",
-      "ppli",
-      "qprt-insurance-hedge",
-    ]);
-    for (const s of pending) {
-      expect(s.notes, `sign-off note for ${s.slug}`).toContain("pending human sign-off");
-    }
   });
 
   it("has a recommendation gate for every seeded strategy (no silent needs_more_info fallbacks)", () => {

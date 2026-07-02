@@ -713,8 +713,11 @@ This document is the staged build plan for the Insurance Strategy Engine. Each p
    recommendation, and unlock links route to the business questions. Verified end-to-end: Brain
    Lock confirmed (drafts invisible to agents pre-approval), a co-owned-business case recommends
    buy-sell + key person with the rule-5 warning after sign-off, and a dependents-under-18 case
-   gets the family blend. 76 Vitest tests green. **Action item for Jay:** 9 new cards await your
-   "Approve & go live" review on `/admin/strategies`.
+   gets the family blend. 76 Vitest tests green. **Sign-off recorded:** Jay approved all 9 live
+   on 2026-07-02 ("Go live") — the seed ships them documented with the sign-off in each card's
+   notes, and the promote-only seed rule writes the `strategy.approved_live` audit entry on any
+   database still holding them pending. The full 26-strategy library is live: 17 original + 9
+   CLU/CFP additions, every AI-researched card carrying a recorded owner sign-off.
 
 ---
 

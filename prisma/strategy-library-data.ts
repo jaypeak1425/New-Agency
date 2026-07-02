@@ -726,7 +726,7 @@ export const strategyLibrarySeed: Array<
     sourceDoc:
       "AI-researched (§7702, §817(h), Rev. Rul. 2003-91, Webber v. Comm'r, 144 T.C. 324 (2015)) — owner sign-off 2026-07-02",
     notes:
-      "AI-researched card, approved live by owner sign-off 2026-07-02 (docs/09 validation workflow for new library entries).",
+      "AI-researched card, approved live by owner sign-off 2026-07-02 (docs/09 validation workflow for new library entries). LEGISLATIVE WATCH (2026-07-02 tax-law alignment review, docs/25): the PPLI Abuse Act was formally introduced in the Senate in April 2026 — PROPOSED, not law (PPLI curbs were excluded from OBBBA), but every PPLI case should disclose pending-legislation risk and re-check the bill's status before design.",
   },
   {
     slug: "clat-wealth-replacement",

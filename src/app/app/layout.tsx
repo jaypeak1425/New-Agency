@@ -47,7 +47,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
 
   return (
     <div className="flex min-h-full">
-      <nav className="flex w-60 flex-col gap-6 bg-navy px-4 py-6">
+      <nav className="flex w-60 flex-col gap-6 bg-navy px-4 py-6 print:hidden">
         <div className="px-2">
           <Wordmark
             variant="dark"
@@ -67,7 +67,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
           </form>
         </div>
       </nav>
-      <main className="flex-1 bg-cream px-10 py-10">{children}</main>
+      <main className="flex-1 bg-cream px-10 py-10 print:bg-white print:p-0">{children}</main>
     </div>
   );
 }

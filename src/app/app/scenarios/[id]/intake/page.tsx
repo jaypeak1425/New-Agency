@@ -325,7 +325,15 @@ async function RecommendationCard({ scenario }: { scenario: Scenario }) {
                 const existingEstimate = estimateBySlug.get(strategy.id);
                 return (
                   <li key={strategy.id} className="rounded-md border border-border p-3">
-                    <p className="text-sm font-medium text-navy">{strategy.name}</p>
+                    <div className="flex items-start justify-between gap-3">
+                      <p className="text-sm font-medium text-navy">{strategy.name}</p>
+                      <Link
+                        href={`/app/scenarios/${scenario.id}/deck/${strategy.id}`}
+                        className="whitespace-nowrap text-xs text-navy underline hover:text-gold"
+                      >
+                        Build client pitch deck &rarr;
+                      </Link>
+                    </div>
                     {strategy.whyUsed && (
                       <p className="mt-1 text-xs text-charcoal/70">{strategy.whyUsed}</p>
                     )}

@@ -719,6 +719,27 @@ This document is the staged build plan for the Insurance Strategy Engine. Each p
    database still holding them pending. The full 26-strategy library is live: 17 original + 9
    CLU/CFP additions, every AI-researched card carrying a recorded owner sign-off.
 
+   **Post-close-out update — tax-law alignment review + the prospect pitch deck generator.**
+   Per the owner's directive, every one of the 26 cards was verified against current (July 2026)
+   law — the full per-strategy verdict table lives in `docs/25-tax-law-alignment.md`. Verified:
+   OBBBA's $15M permanent exemption with GRAT/IDGT/grantor-trust mechanics and §1014 step-up
+   UNCHANGED; SECURE 2.0's 73/75 RMD ages; PPA 2006 §844; Connelly (2024). All 26 aligned; one
+   live watch item — the PPLI Abuse Act was formally introduced in the Senate April 2026
+   (proposed, NOT law; curbs were excluded from OBBBA) and the PPLI card now carries a
+   LEGISLATIVE WATCH note. Then the pitch deck generator (Phase 4 Session 1's blocked
+   deliverable, now buildable): `src/lib/pitch-deck.ts` builds a six-slide, print-ready client
+   deck per eligible strategy, with the full 3-layer guardrail — Brain Lock (decks exist only for
+   strategies the engine currently marks eligible for that scenario), content lock (copy comes
+   only from `src/lib/pitch-deck-content.ts`'s 26 hand-written client-safe narratives, never the
+   IRC-citing agent cards, never AI-generated), and the compliance filter on EVERY string
+   (auto-fixes applied and disclosed; any non-fixable violation holds the whole deck and files a
+   filter_caught ComplianceFlag instead of shipping). "Build client pitch deck →" links sit on
+   each eligible recommendation; the deck page prints one slide per page with the app chrome
+   hidden. Verified with a 12-point Playwright flow: no structure names/IRC citations leak,
+   "non-taxable" language throughout, force-conditioning present, non-recommended strategies
+   refused, generation audit-logged, print view clean. 80 Vitest tests green (narratives for all
+   26 documented slugs, zero filter holds, titles pass clean).
+
 ---
 
 ## What the Dev Needs From You at the Start of Each Phase

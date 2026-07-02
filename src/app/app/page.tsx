@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { getCurrentUser } from "@/lib/auth";
 import { computeDashboard } from "@/lib/dashboard";
+import { computeAtlasFeed } from "@/lib/nudges";
+import { agingStatusFor, AGING_LABELS } from "@/lib/aging";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { Card } from "@/components/ui/Card";
 import { SCENARIO_STATUS_LABELS as STATUS_LABELS } from "@/components/ScenarioStatusBadge";
@@ -23,9 +25,25 @@ export default async function DashboardPage() {
     );
   }
 
+  const atlas = await computeAtlasFeed(user!.id);
+  const atlasItems = [...atlas.nudges.map((n) => n.message), ...atlas.agingMessages];
+
   return (
     <div>
       <h1 className="text-3xl">Dashboard</h1>
+
+      {atlasItems.length > 0 && (
+        <Card variant="dark" className="mt-6">
+          <p className="text-xs uppercase tracking-wide text-gold">Atlas</p>
+          <ul className="mt-3 space-y-2">
+            {atlasItems.map((message, i) => (
+              <li key={i} className="text-sm leading-relaxed text-cream/90">
+                {message}
+              </li>
+            ))}
+          </ul>
+        </Card>
+      )}
 
       <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <Card>
@@ -79,11 +97,20 @@ export default async function DashboardPage() {
         <div className="mt-4 space-y-3">
           {thisYear.lines
             .filter((line) => line.scenario.status !== "closed_won" && line.scenario.status !== "closed_lost")
-            .map((line) => (
+            .map((line) => {
+              const aging = agingStatusFor(line.scenario.updatedAt);
+              return (
               <div key={line.scenario.id} className="flex items-center justify-between border-b border-border pb-2">
                 <div>
                   <p className="text-sm font-medium text-navy">{line.scenario.label}</p>
-                  <p className="text-xs text-charcoal/50">{STATUS_LABELS[line.scenario.status]}</p>
+                  <p className="text-xs text-charcoal/50">
+                    {STATUS_LABELS[line.scenario.status]}
+                    {aging.status !== "active" && (
+                      <span className="ml-2 text-red-700/70">
+                        {AGING_LABELS[aging.status]} — {aging.daysSinceActivity} days idle
+                      </span>
+                    )}
+                  </p>
                 </div>
                 <p className="text-sm text-navy">
                   {line.expectedCommissionValue !== null
@@ -91,7 +118,8 @@ export default async function DashboardPage() {
                     : `${money(line.expectedCommission)} (set relationship type for a close-rate estimate)`}
                 </p>
               </div>
-            ))}
+              );
+            })}
           {thisYear.lines.filter(
             (line) => line.scenario.status !== "closed_won" && line.scenario.status !== "closed_lost",
           ).length === 0 && <p className="text-sm text-charcoal/60">No open scenarios right now.</p>}

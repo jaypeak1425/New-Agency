@@ -679,6 +679,21 @@ This document is the staged build plan for the Insurance Strategy Engine. Each p
    the single-life/first-death design or be merged — worth a look with Luke, but both records are
    live and correctly gated in the meantime.
 
+   **Post-close-out update — dynamic intake + next-step guidance.** The intake finally behaves
+   like the docs/03 conversation instead of a wall of 20 questions: the business questions
+   (Q5–Q7) appear only when Q4 says business owner (switching away clears them — the action
+   already nulls absent fields), the two optional sections collapse behind toggles that auto-open
+   when they hold answers, and a sticky progress line counts answers live with the denominator
+   itself adapting (7 questions for a non-owner, 10 for an owner). Once the intake is saved the
+   page is results-first: Atlas's case design leads, the form drops behind an "Update the intake"
+   toggle (auto-opened on edit links, Atlas parses, or errors). The recommendation card's
+   "needs more info" list is now actionable — each strategy links to the exact section that
+   unlocks it (avatar details / estate details / the annuity intake), arriving with that section
+   open. The scenario list reads like a to-do: every open case shows a next-step chip (complete
+   the intake → review the design & send → with your wholesaler) and case titles link straight
+   to the case design. All server actions and field names unchanged; verified with a 15-point
+   Playwright flow against the production build (73 Vitest tests green).
+
 ---
 
 ## What the Dev Needs From You at the Start of Each Phase

@@ -15,6 +15,22 @@ const STATUS_OPTIONS = [
   { value: "closed_lost", label: "Closed — lost" },
 ];
 
+// One glanceable "what do I do next" line per case, derived from the state
+// the record is actually in — the list should read like a to-do, not a table.
+function nextStep(
+  scenario: { status: string; intakeCompletedAt: Date | null; wholesalerNotifiedAt: Date | null },
+  hasWholesaler: boolean,
+): string | null {
+  if (scenario.status === "closed_won" || scenario.status === "closed_lost") return null;
+  if (!scenario.intakeCompletedAt) return "Next: complete the intake — Atlas designs the case from it";
+  if (!scenario.wholesalerNotifiedAt) {
+    return hasWholesaler
+      ? "Next: review Atlas's case design, then send it to your wholesaler"
+      : "Next: review Atlas's case design";
+  }
+  return "With your wholesaler — update the status as it moves";
+}
+
 export default async function ScenariosPage({
   searchParams,
 }: {
@@ -68,8 +84,17 @@ export default async function ScenariosPage({
           <Card key={scenario.id}>
             <div className="flex items-start justify-between gap-4">
               <div>
-                <h3 className="text-lg font-medium text-navy">{scenario.label}</h3>
+                <h3 className="text-lg font-medium text-navy">
+                  <Link href={`/app/scenarios/${scenario.id}/intake`} className="hover:text-gold">
+                    {scenario.label}
+                  </Link>
+                </h3>
                 {scenario.notes && <p className="mt-1 text-sm text-charcoal/70">{scenario.notes}</p>}
+                {nextStep(scenario, hasWholesaler) && (
+                  <p className="mt-1.5 inline-block rounded-full bg-gold/15 px-2.5 py-0.5 text-xs text-navy">
+                    {nextStep(scenario, hasWholesaler)}
+                  </p>
+                )}
                 <form action={updateScenarioStatusAction} className="mt-2">
                   <input type="hidden" name="scenarioId" value={scenario.id} />
                   <StatusSelect name="status" defaultValue={scenario.status} options={STATUS_OPTIONS} />

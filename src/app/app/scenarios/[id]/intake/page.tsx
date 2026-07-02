@@ -17,6 +17,7 @@ import {
 } from "../../actions";
 import { Card } from "@/components/ui/Card";
 import { SubmitButton } from "@/components/SubmitButton";
+import { IntakeForm } from "@/components/IntakeForm";
 import { AtlasReveal, type RevealStep } from "@/components/AtlasReveal";
 import type { Scenario, User } from "@/generated/prisma/client";
 
@@ -27,21 +28,47 @@ const AVATAR_LABELS: Record<string, string> = {
   family_legacy: "Family / Legacy",
 };
 
-const radioClass = "h-4 w-4 border-border text-navy focus:ring-gold";
-const checkboxClass = "h-4 w-4 rounded border-border text-navy focus:ring-gold";
-const optionLabelClass = "flex items-center gap-2 text-sm text-charcoal";
-const textInputClass =
-  "mt-1 block w-full rounded-md border border-border bg-surface px-3 py-2 text-sm text-charcoal placeholder:text-charcoal/40 focus:border-gold focus:outline-none focus:ring-1 focus:ring-gold";
+// Where each strategy's missing answers live, so the "needs more info" list
+// can link straight to the section that unlocks it instead of leaving the
+// agent to guess. Slugs not listed default to the estate section (all the
+// HNW estate-planning gates read from there).
+const UNLOCK_SECTION: Record<string, "avatar" | "estate" | "annuity"> = {
+  "quiet-wealth-transfer": "avatar",
+  "rmd-repositioning": "avatar",
+  "roth-plus-life": "avatar",
+  "annuity-rescue": "annuity",
+  "qualified-ltc": "annuity",
+};
+
+function unlockLink(scenarioId: string, slug: string) {
+  const section = UNLOCK_SECTION[slug] ?? "estate";
+  if (section === "annuity") {
+    return {
+      href: `/app/scenarios/${scenarioId}/underwriting/annuity`,
+      label: "complete the annuity intake",
+    };
+  }
+  return {
+    href: `/app/scenarios/${scenarioId}/intake?edit=1&focus=${section}#${section}-details`,
+    label: section === "avatar" ? "answer the avatar details" : "answer the estate details",
+  };
+}
 
 export default async function IntakePage({
   params,
   searchParams,
 }: {
   params: Promise<{ id: string }>;
-  searchParams: Promise<{ error?: string; parsed?: string; ready?: string }>;
+  searchParams: Promise<{
+    error?: string;
+    parsed?: string;
+    ready?: string;
+    edit?: string;
+    focus?: string;
+  }>;
 }) {
   const { id } = await params;
-  const { error, parsed, ready } = await searchParams;
+  const { error, parsed, ready, edit, focus } = await searchParams;
   const user = await getCurrentUser();
   if (!user) redirect("/login");
 
@@ -53,32 +80,16 @@ export default async function IntakePage({
     throw err;
   }
 
-  return (
-    <div>
-      <Link href="/app/scenarios" className="text-sm text-navy hover:text-gold">
-        &larr; Back to scenarios
-      </Link>
-      <h1 className="mt-4 text-3xl">&ldquo;I&rsquo;ve got a guy&rdquo; intake</h1>
-      <p className="mt-2 text-sm text-charcoal/60">
-        {scenario.label} &mdash; walk through Atlas&rsquo;s 10 questions. Answer what you know;
-        you can come back and fill in the rest later.
-      </p>
-      <p className="mt-2 text-sm">
-        <Link href={`/app/scenarios/${id}/underwriting/life`} className="text-navy hover:text-gold">
-          Life insurance underwriting &rarr;
-        </Link>
-        <span className="mx-2 text-charcoal/30">&middot;</span>
-        <Link href={`/app/scenarios/${id}/underwriting/annuity`} className="text-navy hover:text-gold">
-          Annuity intake &rarr;
-        </Link>
-      </p>
+  const focusSection = focus === "avatar" || focus === "estate" ? focus : null;
+  const intakeDone = Boolean(scenario.intakeCompletedAt);
+  // Results-first once the intake exists: the agent lands on the case
+  // design, and the form lives behind an "Update the intake" toggle —
+  // auto-opened when they came here to edit (unlock links, Atlas parse,
+  // or a validation error).
+  const formOpen = !intakeDone || Boolean(edit || parsed || error || focusSection);
 
-      {error && (
-        <p role="alert" className="mt-4 rounded-md bg-red-50 px-3 py-2 text-sm text-red-700">
-          {error}
-        </p>
-      )}
-
+  const intakeSection = (
+    <div id="intake-edit">
       {parsed && (
         <div className="mt-4 max-w-2xl rounded-lg border border-gold/40 bg-gradient-to-r from-gold/15 to-gold/5 px-4 py-3">
           <p className="text-sm text-navy">
@@ -118,594 +129,40 @@ export default async function IntakePage({
       )}
 
       <Card className="mt-6 max-w-2xl">
-        <form action={completeIntakeAction} className="space-y-8">
-          <input type="hidden" name="scenarioId" value={scenario.id} />
-
-          <fieldset>
-            <legend className="text-sm font-medium text-navy">
-              &ldquo;Tell me about this person. What&rsquo;s their situation?&rdquo;
-            </legend>
-            <textarea
-              name="clientDescription"
-              rows={3}
-              defaultValue={scenario.clientDescription ?? ""}
-              className={textInputClass}
-              placeholder="One line or a paragraph — however it comes to you"
-            />
-          </fieldset>
-
-          <fieldset>
-            <legend className="text-sm font-medium text-navy">Q1. &ldquo;How old are they?&rdquo;</legend>
-            <input
-              type="number"
-              name="primaryAge"
-              min={0}
-              max={120}
-              defaultValue={scenario.primaryAge ?? ""}
-              className={`${textInputClass} w-32`}
-            />
-          </fieldset>
-
-          <fieldset>
-            <legend className="text-sm font-medium text-navy">
-              Q2. &ldquo;How&rsquo;s their health &mdash; good, average, or are there any health issues we
-              should know about?&rdquo;
-            </legend>
-            <div className="mt-2 space-y-2">
-              {(["good", "average", "health_issues"] as const).map((value) => (
-                <label key={value} className={optionLabelClass}>
-                  <input
-                    type="radio"
-                    name="healthRating"
-                    value={value}
-                    defaultChecked={scenario.healthRating === value}
-                    className={radioClass}
-                  />
-                  {value === "good" ? "Good" : value === "average" ? "Average" : "Health issues"}
-                </label>
-              ))}
-            </div>
-            <input
-              type="text"
-              name="healthNotes"
-              defaultValue={scenario.healthNotes ?? ""}
-              placeholder="Any specifics (medications, conditions)"
-              className={textInputClass}
-            />
-          </fieldset>
-
-          <fieldset>
-            <legend className="text-sm font-medium text-navy">
-              Q3. &ldquo;Tobacco user? Cigarettes, cigars, dip, vape, marijuana &mdash; and how often?&rdquo;
-            </legend>
-            <div className="mt-2 space-y-2">
-              {(["none", "occasional", "regular"] as const).map((value) => (
-                <label key={value} className={optionLabelClass}>
-                  <input
-                    type="radio"
-                    name="tobaccoUse"
-                    value={value}
-                    defaultChecked={scenario.tobaccoUse === value}
-                    className={radioClass}
-                  />
-                  {value === "none" ? "None" : value === "occasional" ? "Occasional" : "Regular"}
-                </label>
-              ))}
-            </div>
-            <input
-              type="text"
-              name="tobaccoNotes"
-              defaultValue={scenario.tobaccoNotes ?? ""}
-              placeholder="What, and how often"
-              className={textInputClass}
-            />
-          </fieldset>
-
-          <fieldset>
-            <legend className="text-sm font-medium text-navy">
-              Q4. &ldquo;Are they a business owner, an employee, or neither?&rdquo;
-            </legend>
-            <div className="mt-2 space-y-2">
-              {(["business_owner", "employee", "neither"] as const).map((value) => (
-                <label key={value} className={optionLabelClass}>
-                  <input
-                    type="radio"
-                    name="businessOwnerStatus"
-                    value={value}
-                    defaultChecked={scenario.businessOwnerStatus === value}
-                    className={radioClass}
-                  />
-                  {value === "business_owner"
-                    ? "Business owner"
-                    : value === "employee"
-                      ? "Employee"
-                      : "Neither"}
-                </label>
-              ))}
-            </div>
-          </fieldset>
-
-          <fieldset>
-            <legend className="text-sm font-medium text-navy">
-              Q5. If they own a business: &ldquo;What&rsquo;s the structure &mdash; C-Corp, S-Corp,
-              partnership, LLC, or sole prop?&rdquo;
-            </legend>
-            <select
-              name="businessStructure"
-              defaultValue={scenario.businessStructure ?? ""}
-              className={textInputClass}
-            >
-              <option value="">Not applicable / unknown</option>
-              <option value="c_corp">C-Corp</option>
-              <option value="s_corp">S-Corp</option>
-              <option value="partnership">Partnership</option>
-              <option value="llc">LLC</option>
-              <option value="sole_prop">Sole prop</option>
-            </select>
-          </fieldset>
-
-          <fieldset>
-            <legend className="text-sm font-medium text-navy">
-              Q6. If business owner: &ldquo;Are there co-owners? If so, what are their ages and
-              ownership percentages?&rdquo;
-            </legend>
-            <textarea
-              name="coOwnersNotes"
-              rows={2}
-              defaultValue={scenario.coOwnersNotes ?? ""}
-              className={textInputClass}
-              placeholder="e.g. 50/50 split, ages 50 and 49"
-            />
-          </fieldset>
-
-          <fieldset>
-            <legend className="text-sm font-medium text-navy">
-              Q7. If business owner: &ldquo;Are there key employees? How many?&rdquo;
-            </legend>
-            <input
-              type="number"
-              name="keyEmployeesCount"
-              min={0}
-              defaultValue={scenario.keyEmployeesCount ?? ""}
-              className={`${textInputClass} w-32`}
-            />
-            <input
-              type="text"
-              name="keyEmployeesNotes"
-              defaultValue={scenario.keyEmployeesNotes ?? ""}
-              placeholder="Ages, tenure, anything relevant"
-              className={textInputClass}
-            />
-          </fieldset>
-
-          <fieldset>
-            <legend className="text-sm font-medium text-navy">
-              Q8. &ldquo;What are they trying to solve for?&rdquo; Select all that apply.
-            </legend>
-            <div className="mt-2 space-y-2">
-              {(
-                [
-                  ["retirement_income", "Retirement income"],
-                  ["business_continuity", "Business continuity"],
-                  ["key_employee_retention", "Key employee retention"],
-                  ["estate_planning", "Estate planning"],
-                  ["legacy", "Leaving a legacy to family"],
-                  ["other", "Something else"],
-                ] as const
-              ).map(([value, label]) => (
-                <label key={value} className={optionLabelClass}>
-                  <input
-                    type="checkbox"
-                    name="primaryGoals"
-                    value={value}
-                    defaultChecked={scenario.primaryGoals.includes(value)}
-                    className={checkboxClass}
-                  />
-                  {label}
-                </label>
-              ))}
-            </div>
-            <input
-              type="text"
-              name="goalsNotes"
-              defaultValue={scenario.goalsNotes ?? ""}
-              placeholder="Anything else in their own words"
-              className={textInputClass}
-            />
-          </fieldset>
-
-          <fieldset>
-            <legend className="text-sm font-medium text-navy">
-              Q9. &ldquo;Do you have an existing relationship with them, or is this a new
-              prospect?&rdquo;
-            </legend>
-            <div className="mt-2 space-y-2">
-              {(["existing", "new_prospect"] as const).map((value) => (
-                <label key={value} className={optionLabelClass}>
-                  <input
-                    type="radio"
-                    name="existingRelationship"
-                    value={value}
-                    defaultChecked={scenario.existingRelationship === value}
-                    className={radioClass}
-                  />
-                  {value === "existing" ? "Existing relationship" : "New prospect"}
-                </label>
-              ))}
-            </div>
-
-            <p className="mt-3 text-xs text-charcoal/50">
-              Optional — for the pipeline math: which close-rate category is this closest to?
-            </p>
-            <div className="mt-1 space-y-2">
-              {(
-                [
-                  ["existing_strong", "Existing client / strong relationship (40%)"],
-                  ["existing_first_meeting", "Existing prospect, first meeting (25%)"],
-                  ["existing_second_meeting", "Existing prospect, second meeting (40%)"],
-                  ["cold_first_meeting", "Cold lead, first meeting (15%)"],
-                  ["cold_second_meeting", "Cold lead, second meeting (30%)"],
-                  ["referral_warm", "Warm referral (35%)"],
-                ] as const
-              ).map(([value, label]) => (
-                <label key={value} className={optionLabelClass}>
-                  <input
-                    type="radio"
-                    name="relationshipType"
-                    value={value}
-                    defaultChecked={scenario.relationshipType === value}
-                    className={radioClass}
-                  />
-                  {label}
-                </label>
-              ))}
-            </div>
-          </fieldset>
-
-          <fieldset>
-            <legend className="text-sm font-medium text-navy">
-              Q10. &ldquo;Roughly what&rsquo;s their annual income or business revenue?&rdquo;
-            </legend>
-            <div className="mt-2 space-y-2">
-              {(
-                [
-                  ["under_250k", "Under $250K"],
-                  ["range_250k_1m", "$250K–$1M"],
-                  ["range_1m_5m", "$1M–$5M"],
-                  ["over_5m", "Above $5M"],
-                ] as const
-              ).map(([value, label]) => (
-                <label key={value} className={optionLabelClass}>
-                  <input
-                    type="radio"
-                    name="incomeRevenueRange"
-                    value={value}
-                    defaultChecked={scenario.incomeRevenueRange === value}
-                    className={radioClass}
-                  />
-                  {label}
-                </label>
-              ))}
-            </div>
-          </fieldset>
-
-          <fieldset className="border-t border-border pt-6">
-            <legend className="text-sm font-medium text-navy">
-              Optional — helps Atlas classify the avatar stack
-            </legend>
-            <p className="mt-1 text-xs text-charcoal/50">
-              Not one of the 10 fixed questions, but worth asking when a strategy hinges on it
-              (e.g. &ldquo;Worth asking if they have IRAs or 401(k)s with significant
-              balances&rdquo;).
-            </p>
-
-            <p className="mt-4 text-sm text-charcoal">Roughly what&rsquo;s their net worth?</p>
-            <div className="mt-2 space-y-2">
-              {(
-                [
-                  ["under_500k", "Under $500K"],
-                  ["range_500k_2m", "$500K–$2M"],
-                  ["range_2m_5m", "$2M–$5M"],
-                  ["over_5m", "Above $5M"],
-                ] as const
-              ).map(([value, label]) => (
-                <label key={value} className={optionLabelClass}>
-                  <input
-                    type="radio"
-                    name="netWorthEstimate"
-                    value={value}
-                    defaultChecked={scenario.netWorthEstimate === value}
-                    className={radioClass}
-                  />
-                  {label}
-                </label>
-              ))}
-            </div>
-
-            <p className="mt-4 text-sm text-charcoal">
-              Do they have $500K+ in qualified funds (IRA, 401(k), etc.)?
-            </p>
-            <div className="mt-2 space-y-2">
-              {(["over_500k", "under_500k"] as const).map((value) => (
-                <label key={value} className={optionLabelClass}>
-                  <input
-                    type="radio"
-                    name="qualifiedFundsEstimate"
-                    value={value}
-                    defaultChecked={scenario.qualifiedFundsEstimate === value}
-                    className={radioClass}
-                  />
-                  {value === "over_500k" ? "Yes, $500K+" : "No, under $500K"}
-                </label>
-              ))}
-            </div>
-
-            <p className="mt-4 text-sm text-charcoal">Do they have dependents under 18?</p>
-            <div className="mt-2 space-y-2">
-              {(["true", "false"] as const).map((value) => (
-                <label key={value} className={optionLabelClass}>
-                  <input
-                    type="radio"
-                    name="hasDependentsUnder18"
-                    value={value}
-                    defaultChecked={
-                      scenario.hasDependentsUnder18 !== null &&
-                      String(scenario.hasDependentsUnder18) === value
-                    }
-                    className={radioClass}
-                  />
-                  {value === "true" ? "Yes" : "No"}
-                </label>
-              ))}
-            </div>
-          </fieldset>
-
-          <fieldset className="border-t border-border pt-6">
-            <legend className="text-sm font-medium text-navy">
-              Optional — HNW estate-planning details
-            </legend>
-            <p className="mt-1 text-xs text-charcoal/50">
-              Only needed to check this prospect against the HNW estate-planning strategies (ILIT,
-              SLAT, Dynasty Trust, and similar). Most scenarios can skip this section.
-            </p>
-
-            <p className="mt-4 text-sm text-charcoal">Marital status</p>
-            <div className="mt-2 space-y-2">
-              {(["married", "single"] as const).map((value) => (
-                <label key={value} className={optionLabelClass}>
-                  <input
-                    type="radio"
-                    name="maritalStatus"
-                    value={value}
-                    defaultChecked={scenario.maritalStatus === value}
-                    className={radioClass}
-                  />
-                  {value === "married" ? "Married" : "Single"}
-                </label>
-              ))}
-            </div>
-
-            <label className="mt-4 block text-sm font-medium text-charcoal">
-              State of residence
-              <input
-                type="text"
-                name="stateOfResidence"
-                defaultValue={scenario.stateOfResidence ?? ""}
-                placeholder="For state estate-tax exposure"
-                className={`${textInputClass} w-48`}
-              />
-            </label>
-
-            <p className="mt-4 text-sm text-charcoal">
-              Is their net worth mostly illiquid (real estate, closely held business)?
-            </p>
-            <div className="mt-2 space-y-2">
-              {(["true", "false"] as const).map((value) => (
-                <label key={value} className={optionLabelClass}>
-                  <input
-                    type="radio"
-                    name="illiquidNetWorth"
-                    value={value}
-                    defaultChecked={
-                      scenario.illiquidNetWorth !== null && String(scenario.illiquidNetWorth) === value
-                    }
-                    className={radioClass}
-                  />
-                  {value === "true" ? "Yes" : "No"}
-                </label>
-              ))}
-            </div>
-
-            <p className="mt-4 text-sm text-charcoal">
-              Does their estate value exceed the federal exemption ($15M single / $30M married in
-              2026)?
-            </p>
-            <div className="mt-2 space-y-2">
-              {(["true", "false"] as const).map((value) => (
-                <label key={value} className={optionLabelClass}>
-                  <input
-                    type="radio"
-                    name="estateExceedsExemption"
-                    value={value}
-                    defaultChecked={
-                      scenario.estateExceedsExemption !== null &&
-                      String(scenario.estateExceedsExemption) === value
-                    }
-                    className={radioClass}
-                  />
-                  {value === "true" ? "Yes" : "No"}
-                </label>
-              ))}
-            </div>
-
-            <p className="mt-4 text-sm text-charcoal">
-              Do they hold a concentrated, low-basis appreciated asset (founder stock, appreciated
-              real estate)?
-            </p>
-            <div className="mt-2 space-y-2">
-              {(["true", "false"] as const).map((value) => (
-                <label key={value} className={optionLabelClass}>
-                  <input
-                    type="radio"
-                    name="concentratedLowBasisPosition"
-                    value={value}
-                    defaultChecked={
-                      scenario.concentratedLowBasisPosition !== null &&
-                      String(scenario.concentratedLowBasisPosition) === value
-                    }
-                    className={radioClass}
-                  />
-                  {value === "true" ? "Yes" : "No"}
-                </label>
-              ))}
-            </div>
-
-            <p className="mt-4 text-sm text-charcoal">Who&rsquo;s the intended beneficiary structure?</p>
-            <div className="mt-2 space-y-2">
-              {(
-                [
-                  ["spouse_only", "Spouse only"],
-                  ["children", "Children"],
-                  ["grandchildren_multigenerational", "Grandchildren / multi-generational"],
-                  ["charity", "Charity"],
-                ] as const
-              ).map(([value, label]) => (
-                <label key={value} className={optionLabelClass}>
-                  <input
-                    type="radio"
-                    name="beneficiaryStructure"
-                    value={value}
-                    defaultChecked={scenario.beneficiaryStructure === value}
-                    className={radioClass}
-                  />
-                  {label}
-                </label>
-              ))}
-            </div>
-
-            <p className="mt-4 text-sm text-charcoal">Control preference</p>
-            <div className="mt-2 space-y-2">
-              {(
-                [
-                  ["relinquish_control", "Willing to fully relinquish control (outright gift)"],
-                  ["retained_access_or_control", "Wants retained access or control"],
-                ] as const
-              ).map(([value, label]) => (
-                <label key={value} className={optionLabelClass}>
-                  <input
-                    type="radio"
-                    name="controlPreference"
-                    value={value}
-                    defaultChecked={scenario.controlPreference === value}
-                    className={radioClass}
-                  />
-                  {label}
-                </label>
-              ))}
-            </div>
-
-            <p className="mt-4 text-sm text-charcoal">Funding preference</p>
-            <div className="mt-2 space-y-2">
-              {(
-                [
-                  ["gift_or_exemption", "Willing to gift / use exemption"],
-                  ["financing_or_loan", "Prefers financing / loan structures"],
-                  ["employer_funded", "Wants employer-funded (executive benefit)"],
-                ] as const
-              ).map(([value, label]) => (
-                <label key={value} className={optionLabelClass}>
-                  <input
-                    type="radio"
-                    name="fundingPreference"
-                    value={value}
-                    defaultChecked={scenario.fundingPreference === value}
-                    className={radioClass}
-                  />
-                  {label}
-                </label>
-              ))}
-            </div>
-
-            <p className="mt-4 text-sm text-charcoal">Existing structures already in place</p>
-            <div className="mt-2 space-y-2">
-              {(
-                [
-                  ["ilit", "ILIT"],
-                  ["grantor_trust", "Grantor trust"],
-                  ["qualified_plan", "Qualified plan"],
-                  ["business_entity", "Business entity"],
-                ] as const
-              ).map(([value, label]) => (
-                <label key={value} className={optionLabelClass}>
-                  <input
-                    type="checkbox"
-                    name="existingStructures"
-                    value={value}
-                    defaultChecked={scenario.existingStructures.includes(value)}
-                    className={checkboxClass}
-                  />
-                  {label}
-                </label>
-              ))}
-            </div>
-
-            <p className="mt-4 text-sm text-charcoal">Urgency driver</p>
-            <div className="mt-2 space-y-2">
-              {(
-                [
-                  ["legislative_exemption_sunset", "Legislative / exemption-sunset concern"],
-                  ["liquidity_event", "Liquidity event"],
-                  ["health_change", "Health change"],
-                  ["business_sale", "Business sale"],
-                  ["generational_transfer_event", "Generational transfer event"],
-                  ["none", "None / not urgent"],
-                ] as const
-              ).map(([value, label]) => (
-                <label key={value} className={optionLabelClass}>
-                  <input
-                    type="radio"
-                    name="urgencyDriver"
-                    value={value}
-                    defaultChecked={scenario.urgencyDriver === value}
-                    className={radioClass}
-                  />
-                  {label}
-                </label>
-              ))}
-            </div>
-
-            <p className="mt-4 text-sm text-charcoal">
-              If an ILIT is in play, is the policy being transferred in from an existing policy
-              (rather than newly issued with the ILIT as original owner)?
-            </p>
-            <p className="text-xs text-charcoal/50">
-              CLAUDE.md hard rule 4: the ILIT must be the original owner to avoid the §2035 3-year
-              lookback.
-            </p>
-            <div className="mt-2 space-y-2">
-              {(["true", "false"] as const).map((value) => (
-                <label key={value} className={optionLabelClass}>
-                  <input
-                    type="radio"
-                    name="existingPolicyTransfer"
-                    value={value}
-                    defaultChecked={
-                      scenario.existingPolicyTransfer !== null &&
-                      String(scenario.existingPolicyTransfer) === value
-                    }
-                    className={radioClass}
-                  />
-                  {value === "true" ? "Yes, transferring an existing policy" : "No, new-issue"}
-                </label>
-              ))}
-            </div>
-          </fieldset>
-
-          <div className="flex items-center gap-4 pt-2">
-            <SubmitButton pendingText="Saving…">Save intake answers</SubmitButton>
-          </div>
-        </form>
+        <IntakeForm scenario={scenario} action={completeIntakeAction} focusSection={focusSection} />
       </Card>
+    </div>
+  );
+
+  return (
+    <div>
+      <Link href="/app/scenarios" className="text-sm text-navy hover:text-gold">
+        &larr; Back to scenarios
+      </Link>
+      <h1 className="mt-4 text-3xl">&ldquo;I&rsquo;ve got a guy&rdquo; intake</h1>
+      <p className="mt-2 text-sm text-charcoal/60">
+        {scenario.label}
+        {intakeDone
+          ? " — Atlas's case design is below. Update the intake any time; the design recomputes on save."
+          : " — walk through Atlas's questions. Answer what you know; you can come back and fill in the rest later."}
+      </p>
+      <p className="mt-2 text-sm">
+        <Link href={`/app/scenarios/${id}/underwriting/life`} className="text-navy hover:text-gold">
+          Life insurance underwriting &rarr;
+        </Link>
+        <span className="mx-2 text-charcoal/30">&middot;</span>
+        <Link href={`/app/scenarios/${id}/underwriting/annuity`} className="text-navy hover:text-gold">
+          Annuity intake &rarr;
+        </Link>
+      </p>
+
+      {error && (
+        <p role="alert" className="mt-4 rounded-md bg-red-50 px-3 py-2 text-sm text-red-700">
+          {error}
+        </p>
+      )}
+
+      {!intakeDone && intakeSection}
 
       {scenario.intakeCompletedAt && (
         <AtlasReveal play={Boolean(ready)} steps={await buildRevealSteps(scenario)}>
@@ -716,10 +173,24 @@ export default async function IntakePage({
           )}
         </AtlasReveal>
       )}
+
+      {intakeDone && (
+        <details open={formOpen} className="group mt-8 max-w-2xl">
+          <summary className="flex cursor-pointer list-none items-center gap-2 text-sm font-medium text-navy hover:text-gold [&::-webkit-details-marker]:hidden">
+            <span className="inline-block text-gold transition-transform group-open:rotate-90">
+              &#9656;
+            </span>
+            Update the intake
+            <span className="font-normal text-charcoal/50">
+              — answers, avatar details, estate details
+            </span>
+          </summary>
+          {intakeSection}
+        </details>
+      )}
     </div>
   );
 }
-
 // The reveal's step lines — every one is a real computation the engine runs
 // for this scenario, restated for the animation, never invented: avatar
 // classification is the same sync call the card below makes, the hard-rule
@@ -942,9 +413,25 @@ async function RecommendationCard({ scenario }: { scenario: Scenario }) {
           )}
 
           {needsMoreInfo.length > 0 && (
-            <p className="mt-3 text-xs text-charcoal/50">
-              Could also fit, pending more info: {needsMoreInfo.map((r) => r.strategy.name).join(", ")}.
-            </p>
+            <div className="mt-3 rounded-md bg-cream px-3 py-2">
+              <p className="text-xs font-medium text-navy">
+                {needsMoreInfo.length} more strateg{needsMoreInfo.length === 1 ? "y" : "ies"} could
+                fit — a few answers would confirm:
+              </p>
+              <ul className="mt-1.5 space-y-1">
+                {needsMoreInfo.map((r) => {
+                  const link = unlockLink(scenario.id, r.strategy.slug);
+                  return (
+                    <li key={r.strategy.id} className="text-xs text-charcoal/70">
+                      {r.strategy.name} —{" "}
+                      <Link href={link.href} className="text-navy underline hover:text-gold">
+                        {link.label}
+                      </Link>
+                    </li>
+                  );
+                })}
+              </ul>
+            </div>
           )}
         </>
       )}

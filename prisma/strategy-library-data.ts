@@ -13,9 +13,14 @@ import type { Prisma } from "../src/generated/prisma/client";
 //     docs/00-developer-brief.md, docs/05-product-universe-life-vs-annuity.md,
 //     and docs/21-final-handoff.md's "9 core strategies" enumeration, but no
 //     doc gives their mechanics/legal-basis in the structured form the brain
-//     doc would. They're seeded as `pending_content` placeholders — per the
-//     Brain Lock rule (CLAUDE.md), the recommendation engine must never
-//     surface a pending_content strategy to an agent.
+//     doc would. Their cards below are AI-researched drafts built from the
+//     repo's own sketches (docs/05, CLAUDE.md hard rules) plus primary-source
+//     verification (IRC, PPA 2006 §844, SECURE 2.0, OBBBA 2026 exemption).
+//     They stay `pending_content` — per the Brain Lock rule (CLAUDE.md), the
+//     recommendation engine must never surface a pending_content strategy to
+//     an agent — until a human reviewer signs off via the admin "Approve &
+//     go live" action (docs/09-prelaunch-validation.md Path A), which is what
+//     flips status to `documented`.
 //
 // docs/21-final-handoff.md section 7 is the only place the 9 core strategies
 // are named as a complete set (5 from Jay: QWT, RMD Repositioning, Roth+Life,
@@ -82,17 +87,37 @@ export const strategyLibrarySeed: Array<
     sourceDoc: "docs/advanced-case-design-framework.md",
   },
 
-  // ---- Core (pending content) ----
+  // ---- Core (pending content — full AI-researched drafts awaiting human
+  // sign-off via the admin "Approve & go live" action, docs/09 Path A) ----
   {
     slug: "estate-funding",
-    name: "Estate Funding",
+    name: "Estate Funding (Single-Life ILIT Liquidity)",
     tier: "core",
     status: "pending_content",
     avatarTags: ["high_net_worth"],
-    notes:
-      "Named as a distinct core strategy in docs/21-final-handoff.md's enumeration, but docs/03-intake-flow.md and docs/15-email-sequence.md use \"Estate Funding (Survivorship)\" as a single label — may be the same strategy as survivorship-second-to-die under a different name. Needs Jay/Luke to confirm before the recommendation engine treats it as separate. No mechanics/legal-basis content exists in this repo.",
+    clientTriggerProfile:
+      "Single, widowed, or divorced client with an illiquid taxable estate — or a married client whose liquidity need lands at the FIRST death (non-citizen spouse without a QDOT, state estate tax with a low threshold, or business/buy-out obligations due at death) — needing cash at death without forced asset sales.",
+    legalBasis:
+      "§101(a) death benefit received non-taxable by the trust. Standard ILIT framework: §2042 (no incidents of ownership), §2035 3-year lookback avoided via new-issue with ILIT as original owner, §2503(b) annual-exclusion Crummey gifts. §2056(d): the unlimited marital deduction is NOT available for a non-citizen surviving spouse absent a §2056A QDOT — tax can be due at first death. Compare §6166 installment deferral for closely held business estates: insurance avoids the interest cost, IRS lien, and acceleration risk that come with §6166.",
+    mechanics:
+      "ILIT applies for and owns a single-life policy on the client from inception; annual-exclusion Crummey gifts (or exemption gifts) fund premiums; at death the trustee provides estate liquidity by lending proceeds to, or purchasing assets from, the estate — cash reaches the tax bill while proceeds stay outside the taxable estate.",
+    whyUsed:
+      "Survivorship coverage pays at the SECOND death — when the estate tax bill actually lands at the first (single client, non-citizen spouse, state estate tax, business obligations), single-life coverage is the only design that matches the due date of the liability.",
+    matchingParameters: [
+      "estate_exceeds_exemption = true",
+      "illiquid_estate_assets = true",
+      "liquidity_needed_at_first_death (single/widowed/divorced, non-citizen spouse, or state estate tax)",
+      "insured_individually_underwritable",
+    ],
+    uplineQuestions: [
+      "Is the liquidity need modeled at first death (state estate tax, non-citizen spouse, business obligations) rather than second death — and does that justify single-life over survivorship pricing?",
+      "Is the policy new-issue with the ILIT as original applicant/owner, and is the Crummey gifting/notice process documented?",
+      "Has a §6166 installment-deferral comparison been run for the closely held business portion, including the interest cost and lien?",
+    ],
     sourceDoc:
-      "docs/00-developer-brief.md, docs/21-final-handoff.md (named only, no mechanics)",
+      "docs/00-developer-brief.md, docs/21-final-handoff.md (named); mechanics/legal basis AI-researched (IRC §101(a)/§2042/§2035/§2056(d)/§2056A/§6166) — pending human sign-off",
+    notes:
+      "AI-researched draft pending human sign-off. Differentiated from survivorship-second-to-die as the SINGLE-LIFE / first-death liquidity design (docs/03 and docs/15 use \"Estate Funding (Survivorship)\" as one label, docs/21 lists them separately) — Jay/Luke should confirm this split at sign-off, or merge the two records.",
   },
   {
     slug: "grats",
@@ -100,10 +125,28 @@ export const strategyLibrarySeed: Array<
     tier: "core",
     status: "pending_content",
     avatarTags: ["high_net_worth"],
-    notes:
-      "Named in docs/21-final-handoff.md and docs/00-developer-brief.md's HNW avatar row as one of Luke's core strategies. No mechanics, legal basis, or trigger conditions exist in any doc in this repo.",
+    clientTriggerProfile:
+      "Client above the federal exemption holding assets expected to appreciate faster than the §7520 rate (pre-liquidity-event business interests, concentrated growth stock, real estate ahead of a re-zoning/sale) who wants to move the growth out of the estate without spending exemption or making a large taxable gift.",
+    legalBasis:
+      "§2702 and Treas. Reg. §25.2702-3 (qualified annuity interest); Walton v. Commissioner, 115 T.C. 589 (2000) permits the \"zeroed-out\" GRAT where the retained annuity's present value at the §7520 rate nearly equals the contribution, making the taxable gift near zero. §2036(a) pulls trust assets back into the estate if the grantor dies during the term (mortality risk). §2642(f) ETIP rule: GST exemption cannot be allocated until the term ends — GRATs are poor GST vehicles.",
+    mechanics:
+      "Grantor transfers the appreciating asset to a short-term (often 2–3 year) GRAT and retains an annuity that returns the principal plus the §7520 hurdle rate; appreciation above the hurdle passes to the remainder beneficiaries (often a grantor trust for the family) with little or no taxable gift. Rolling GRATs (re-contributing each annuity payment to a new GRAT) smooth market and mortality risk. Life insurance owned by an ILIT hedges the §2036 death-during-term risk — if the grantor dies mid-term the GRAT fails back into the estate and the death benefit covers the resulting tax.",
+    whyUsed:
+      "The premier near-zero-gift estate freeze for volatile or high-growth assets when the client won't part with exemption — and every GRAT creates an insurance need (the mortality hedge), which is why it belongs in a life producer's core library.",
+    matchingParameters: [
+      "estate_exceeds_exemption = true",
+      "owns_appreciating_business_or_concentrated_asset = true",
+      "expected_growth > 7520_hurdle_rate",
+      "wants_to_minimize_gift_tax_usage = true",
+    ],
+    uplineQuestions: [
+      "What GRAT term and §7520 rate is the attorney modeling, and is the structure zeroed-out per Walton or deliberately leaving a small taxable gift?",
+      "Is an ILIT-owned policy in place hedging the §2036 death-during-term risk, and is the face amount sized to the projected estate tax if the GRAT fails?",
+      "Is the remainder passing to a grantor trust (so post-GRAT growth also compounds estate-tax-free), and has GST allocation been kept off this vehicle given the ETIP rule?",
+    ],
     sourceDoc:
-      "docs/00-developer-brief.md, docs/21-final-handoff.md (named only, no mechanics)",
+      "docs/00-developer-brief.md, docs/21-final-handoff.md (named); mechanics/legal basis AI-researched (IRC §2702/§2036/§2642(f), Walton v. Comm'r, Treas. Reg. §25.2702-3) — pending human sign-off",
+    notes: "AI-researched draft pending human sign-off (docs/09 Path A).",
   },
   {
     slug: "quiet-wealth-transfer",
@@ -111,10 +154,29 @@ export const strategyLibrarySeed: Array<
     tier: "core",
     status: "pending_content",
     avatarTags: ["qualified_fund_heavy"],
-    notes:
-      "docs/05-product-universe-life-vs-annuity.md gives a one-line mechanic sketch: \"SPIA bridge to life in ILIT — repositions the IRA into a tax-efficient legacy. The SPIA generates taxable income, the after-tax income funds the life premiums.\" That's directional, not the structured mechanics/legal-basis/trigger-condition detail the brain doc format requires — kept as pending_content rather than promoted to documented.",
+    clientTriggerProfile:
+      "Client with $500K+ of qualified money (IRA/401(k)) they don't need to live on, whose real goal is legacy — especially post-SECURE Act, where heirs must drain an inherited IRA within 10 years at their own (often peak-earnings) tax rates.",
+    legalBasis:
+      "This is a DISTRIBUTION strategy, never an exchange: §1035 does not apply to qualified money (hard rule #2) and no direct annuity-to-life §1035 exists (hard rule #1). The qualified funds purchase an IRA-owned SPIA — annuitization satisfies §401(a)(9) RMDs under Treas. Reg. §1.401(a)(9)-6 — and payments are taxable income under §72. After-tax income makes §2503(b) Crummey gifts to an ILIT that is the ORIGINAL owner of the life policy (hard rule #4, avoiding the §2035 lookback). Death benefit is non-taxable under §101(a) and outside the estate. Motivation: §401(a)(9)(H) (SECURE Act 10-year rule) makes the IRA one of the worst assets to die holding.",
+    mechanics:
+      "The docs/05 SPIA bridge: annuitize the qualified balance into a SPIA (lifetime taxable income, RMDs satisfied automatically); the client pays income tax on the payments at their own — typically lower — bracket instead of the heirs' brackets; the after-tax income funds premiums, via Crummey gifts, on an ILIT-owned permanent policy. The taxable, 10-year-forced IRA is quietly converted into a non-taxable death benefit outside the estate, while the policy remains in force.",
+    whyUsed:
+      "Post-SECURE, an inherited IRA is a compressed tax bomb for the children; QWT swaps it for a leveraged, non-taxable, estate-excluded legacy — the flagship Qualified-Fund-Heavy play and the canonical SPIA-bridge design the 9 hard rules were written around.",
+    matchingParameters: [
+      "qualified_funds >= 500k",
+      "legacy_or_estate_planning_goal = true",
+      "income_not_needed_for_lifestyle (funds are legacy money)",
+      "insured_underwritable (life policy on client or spouse)",
+      "ilit_original_owner = true (hard rule 4)",
+    ],
+    uplineQuestions: [
+      "Is the SPIA quoted inside the IRA (qualified SPIA) so annuitization satisfies §401(a)(9), and what payout option (life-only vs. period-certain) balances income against legacy?",
+      "What is the after-tax income at the client's bracket, and does it comfortably carry the ILIT premium with Crummey notices documented annually?",
+      "Is the life policy new-issue with the ILIT as original applicant/owner — never a transfer or an attempted annuity-to-life exchange?",
+    ],
     sourceDoc:
-      "docs/00-developer-brief.md, docs/05-product-universe-life-vs-annuity.md, docs/07-progress-dashboard-math.md, docs/09-prelaunch-validation.md, docs/11-sales-page.md (named + partial mechanic sketch, no legal basis/trigger conditions)",
+      "docs/05-product-universe-life-vs-annuity.md (SPIA-bridge sketch), CLAUDE.md hard rules 1/2/4; expanded legal basis AI-researched (§72, §401(a)(9), SECURE §401(a)(9)(H), §101(a)) — pending human sign-off",
+    notes: "AI-researched draft pending human sign-off (docs/09 Path A).",
   },
   {
     slug: "rmd-repositioning",
@@ -122,10 +184,29 @@ export const strategyLibrarySeed: Array<
     tier: "core",
     status: "pending_content",
     avatarTags: ["qualified_fund_heavy"],
-    notes:
-      "Named repeatedly (docs/00, 05, 07, 11) as a Qualified-Fund-Heavy strategy, always paired with QWT/Roth+Life in a list — no doc gives its own distinct mechanics or legal basis.",
+    clientTriggerProfile:
+      "Client at RMD age (73 under SECURE 2.0; 75 for those born 1960 or later, starting 2033) with $500K+ qualified, who is forced to take distributions they don't spend — the RMDs land in a taxable account and eventually back in the taxable estate.",
+    legalBasis:
+      "§401(a)(9) forces the distributions; SECURE 2.0 (2022) set the required beginning age at 73, rising to 75 in 2033. The strategy adds no new tax event — it redirects money already being distributed and taxed. After-tax RMDs make §2503(b) Crummey gifts to an ILIT holding a new-issue policy (hard rule #4); §101(a) death benefit is non-taxable and estate-excluded. SECURE's 10-year rule (§401(a)(9)(H)) supplies the urgency: whatever qualified balance remains at death is drained into the heirs' brackets within a decade.",
+    mechanics:
+      "No annuitization required — the tax is already being paid on the forced RMD, so the only question is where the after-tax dollars land. Instead of a taxable brokerage account, the RMD funds ILIT premiums via annual-exclusion gifts; each year's forced distribution converts into leveraged, non-taxable death benefit outside the estate while the policy remains in force.",
+    whyUsed:
+      "The easiest yes in the Qualified-Fund-Heavy universe: the client is already taking the money and already paying the tax — Atlas just repositions the destination. Simpler than QWT (no SPIA needed) whenever the RMD alone carries the premium.",
+    matchingParameters: [
+      "qualified_funds >= 500k",
+      "age >= 73 (RMDs already forced)",
+      "rmds_not_needed_for_lifestyle = true",
+      "legacy_or_estate_planning_goal = true",
+      "insured_underwritable",
+    ],
+    uplineQuestions: [
+      "Does the annual RMD, after tax, fully carry the target premium — or should the design blend RMD dollars with other income (or step down the face amount)?",
+      "Is the policy new-issue with the ILIT as original applicant/owner, with Crummey notices documented?",
+      "Given the client's age, what product chassis (GUL vs. current-assumption UL vs. whole life) best matches a premium stream that ends at death?",
+    ],
     sourceDoc:
-      "docs/00-developer-brief.md, docs/05-product-universe-life-vs-annuity.md (named only, no mechanics)",
+      "docs/00-developer-brief.md, docs/05-product-universe-life-vs-annuity.md (named); mechanics/legal basis AI-researched (§401(a)(9), SECURE 2.0 ages 73/75, §2503(b), §101(a)) — pending human sign-off",
+    notes: "AI-researched draft pending human sign-off (docs/09 Path A).",
   },
   {
     slug: "roth-plus-life",
@@ -133,10 +214,29 @@ export const strategyLibrarySeed: Array<
     tier: "core",
     status: "pending_content",
     avatarTags: ["qualified_fund_heavy"],
-    notes:
-      "Named repeatedly as a Qualified-Fund-Heavy strategy alongside QWT and RMD Repositioning — no mechanics or legal basis documented anywhere in this repo.",
+    clientTriggerProfile:
+      "Client with $500K+ qualified money in a lower-bracket window (typically post-retirement, pre-RMD) willing to pre-pay income tax to convert to Roth — paired with life insurance so the conversion-tax outlay doesn't shrink the legacy.",
+    legalBasis:
+      "§408A conversion rules: any traditional IRA balance can convert to Roth with the converted amount taxed as ordinary income in the conversion year; since TCJA repealed §408A(d)(6) recharacterization for conversions (2018+), a conversion is IRREVOCABLE — staging matters. Roth IRAs have no lifetime RMDs (§408A(c)(5)); heirs under the 10-year rule drain the Roth non-taxable. Life leg: §101(a) death benefit; watch §7702A — overfunding the policy into MEC status is irrevocable (hard rule #6).",
+    mechanics:
+      "Staged partial conversions sized each year to fill the client's low brackets (converting to the top of the current bracket, never blindly all at once — conversions can't be undone). The life policy runs alongside: sized so the death benefit restores the estate for the conversion taxes paid, or owned by an ILIT to add estate exclusion for larger estates. The result heirs receive: a Roth that is non-taxable to them under the 10-year rule, plus a non-taxable death benefit, instead of a traditional IRA taxed at their peak brackets.",
+    whyUsed:
+      "Converts the client's future RMD problem and the heirs' 10-year tax bomb into two non-taxable buckets — the analytical companion to QWT for clients who want to keep the account rather than annuitize it.",
+    matchingParameters: [
+      "qualified_funds >= 500k",
+      "current_bracket_window_low (pre-RMD or low-income years)",
+      "legacy_or_estate_planning_goal = true",
+      "can_pay_conversion_tax_from_outside_funds (preferred)",
+      "insured_underwritable",
+    ],
+    uplineQuestions: [
+      "What multi-year conversion schedule keeps each year inside the target bracket, and is the conversion tax being paid from outside funds so the full balance converts?",
+      "Is the life policy sized to restore the conversion-tax outlay to the estate, and should an ILIT own it given the estate size?",
+      "Is the funding pattern MEC-tested (§7702A 7-pay) — remembering MEC status is irrevocable once triggered?",
+    ],
     sourceDoc:
-      "docs/00-developer-brief.md, docs/05-product-universe-life-vs-annuity.md (named only, no mechanics)",
+      "docs/00-developer-brief.md, docs/05-product-universe-life-vs-annuity.md (named); mechanics/legal basis AI-researched (§408A, TCJA recharacterization repeal, §408A(c)(5), §7702A) — pending human sign-off",
+    notes: "AI-researched draft pending human sign-off (docs/09 Path A).",
   },
   {
     slug: "annuity-rescue",
@@ -144,10 +244,28 @@ export const strategyLibrarySeed: Array<
     tier: "core",
     status: "pending_content",
     avatarTags: ["qualified_fund_heavy"],
-    notes:
-      "Directly implicated by hard rule #1 (direct annuity-to-life §1035 is never valid — must route through a SPIA bridge funding life premiums inside an ILIT), so the shape of the mechanic is constrained even without full documentation. Kept pending_content since no doc spells out the full structure, legal basis, or trigger conditions in the brain-doc format.",
+    clientTriggerProfile:
+      "Client holding an old deferred annuity that no longer fits — high fees, weak crediting, an unneeded income rider, or a large embedded gain the client never intends to spend (the classic \"annuity they bought in their 60s and forgot\").",
+    legalBasis:
+      "Three compliant exits, each hard-rule-gated. (1) Non-qualified §1035(a)(3) annuity-to-annuity exchange into a better contract — non-qualified only (hard rule #2); qualified annuities move by rollover/transfer instead. (2) Non-qualified §1035 annuity-to-LTC exchange under PPA 2006 §844 (effective 2010): direct assignment into a §7702B-qualified hybrid, where the embedded gain is consumed by LTC benefits non-taxable under §72(e)(11)/§7702B. (3) Legacy intent: annuitize to a SPIA and fund an ILIT-owned life policy with the after-tax income — NEVER a direct annuity-to-life §1035, which does not exist (hard rule #1).",
+    mechanics:
+      "Diagnose the old contract first (surrender charge schedule, gain, rider value, carrier strength), then pick the exit that matches the client's actual use for the money: better accumulation → path 1 (full or partial 1035, direct carrier-to-carrier assignment); LTC exposure → path 2 (the gain that would have been ordinary income on surrender instead pays LTC benefits); pure legacy → path 3 (the SPIA bridge into life-in-ILIT). Losses on surrender and gains carried through an exchange keep basis tracking essential.",
+    whyUsed:
+      "Billions sit in stale deferred annuities with embedded gains — the rescue turns a dormant, tax-deferred liability into the client's actual goal (growth, LTC protection, or legacy) without triggering the gain on surrender, and it's the natural annuity-side answer when the age/health gate closes the life universe.",
+    matchingParameters: [
+      "existing_deferred_annuity = true (from the annuity intake)",
+      "contract_underperforming_or_mismatched = true",
+      "source_of_funds = non_qualified (for the §1035 paths; qualified uses rollover rules)",
+      "surrender_charges_modeled = true",
+    ],
+    uplineQuestions: [
+      "What is the embedded gain, remaining surrender schedule, and any rider value that would be forfeited — does the new contract clear that hurdle?",
+      "Is the exchange structured as a direct carrier-to-carrier §1035 assignment (never a surrender-and-repurchase), and is the money confirmed non-qualified?",
+      "If the client's real goal is legacy, has the SPIA-bridge-to-ILIT design been quoted instead — and confirmed as new-issue life with the ILIT as original owner?",
+    ],
     sourceDoc:
-      "docs/00-developer-brief.md, docs/05-product-universe-life-vs-annuity.md, CLAUDE.md hard rule #1 (named + hard-rule constraint, no full mechanics)",
+      "docs/05-product-universe-life-vs-annuity.md, CLAUDE.md hard rules 1/2; expanded legal basis AI-researched (§1035(a)(3), PPA 2006 §844, §72(e)(11), §7702B) — pending human sign-off",
+    notes: "AI-researched draft pending human sign-off (docs/09 Path A).",
   },
   {
     slug: "qualified-ltc",
@@ -155,10 +273,28 @@ export const strategyLibrarySeed: Array<
     tier: "core",
     status: "pending_content",
     avatarTags: ["qualified_fund_heavy"],
-    notes:
-      "Directly implicated by hard rule #8 (a spouse's IRA cannot fund joint LTC benefits — prohibited transaction), so that constraint applies once this strategy is documented. docs/05-product-universe-life-vs-annuity.md notes it's \"often a §1035 annuity-to-LTC hybrid\" but gives no further mechanics.",
+    clientTriggerProfile:
+      "Client 60+ worried about long-term-care costs, holding either an old non-qualified annuity with embedded gain (the docs/05 \"§1035 annuity-to-LTC hybrid\" case) or qualified money that can fund a hybrid via distributions — self-insuring today with fully taxable dollars.",
+    legalBasis:
+      "§7702B defines tax-qualified LTC coverage: benefits received for qualified LTC are non-taxable (per-diem limits apply under §7702B(d)). PPA 2006 §844 (effective 2010) amended §1035 to permit non-qualified annuity/life → LTC-hybrid exchanges via direct assignment, and added §72(e)(11): charges against annuity value for LTC riders are not taxable distributions — embedded gain is consumed by care benefits instead of ever being taxed. Qualified money cannot §1035 (hard rule #2) — it funds a hybrid via taxable distributions or an IRA-funded annuity-with-LTC-rider design. Hard rule #8: a spouse's IRA can never fund JOINT LTC benefits — IRA-funded designs must cover the IRA owner individually; joint/shared benefits come only from non-qualified money.",
+    mechanics:
+      "Non-qualified path: §1035 the gain-heavy annuity (or life policy) directly into a §7702B hybrid LTC annuity or life/LTC policy — dollars that would have been ordinary income on surrender become non-taxable care benefits. Qualified path: distributions (often a 10-pay schedule, or the RMDs themselves) fund the hybrid, spreading the tax; each spouse's IRA funds their own individual coverage only. Hybrids return value to the family (death benefit or remaining account value) if care is never needed — the answer to \"use it or lose it\" resistance on standalone LTC.",
+    whyUsed:
+      "LTC is the risk that unwinds every other strategy in the library — a two-year care event can force the exact asset sales the estate plan was built to avoid. Hybrid funding turns a dormant taxable gain (or forced RMDs) into non-taxable care benefits, and underwriting is typically simplified versus fully underwritten life, keeping it available after the life-insurance age/health gate closes.",
+    matchingParameters: [
+      "age >= 60 or ltc_concern_expressed",
+      "existing_annuity_with_gain = true (non-qualified §1035 path) OR qualified_funds >= 500k (distribution path)",
+      "no_spouse_ira_funding_joint_benefits (hard rule 8)",
+      "hybrid_return-of-value_design_preferred = true",
+    ],
+    uplineQuestions: [
+      "For the non-qualified path: what is the embedded gain being repositioned, and is the exchange a direct assignment into a §7702B-qualified hybrid (full or partial 1035)?",
+      "For the qualified path: is each spouse's IRA funding only that spouse's individual benefit — never a joint benefit (hard rule 8) — and is the distribution schedule tax-modeled?",
+      "What are the inflation rider, benefit period, and elimination period — and does the hybrid's return-of-value feature answer the client's use-it-or-lose-it objection?",
+    ],
     sourceDoc:
-      "docs/00-developer-brief.md, docs/05-product-universe-life-vs-annuity.md, CLAUDE.md hard rule #8 (named + hard-rule constraint, no full mechanics)",
+      "docs/05-product-universe-life-vs-annuity.md, CLAUDE.md hard rule 8; expanded legal basis AI-researched (§7702B, PPA 2006 §844, §72(e)(11), §7702B(d)) — pending human sign-off",
+    notes: "AI-researched draft pending human sign-off (docs/09 Path A).",
   },
 
   // ---- Supporting (documented) ----

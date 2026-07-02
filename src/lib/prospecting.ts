@@ -60,13 +60,15 @@ async function pitchFor(scenario: Scenario): Promise<string> {
   const lifeUnderwritingIntake = await getLifeUnderwritingIntake(scenario.userId, scenario.id);
   const { pivot, recommendations } = await recommendStrategies(scenario, lifeUnderwritingIntake);
 
-  if (pivot.triggered) {
-    return "No fitting strategy yet — this case needs the annuity-side pivot (see the intake page).";
-  }
-
   const topEligible = recommendations.find((r) => r.eligibility === "eligible");
   if (topEligible) {
+    // Under a pivot this is already the annuity-side strategy — still the
+    // right pitch line for the call queue.
     return topEligible.strategy.name;
+  }
+
+  if (pivot.triggered) {
+    return "No fitting strategy yet — this case needs the annuity-side pivot (see the intake page).";
   }
 
   const needsMoreInfo = recommendations.find((r) => r.eligibility === "needs_more_info");

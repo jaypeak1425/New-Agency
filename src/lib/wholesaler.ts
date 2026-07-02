@@ -169,7 +169,10 @@ export async function buildHandoffPreview(agent: User, scenarioId: string) {
   const classification = classifyAvatars(scenario);
   const underwritingEstimate = estimateUnderwritingClass(scenario, lifeUnderwritingIntake);
 
-  if (pivot.triggered) {
+  // A pivot no longer blocks the handoff outright: if a documented
+  // annuity-side strategy (Annuity Rescue / Qualified LTC) is fully eligible,
+  // that IS the strategy request the wholesaler receives.
+  if (pivot.triggered && eligible.length === 0) {
     return { ready: false as const, reason: pivot.message ?? "This case needs a pivot to an alternative strategy first.", content: null };
   }
   if (eligible.length === 0) {

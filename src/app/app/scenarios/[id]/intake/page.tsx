@@ -799,13 +799,17 @@ async function RecommendationCard({ scenario }: { scenario: Scenario }) {
   );
   const eligible = recommendations.filter((r) => r.eligibility === "eligible");
   const needsMoreInfo = recommendations.filter((r) => r.eligibility === "needs_more_info");
-  const commission = pivot.triggered
-    ? null
-    : await computeExpectedCommission(scenario.userId, scenario.id);
+  // The pivot no longer empties the recommendation — the annuity-side
+  // strategies (Annuity Rescue, Qualified LTC) flow through the same list,
+  // commission math and all, once they're live in the library.
+  const showStrategySection = !pivot.triggered || recommendations.length > 0;
+  const commission = showStrategySection
+    ? await computeExpectedCommission(scenario.userId, scenario.id)
+    : null;
   const estimateBySlug = new Map(commission?.lines.map((l) => [l.strategy.id, l]) ?? []);
-  const pipelineValue = pivot.triggered
-    ? null
-    : await computeExpectedCommissionValue(scenario.userId, scenario);
+  const pipelineValue = showStrategySection
+    ? await computeExpectedCommissionValue(scenario.userId, scenario)
+    : null;
 
   return (
     <Card className="mt-6 max-w-2xl">
@@ -814,21 +818,25 @@ async function RecommendationCard({ scenario }: { scenario: Scenario }) {
         Drawn only from the locked, documented strategy library — never invented.
       </p>
 
-      {pivot.triggered ? (
+      {pivot.triggered && (
         <p className="mt-3 rounded-md bg-cream px-3 py-2 text-sm text-charcoal/80">{pivot.message}</p>
-      ) : (
+      )}
+
+      {showStrategySection && (
         <>
-          {healthConcernNote && (
+          {healthConcernNote && !pivot.triggered && (
             <p className="mt-3 rounded-md bg-cream px-3 py-2 text-xs text-charcoal/70">
               {healthConcernNote}
             </p>
           )}
 
           {eligible.length === 0 ? (
-            <p className="mt-3 text-sm text-charcoal/70">
-              Based on what you&rsquo;ve told me, none of the standard strategies are a clean fit
-              yet. Fill in more of the optional sections above to narrow this down.
-            </p>
+            !pivot.triggered && (
+              <p className="mt-3 text-sm text-charcoal/70">
+                Based on what you&rsquo;ve told me, none of the standard strategies are a clean fit
+                yet. Fill in more of the optional sections above to narrow this down.
+              </p>
+            )
           ) : (
             <ul className="mt-3 space-y-3">
               {eligible.map(({ strategy, hardRuleViolations }) => {

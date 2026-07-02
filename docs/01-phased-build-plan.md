@@ -177,7 +177,9 @@ This document is the staged build plan for the Insurance Strategy Engine. Each p
    Annuity Rescue, Qualified LTC) as `status: pending_content` placeholders. **Action item for
    Jay:** supply the real brain doc content for these 7 before Session 6 (recommendation engine) —
    the engine is coded to only ever surface `documented` strategies, so it will simply have a
-   thinner core library until then, never a fabricated one.
+   thinner core library until then, never a fabricated one. *(Update: the 7 cards are now fully
+   drafted from research — see the Phase 6 post-close-out note. They go live via the
+   `/admin/strategies` "Approve & go live" sign-off, not by editing the seed.)*
 4. **Session 4:** Build the "I've got a guy" intake flow (10 questions, conversational voice)
    — **done with a caveat:** shipped as a structured step-by-step form (real fields, Atlas's exact
    question wording, all 10 answers persisted on the Scenario record) rather than the doc's
@@ -650,6 +652,27 @@ This document is the staged build plan for the Insurance Strategy Engine. Each p
    7 valid fields extracted and pre-filled, an invalid enum and two unknown keys (including a
    planted "recommendedStrategy") correctly discarded, and the downstream avatar/recommendation
    engine ran unchanged on the parsed data. Voice input still needs speech-to-text — not built.
+
+   **Post-close-out update — the 7 `pending_content` strategy cards are now fully drafted and
+   the go-live workflow exists.** Every card in `prisma/strategy-library-data.ts` (Estate Funding,
+   GRATs, QWT, RMD Repositioning, Roth+Life, Annuity Rescue, Qualified LTC) now carries complete
+   AI-researched mechanics/legal-basis/trigger/matching-parameter/upline-question content, built
+   from the repo's own sketches plus primary-source verification (OBBBA's $15M 2026 exemption,
+   SECURE 2.0's 73/75 RMD ages, PPA 2006 §844's annuity→LTC §1035) and shaped around the 9 hard
+   rules (QWT/Annuity Rescue encode the SPIA-bridge-only path of rule 1; rule 2's §1035
+   non-qualified guardrail surfaces in-engine when the annuity intake says qualified; rule 8's
+   spouse-IRA prohibition is baked into the Qualified LTC card). All 7 stay `pending_content` —
+   Brain Lock holds — until a human signs off via the new **"Approve & go live"** button on
+   `/admin/strategies` (docs/09 Path A): admin-only, gated on card completeness (docs/09 Gate 1),
+   audit-logged with a full content snapshot, clears any open pre-launch compliance flag, and the
+   re-seed never downgrades an approved status. The recommendation engine gained gates for all 7
+   (17/17 covered) and the pivot got real: an age>80 case now evaluates the annuity-side
+   strategies (Annuity Rescue, Qualified LTC) instead of dead-ending, the handoff fires on an
+   eligible annuity-side strategy, and the call queue pitches it. Verified end-to-end: approve →
+   QFH-legacy case recommends QWT; age-84 case pivots and recommends both annuity strategies with
+   the rule-2 warning on qualified funds; 73 Vitest tests green. **Action item for Jay:** the
+   cards are drafts pending YOUR sign-off — read each one on `/admin/strategies` (especially the
+   Estate Funding vs. Survivorship split question in its notes) before clicking Approve & go live.
 
 ---
 

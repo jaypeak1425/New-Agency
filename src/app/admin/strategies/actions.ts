@@ -3,6 +3,7 @@
 import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth";
 import { ComplianceQueueError, flagStrategyForPreLaunchReview } from "@/lib/compliance-queue";
+import { approveStrategyForLaunch, StrategyError } from "@/lib/strategies";
 
 export async function flagStrategyForReviewAction(formData: FormData) {
   const admin = await getCurrentUser();
@@ -18,4 +19,21 @@ export async function flagStrategyForReviewAction(formData: FormData) {
     redirect(`/admin/strategies?error=${encodeURIComponent(message)}`);
   }
   redirect("/admin/strategies");
+}
+
+// docs/09-prelaunch-validation.md Path A — the single-reviewer sign-off.
+export async function approveStrategyAction(formData: FormData) {
+  const admin = await getCurrentUser();
+  if (!admin) redirect("/login");
+  if (admin.role !== "admin") redirect("/app");
+
+  const strategyId = String(formData.get("strategyId") ?? "");
+
+  try {
+    await approveStrategyForLaunch(admin, strategyId);
+  } catch (error) {
+    const message = error instanceof StrategyError ? error.message : "Something went wrong.";
+    redirect(`/admin/strategies?error=${encodeURIComponent(message)}`);
+  }
+  redirect("/admin/strategies?approved=1");
 }

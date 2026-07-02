@@ -32,11 +32,17 @@ async function main() {
   console.log(`Seeded admin user: ${email}`);
 
   for (const strategy of strategyLibrarySeed) {
+    // Never downgrade a live strategy's status on re-seed: "Approve & go
+    // live" (docs/09 Path A) is a human sign-off recorded in the DB, and the
+    // seed file always ships pending_content for the researched drafts. The
+    // content fields still refresh in place.
+    const { status, ...contentRefresh } = strategy;
     await prisma.strategy.upsert({
       where: { slug: strategy.slug },
-      update: strategy,
+      update: contentRefresh,
       create: strategy,
     });
+    void status;
   }
 
   console.log(`Seeded strategy library: ${strategyLibrarySeed.length} strategies`);

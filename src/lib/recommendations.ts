@@ -1,5 +1,10 @@
 import { prisma } from "@/lib/prisma";
-import type { LifeUnderwritingIntake, Scenario, Strategy } from "@/generated/prisma/client";
+import type {
+  AnnuityIntake,
+  LifeUnderwritingIntake,
+  Scenario,
+  Strategy,
+} from "@/generated/prisma/client";
 import { checkHardRules, type HardRuleViolation } from "@/lib/hard-rules";
 import { estimateUnderwritingClass } from "@/lib/underwriting";
 
@@ -11,21 +16,41 @@ export interface StrategyRecommendation {
   hardRuleViolations: HardRuleViolation[];
 }
 
-// CLAUDE.md's 9 hard rules (src/lib/hard-rules.ts) guard against annuity
-// exchanges, COLI, MEC, and qualified-plan life insurance — none of which
-// exist in the 17-strategy library yet (COLI isn't a seeded strategy at all;
-// the annuity-side strategies are all pending_content). Rule 4 (ILIT must be
-// original owner to avoid the §2035 3-year lookback) is the one rule that's
-// structurally applicable right now, since ilit-foundation-wrapper is
-// documented. The other 8 rules have nothing to check against yet — wiring
-// them in now would be a no-op, not real enforcement.
-function hardRuleViolationsFor(strategy: Strategy, scenario: Scenario): HardRuleViolation[] {
-  if (strategy.slug !== "ilit-foundation-wrapper" || scenario.existingPolicyTransfer === null) {
-    return [];
+// CLAUDE.md's 9 hard rules (src/lib/hard-rules.ts), wired per strategy:
+//  - Rule 4 (ILIT must be original owner to avoid the §2035 3-year lookback)
+//    applies to every ILIT-chassis strategy in the library.
+//  - Rule 2 (§1035 is non-qualified only) applies to the exchange-based
+//    annuity strategies — a qualified source of funds means the §1035 paths
+//    are off-limits and rollover/transfer rules apply instead.
+// Rule 1 (no direct annuity→life §1035) is enforced structurally: no
+// strategy card in the locked library describes that exchange, and the
+// SPIA-bridge cards (QWT, Annuity Rescue) encode the only valid path.
+// Rules 5/6/7/9 (COLI, MEC, §162, §415(b)) have no seeded strategy or
+// scenario field to check against yet — wiring them here would be a no-op.
+const ILIT_CHASSIS_SLUGS = new Set([
+  "ilit-foundation-wrapper",
+  "estate-funding",
+  "quiet-wealth-transfer",
+  "rmd-repositioning",
+]);
+const SECTION_1035_SLUGS = new Set(["annuity-rescue", "qualified-ltc"]);
+
+function hardRuleViolationsFor(
+  strategy: Strategy,
+  scenario: Scenario,
+  annuityIntake: AnnuityIntake | null,
+): HardRuleViolation[] {
+  if (ILIT_CHASSIS_SLUGS.has(strategy.slug) && scenario.existingPolicyTransfer !== null) {
+    return checkHardRules({
+      ilit: { isOriginalOwner: scenario.existingPolicyTransfer === false },
+    }).violations;
   }
-  return checkHardRules({
-    ilit: { isOriginalOwner: scenario.existingPolicyTransfer === false },
-  }).violations;
+  if (SECTION_1035_SLUGS.has(strategy.slug) && annuityIntake?.sourceOfFunds === "qualified") {
+    return checkHardRules({
+      exchange: { from: "annuity", to: "annuity", fundsQualified: true },
+    }).violations;
+  }
+  return [];
 }
 
 // Per-strategy gate logic, hand-written from each documented strategy's
@@ -35,7 +60,7 @@ function hardRuleViolationsFor(strategy: Strategy, scenario: Scenario): HardRule
 // follow-ups). Every strategy not listed here (i.e. every pending_content
 // strategy) is never evaluated — Brain Lock (CLAUDE.md) means only
 // documented strategies are ever surfaced.
-type Gate = (scenario: Scenario) => StrategyEligibility;
+type Gate = (scenario: Scenario, annuityIntake: AnnuityIntake | null) => StrategyEligibility;
 
 function fromRequirements(
   scenario: Scenario,
@@ -48,7 +73,7 @@ function fromRequirements(
   return isEligible() ? "eligible" : "not_eligible";
 }
 
-const GATES: Record<string, Gate> = {
+export const GATES: Record<string, Gate> = {
   "survivorship-second-to-die": (s) =>
     fromRequirements(
       s,
@@ -127,7 +152,96 @@ const GATES: Record<string, Gate> = {
         (s.keyEmployeesCount ?? 0) > 0 &&
         s.fundingPreference === "employer_funded",
     ),
+
+  // ---- The 7 researched core strategies (gates hand-written from each
+  // card's matchingParameters in prisma/strategy-library-data.ts; live only
+  // once the card is approved via the admin sign-off, since the engine still
+  // queries status = documented only) ----
+
+  "estate-funding": (s) =>
+    // Single-life / first-death liquidity — the married-couple version of
+    // this need is survivorship-second-to-die's gate.
+    fromRequirements(
+      s,
+      [s.estateExceedsExemption, s.illiquidNetWorth, s.maritalStatus],
+      () =>
+        s.estateExceedsExemption === true &&
+        s.illiquidNetWorth === true &&
+        s.maritalStatus !== "married",
+    ),
+
+  grats: (s) =>
+    fromRequirements(
+      s,
+      [s.estateExceedsExemption, s.businessOwnerStatus ?? s.concentratedLowBasisPosition],
+      () =>
+        s.estateExceedsExemption === true &&
+        (s.businessOwnerStatus === "business_owner" || s.concentratedLowBasisPosition === true),
+    ),
+
+  "quiet-wealth-transfer": (s) =>
+    fromRequirements(
+      s,
+      [s.qualifiedFundsEstimate],
+      () => s.qualifiedFundsEstimate === "over_500k" && hasLegacyGoal(s),
+    ),
+
+  "rmd-repositioning": (s) =>
+    // RMD_BEGINNING_AGE is the floor; the shared life-insurance age ceiling
+    // (80) still applies above, so the fully-eligible window is 73–80.
+    fromRequirements(
+      s,
+      [s.qualifiedFundsEstimate, s.primaryAge],
+      () =>
+        s.qualifiedFundsEstimate === "over_500k" &&
+        (s.primaryAge ?? 0) >= RMD_BEGINNING_AGE &&
+        hasLegacyGoal(s),
+    ),
+
+  "roth-plus-life": (s) =>
+    fromRequirements(
+      s,
+      [s.qualifiedFundsEstimate],
+      () =>
+        s.qualifiedFundsEstimate === "over_500k" &&
+        (hasLegacyGoal(s) || s.primaryGoals.includes("retirement_income")),
+    ),
+
+  "annuity-rescue": (s, ai) =>
+    // Needs the annuity intake — an existing contract is the whole trigger.
+    // A qualified source of funds stays eligible (rollover path), with the
+    // rule-2 §1035 guardrail surfaced via hardRuleViolationsFor.
+    fromRequirements(
+      s,
+      [ai?.existingAnnuityContractsNotes, ai?.sourceOfFunds],
+      () => Boolean(ai?.existingAnnuityContractsNotes?.trim()),
+    ),
+
+  "qualified-ltc": (s, ai) => {
+    // Two documented funding paths: an existing (gain-heavy) annuity via the
+    // PPA 2006 §1035 route, or $500K+ qualified funds via distributions.
+    if (ai?.existingAnnuityContractsNotes?.trim()) return "eligible";
+    if (s.qualifiedFundsEstimate === null || s.primaryAge === null) return "needs_more_info";
+    return s.qualifiedFundsEstimate === "over_500k" && s.primaryAge >= 60
+      ? "eligible"
+      : "not_eligible";
+  },
 };
+
+// docs/03-intake-flow.md Q8 vocabulary — the legacy-intent cluster the three
+// Qualified-Fund-Heavy repositioning strategies key off.
+function hasLegacyGoal(s: Scenario): boolean {
+  return (
+    s.primaryGoals.includes("legacy") ||
+    s.primaryGoals.includes("estate_planning") ||
+    s.primaryGoals.includes("minimize_estate_tax")
+  );
+}
+
+// SECURE 2.0 (2022): required beginning age is 73 (born 1951–1959), rising
+// to 75 for those born 1960+ starting 2033. The gate uses 73 — the earliest
+// age RMDs can already be forced.
+const RMD_BEGINNING_AGE = 73;
 
 // docs/04-field-underwriting.md section 5 ("The Eligibility Gates") is the
 // only doc that gives a concrete, sourced age threshold: "Age > 80 for most
@@ -144,11 +258,15 @@ export interface PivotResult {
 }
 
 // docs/03-intake-flow.md section 5 + docs/04-field-underwriting.md section 6:
-// "Atlas pivots to the annuity universe" when the age/health gate fails. None
-// of the 17 seeded strategies are annuity strategies yet (QWT, Annuity
-// Rescue, and Qualified LTC — the natural annuity-side pivots — are all
-// pending_content), so the pivot message says so honestly instead of
-// recommending something that isn't in the locked library.
+// "Atlas pivots to the annuity universe" when the age/health gate fails.
+// Annuity Rescue and Qualified LTC are the two library strategies that don't
+// hinge on the client being life-insurance underwritable (annuity→annuity
+// and annuity→LTC-hybrid designs; hybrid LTC underwriting is typically
+// simplified) — so when the pivot fires, those are the strategies the engine
+// evaluates instead of returning nothing. Still Brain-Locked: they surface
+// only while their status is documented (i.e. after the admin sign-off).
+const PIVOT_SAFE_SLUGS = ["annuity-rescue", "qualified-ltc"];
+
 function assessPivot(scenario: Scenario): PivotResult {
   const reasons: string[] = [];
 
@@ -160,20 +278,35 @@ function assessPivot(scenario: Scenario): PivotResult {
     return { triggered: false, reasons: [], message: null };
   }
 
+  return { triggered: true, reasons, message: null };
+}
+
+function buildPivotMessage(
+  scenario: Scenario,
+  reasons: string[],
+  pivotRecommendations: StrategyRecommendation[],
+): string {
   const healthNote =
     scenario.healthRating === "health_issues" ? " and the health profile is a further barrier" : "";
+  const preamble =
+    `This client's ${reasons.join("; ")}${healthNote}. The life-insurance-funded strategies in ` +
+    "this library don't fit, so Atlas is pivoting to the annuity universe " +
+    "(docs/04-field-underwriting.md section 6).";
 
-  return {
-    triggered: true,
-    reasons,
-    message:
-      `This client's ${reasons.join("; ")}${healthNote}. The life-insurance-funded strategies in ` +
-      "this library don't fit. The right pivot is the annuity universe (SPIA, QLAC, deferred " +
-      "annuity) per docs/04-field-underwriting.md — but Quiet Wealth Transfer, Annuity Rescue, and " +
-      "Qualified LTC are still pending_content in the strategy library (no real mechanics/legal " +
-      "basis documented yet), so Atlas can't recommend one from the locked library. Flag this case " +
-      "for manual review until that content is supplied.",
-  };
+  if (pivotRecommendations.some((r) => r.eligibility === "eligible")) {
+    return `${preamble} The annuity-side strategies below fit what you've told me so far.`;
+  }
+  if (pivotRecommendations.length > 0) {
+    return (
+      `${preamble} The annuity-side strategies need more information — complete the annuity ` +
+      "intake (existing contracts, source of funds) to confirm the fit."
+    );
+  }
+  return (
+    `${preamble} No annuity-side strategy is live in the locked library yet (Annuity Rescue and ` +
+    "Qualified LTC are drafted but awaiting the pre-launch sign-off), so Atlas can't recommend " +
+    "one — flag this case for manual review."
+  );
 }
 
 export interface RecommendationResult {
@@ -204,16 +337,48 @@ export async function recommendStrategies(
       ? "Health profile suggests this may face a higher underwriting class (possibly Table-rated) — confirm with a full underwriting intake before quoting."
       : null;
 
+  const annuityIntake = await prisma.annuityIntake.findUnique({
+    where: { scenarioId: scenario.id },
+  });
+
   if (pivot.triggered) {
+    // The pivot doesn't end the recommendation — it narrows the library to
+    // the annuity-side strategies that don't require life underwriting.
+    const pivotDocumented = await prisma.strategy.findMany({
+      where: { status: "documented", slug: { in: PIVOT_SAFE_SLUGS } },
+      orderBy: { name: "asc" },
+    });
+    const recommendations = pivotDocumented
+      .map((strategy) => {
+        const gate = GATES[strategy.slug];
+        const eligibility: StrategyEligibility = gate
+          ? gate(scenario, annuityIntake)
+          : "needs_more_info";
+        return {
+          strategy,
+          eligibility,
+          hardRuleViolations: hardRuleViolationsFor(strategy, scenario, annuityIntake),
+        };
+      })
+      .filter((r) => r.eligibility !== "not_eligible");
+
+    pivot.message = buildPivotMessage(scenario, pivot.reasons, recommendations);
+
     await prisma.auditLog.create({
       data: {
         actorId: scenario.userId,
         action: "scenario.pivot_triggered",
         target: scenario.id,
-        metadata: { reasons: pivot.reasons },
+        metadata: {
+          reasons: pivot.reasons,
+          annuityRecommendations: recommendations.map((r) => ({
+            slug: r.strategy.slug,
+            eligibility: r.eligibility,
+          })),
+        },
       },
     });
-    return { pivot, recommendations: [], healthConcernNote };
+    return { pivot, recommendations, healthConcernNote };
   }
 
   const documented = await prisma.strategy.findMany({
@@ -224,8 +389,14 @@ export async function recommendStrategies(
   const recommendations = documented
     .map((strategy) => {
       const gate = GATES[strategy.slug];
-      const eligibility: StrategyEligibility = gate ? gate(scenario) : "needs_more_info";
-      return { strategy, eligibility, hardRuleViolations: hardRuleViolationsFor(strategy, scenario) };
+      const eligibility: StrategyEligibility = gate
+        ? gate(scenario, annuityIntake)
+        : "needs_more_info";
+      return {
+        strategy,
+        eligibility,
+        hardRuleViolations: hardRuleViolationsFor(strategy, scenario, annuityIntake),
+      };
     })
     .filter((r) => r.eligibility !== "not_eligible");
 

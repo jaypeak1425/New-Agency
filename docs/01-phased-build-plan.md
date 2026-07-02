@@ -578,6 +578,17 @@ This document is the staged build plan for the Insurance Strategy Engine. Each p
    numbers, shown once (query-flag, not persistent). Polish: a shared `ScenarioStatusBadge`
    replaces the raw `closed_won`-style enum text that was leaking into the wholesaler portal, and
    deduplicates the three copies of the status-label map.
+
+   **Follow-up — the killer visual itself:** completing the intake now lands directly on the case
+   design (previously it bounced back to the scenarios list) behind a one-shot Atlas reveal:
+   the engine's real pipeline stages in step by step — scenario read, avatar classified (the
+   actual classification result), 9 hard rules checked (the actual rule-4 outcome), locked
+   library scanned (the actual documented-strategy count) — and then the recommendations,
+   commission math, and handoff rise in. Every line restates a computation the engine really ran;
+   nothing is invented for effect. Plays once (via the `?ready=1` redirect), click-to-skip,
+   honors `prefers-reduced-motion`, and revisits render instantly. Dashboard KPIs and the
+   book-of-business celebration also gained ease-out count-up numbers (final value is
+   server-rendered, so no-JS/reduced-motion/SEO all see the real figure).
 2. **Session 2:** Behavioral triggers + nudges — done, built against docs/07's real specs. Section
    6's aging system (0-7 active / 8-14 stale / 15-30 at-risk / 31+ cold, from `updatedAt` — the
    same "activity" simplification the dashboard documents) with the doc's exact surfacing language

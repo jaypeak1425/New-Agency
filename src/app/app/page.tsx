@@ -5,6 +5,7 @@ import { computeAtlasFeed } from "@/lib/nudges";
 import { agingStatusFor, AGING_LABELS } from "@/lib/aging";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { Card } from "@/components/ui/Card";
+import { CountUp } from "@/components/CountUp";
 import { SCENARIO_STATUS_LABELS as STATUS_LABELS } from "@/components/ScenarioStatusBadge";
 
 function money(amount: number) {
@@ -48,18 +49,22 @@ export default async function DashboardPage() {
       <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <Card>
           <p className="text-xs uppercase tracking-wide text-charcoal/50">This week&rsquo;s pipeline</p>
-          <p className="mt-2 text-2xl font-medium text-navy">{money(thisWeek.total)}</p>
+          <p className="mt-2 text-2xl font-medium text-navy">
+            <CountUp value={thisWeek.total} />
+          </p>
           <p className="mt-1 text-xs text-charcoal/50">{thisWeek.lines.length} active this week</p>
         </Card>
         <Card>
           <p className="text-xs uppercase tracking-wide text-charcoal/50">This year&rsquo;s pipeline</p>
-          <p className="mt-2 text-2xl font-medium text-navy">{money(thisYear.total)}</p>
+          <p className="mt-2 text-2xl font-medium text-navy">
+            <CountUp value={thisYear.total} />
+          </p>
           <p className="mt-1 text-xs text-charcoal/50">{thisYear.lines.length} cases YTD</p>
         </Card>
         <Card>
           <p className="text-xs uppercase tracking-wide text-charcoal/50">Book-of-business opportunity</p>
           <p className="mt-2 text-2xl font-medium text-navy">
-            {bookOpportunity ? money(bookOpportunity.addressableOpportunity) : "—"}
+            {bookOpportunity ? <CountUp value={bookOpportunity.addressableOpportunity} /> : "—"}
           </p>
           <p className="mt-1 text-xs text-charcoal/50">
             {bookOpportunity
@@ -69,7 +74,9 @@ export default async function DashboardPage() {
         </Card>
         <Card>
           <p className="text-xs uppercase tracking-wide text-charcoal/50">Closed this year</p>
-          <p className="mt-2 text-2xl font-medium text-navy">{money(closedThisYear.total)}</p>
+          <p className="mt-2 text-2xl font-medium text-navy">
+            <CountUp value={closedThisYear.total} />
+          </p>
           <p className="mt-1 text-xs text-charcoal/50">{closedThisYear.scenarios.length} won this year</p>
         </Card>
       </div>

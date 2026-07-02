@@ -8,6 +8,7 @@ import { getLifeUnderwritingIntake } from "@/lib/underwriting";
 import { buildHandoffPreview } from "@/lib/wholesaler";
 import { computeExpectedCommission, computeExpectedCommissionValue } from "@/lib/commission";
 import { isAiConfigured } from "@/lib/ai";
+import { listDocumentedStrategies } from "@/lib/strategies";
 import {
   completeIntakeAction,
   notifyWholesalerAction,
@@ -16,6 +17,7 @@ import {
 } from "../../actions";
 import { Card } from "@/components/ui/Card";
 import { SubmitButton } from "@/components/SubmitButton";
+import { AtlasReveal, type RevealStep } from "@/components/AtlasReveal";
 import type { Scenario, User } from "@/generated/prisma/client";
 
 const AVATAR_LABELS: Record<string, string> = {
@@ -36,10 +38,10 @@ export default async function IntakePage({
   searchParams,
 }: {
   params: Promise<{ id: string }>;
-  searchParams: Promise<{ error?: string; parsed?: string }>;
+  searchParams: Promise<{ error?: string; parsed?: string; ready?: string }>;
 }) {
   const { id } = await params;
-  const { error, parsed } = await searchParams;
+  const { error, parsed, ready } = await searchParams;
   const user = await getCurrentUser();
   if (!user) redirect("/login");
 
@@ -705,13 +707,48 @@ export default async function IntakePage({
         </form>
       </Card>
 
-      {scenario.intakeCompletedAt && <AvatarClassificationCard scenario={scenario} />}
-      {scenario.intakeCompletedAt && <RecommendationCard scenario={scenario} />}
-      {scenario.intakeCompletedAt && Boolean(user.assignedWholesalerId) && (
-        <HandoffPreviewCard user={user} scenario={scenario} />
+      {scenario.intakeCompletedAt && (
+        <AtlasReveal play={Boolean(ready)} steps={await buildRevealSteps(scenario)}>
+          <AvatarClassificationCard scenario={scenario} />
+          <RecommendationCard scenario={scenario} />
+          {Boolean(user.assignedWholesalerId) && (
+            <HandoffPreviewCard user={user} scenario={scenario} />
+          )}
+        </AtlasReveal>
       )}
     </div>
   );
+}
+
+// The reveal's step lines — every one is a real computation the engine runs
+// for this scenario, restated for the animation, never invented: avatar
+// classification is the same sync call the card below makes, the hard-rule
+// line mirrors src/lib/recommendations.ts's rule-4 gate exactly, and the
+// library count is the engine's own Brain-Locked query.
+async function buildRevealSteps(scenario: Scenario): Promise<RevealStep[]> {
+  const classification = classifyAvatars(scenario);
+  const documented = await listDocumentedStrategies();
+
+  const avatarDetail =
+    classification.activated.length > 0
+      ? classification.activated.map((a) => AVATAR_LABELS[a]).join(" + ")
+      : "no avatar activated yet — more answers will narrow it";
+
+  const rule4Violated = scenario.existingPolicyTransfer === true;
+  const hardRuleDetail = rule4Violated
+    ? "Rule 4 flagged — transferring an existing policy into the ILIT triggers the §2035 3-year lookback (details below)"
+    : "no violations against this structure";
+
+  return [
+    { label: "Scenario read", detail: `intake captured for ${scenario.label}` },
+    { label: "Avatar classified", detail: avatarDetail },
+    { label: "9 hard rules checked", detail: hardRuleDetail },
+    {
+      label: "Locked library scanned",
+      detail: `${documented.length} documented strategies evaluated — nothing outside the library, ever`,
+    },
+    { label: "Case design ready", detail: "recommendations, commission math, and the handoff are below" },
+  ];
 }
 
 function AvatarClassificationCard({

@@ -4,6 +4,7 @@ import { computeBookOfBusinessOpportunity } from "@/lib/book-of-business";
 import { updateBookOfBusinessAction } from "./actions";
 import { Card } from "@/components/ui/Card";
 import { SubmitButton } from "@/components/SubmitButton";
+import { CountUp } from "@/components/CountUp";
 
 const inputClass =
   "mt-1 block w-32 rounded-md border border-border bg-surface px-3 py-2 text-sm text-charcoal focus:border-gold focus:outline-none focus:ring-1 focus:ring-gold";
@@ -26,7 +27,9 @@ export default async function SettingsPage({
         <div className="mt-6 max-w-xl rounded-lg border border-gold/40 bg-gradient-to-r from-gold/15 to-gold/5 p-6 shadow-sm">
           <p className="font-serif text-xl text-navy">
             You just uncovered{" "}
-            <span className="font-semibold">${opportunity.totalOpportunity.toLocaleString()}</span>{" "}
+            <span className="font-semibold">
+              <CountUp value={opportunity.totalOpportunity} durationMs={1600} />
+            </span>{" "}
             in opportunities sitting in your book.
           </p>
           <p className="mt-2 text-sm text-charcoal/70">

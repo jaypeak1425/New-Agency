@@ -169,7 +169,9 @@ export async function completeIntakeAction(formData: FormData) {
     const message = error instanceof ScenarioError ? error.message : "Something went wrong.";
     redirect(`/app/scenarios/${scenarioId}/intake?error=${encodeURIComponent(message)}`);
   }
-  redirect("/app/scenarios");
+  // Land directly on the case design with the one-shot Atlas reveal — the
+  // "answer the questions, get the case design" moment, not a list page.
+  redirect(`/app/scenarios/${scenarioId}/intake?ready=1`);
 }
 
 export async function completeLifeUnderwritingAction(formData: FormData) {

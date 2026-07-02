@@ -2,6 +2,8 @@ import Link from "next/link";
 import { Wordmark } from "@/components/ui/Wordmark";
 import { buttonClassName } from "@/components/ui/button-styles";
 import { Card } from "@/components/ui/Card";
+import { SubmitButton } from "@/components/SubmitButton";
+import { enrollInSequenceAction } from "./sequence-actions";
 
 const AVATARS = [
   {
@@ -56,7 +58,12 @@ const FAQS = [
   },
 ];
 
-export default function Home() {
+export default async function Home({
+  searchParams,
+}: {
+  searchParams: Promise<{ enrolled?: string; sequenceError?: string }>;
+}) {
+  const { enrolled, sequenceError } = await searchParams;
   return (
     <div className="flex min-h-full flex-col">
       <header className="border-b border-border bg-surface">
@@ -194,6 +201,43 @@ export default function Home() {
             <Link href="/signup" className={`mt-8 inline-flex ${buttonClassName("primary")}`}>
               Start your 30-day trial
             </Link>
+          </div>
+        </section>
+
+        {/* Email sequence capture (docs/15-email-sequence.md) */}
+        <section id="stay-in-the-loop" className="px-6 py-16">
+          <div className="mx-auto max-w-xl text-center">
+            <h2 className="text-3xl">Not ready yet? Hear the whole story first.</h2>
+            <p className="mt-4 text-sm text-charcoal/80">
+              Seven short emails from Jay on why producers get stuck at $100K — and the system the
+              ones who break through actually use. No pitch until the end. Unsubscribe anytime.
+            </p>
+            {enrolled ? (
+              <p className="mt-6 rounded-md border border-gold/40 bg-gold/10 px-4 py-3 text-sm text-navy">
+                You&rsquo;re in. The first email is on its way.
+              </p>
+            ) : (
+              <form
+                action={enrollInSequenceAction}
+                className="mx-auto mt-6 flex max-w-md items-center gap-2"
+              >
+                <input
+                  type="email"
+                  name="email"
+                  required
+                  placeholder="you@youragency.com"
+                  className="block w-full rounded-md border border-border bg-surface px-3 py-2.5 text-sm text-charcoal placeholder:text-charcoal/40 focus:border-gold focus:outline-none focus:ring-1 focus:ring-gold"
+                />
+                <SubmitButton pendingText="Joining…" className="whitespace-nowrap">
+                  Get the emails
+                </SubmitButton>
+              </form>
+            )}
+            {sequenceError && (
+              <p role="alert" className="mt-3 text-sm text-red-700">
+                {sequenceError}
+              </p>
+            )}
           </div>
         </section>
 

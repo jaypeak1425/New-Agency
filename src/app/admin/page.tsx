@@ -1,6 +1,7 @@
 import { listUsersForAdmin } from "@/lib/admin";
 import { listWholesalersForAdmin } from "@/lib/wholesaler";
 import { hasActiveAccess } from "@/lib/billing";
+import { getSequenceStats } from "@/lib/sequence";
 import {
   suspendUserAction,
   reactivateUserAction,
@@ -8,6 +9,7 @@ import {
   revokeAccessAction,
   createWholesalerAccountAction,
   assignWholesalerAction,
+  processSequenceSendsAction,
 } from "./actions";
 import { SubmitButton } from "@/components/SubmitButton";
 import { Input } from "@/components/ui/Input";
@@ -33,7 +35,11 @@ export default async function AdminPage({
   searchParams: Promise<{ error?: string }>;
 }) {
   const { error } = await searchParams;
-  const [users, wholesalers] = await Promise.all([listUsersForAdmin(), listWholesalersForAdmin()]);
+  const [users, wholesalers, sequenceStats] = await Promise.all([
+    listUsersForAdmin(),
+    listWholesalersForAdmin(),
+    getSequenceStats(),
+  ]);
   const smallButton = "px-3 py-1.5 text-xs";
   const selectClassName =
     "rounded-md border border-border bg-surface px-2 py-1.5 text-xs text-charcoal focus:border-gold focus:outline-none focus:ring-1 focus:ring-gold";
@@ -73,6 +79,20 @@ export default async function AdminPage({
           <Input label="Name" name="name" type="text" className="w-64" />
           <SubmitButton pendingText="Creating…" className="px-4 py-2 text-sm">
             Create wholesaler
+          </SubmitButton>
+        </form>
+      </section>
+
+      <section className="mt-6 rounded-lg border border-border bg-surface p-6">
+        <h2 className="text-lg font-medium text-charcoal">Email sequence (docs/15)</h2>
+        <p className="mt-1 text-sm text-charcoal/60">
+          {sequenceStats.active} active enrollment(s) · {sequenceStats.dueNow} due to send now ·{" "}
+          {sequenceStats.completed} completed · {sequenceStats.unsubscribed} unsubscribed. No
+          scheduler exists — process due sends manually.
+        </p>
+        <form action={processSequenceSendsAction} className="mt-4">
+          <SubmitButton pendingText="Sending…" className="px-4 py-2 text-sm">
+            Send due sequence emails
           </SubmitButton>
         </form>
       </section>

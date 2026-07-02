@@ -10,6 +10,7 @@ import {
   assignWholesaler,
   unassignWholesaler,
 } from "@/lib/wholesaler";
+import { SequenceError, processDueSequenceSends } from "@/lib/sequence";
 
 async function requireAdmin() {
   const admin = await getCurrentUser();
@@ -84,6 +85,17 @@ export async function createWholesalerAccountAction(formData: FormData) {
     await createWholesalerAccount(admin, email, name, appBaseUrl);
   } catch (error) {
     const message = error instanceof WholesalerActionError ? error.message : "Something went wrong.";
+    redirect(`/admin?error=${encodeURIComponent(message)}`);
+  }
+  redirect("/admin");
+}
+
+export async function processSequenceSendsAction() {
+  const admin = await requireAdmin();
+  try {
+    await processDueSequenceSends(admin);
+  } catch (error) {
+    const message = error instanceof SequenceError ? error.message : "Something went wrong.";
     redirect(`/admin?error=${encodeURIComponent(message)}`);
   }
   redirect("/admin");

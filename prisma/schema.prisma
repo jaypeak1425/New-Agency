@@ -747,3 +747,24 @@ model ComplianceFlag {
 
   @@map("compliance_flags")
 }
+
+// docs/15-email-sequence.md — a prospect (not a user) enrolled in the
+// 7-email soap-opera sequence via the landing-page capture form. Email 1 is
+// due immediately; each later email is due 3 days after the previous send
+// (the doc's "every 2-3 days, ~18 days total"). No cron/job runner exists,
+// so due sends are processed by an admin action, not a scheduler; the doc's
+// "Tuesday/Friday 7-8am local" send-time targeting and open-based
+// re-engagement pause both need infrastructure (a scheduler, open tracking)
+// this repo doesn't have.
+model SequenceEnrollment {
+  id             String    @id @default(cuid())
+  email          String    @unique
+  nextStep       Int       @default(1)
+  nextSendAt     DateTime  @default(now())
+  completedAt    DateTime?
+  unsubscribedAt DateTime?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  @@map("sequence_enrollments")
+}

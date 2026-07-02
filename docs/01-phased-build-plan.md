@@ -572,12 +572,47 @@ This document is the staged build plan for the Insurance Strategy Engine. Each p
 - [ ] Ready to show at IMO conferences and go public
 
 ### Batching for Copilot (5-7 sessions)
-1. **Session 1:** iPhone-moment polish + on-screen celebrations
-2. **Session 2:** Behavioral triggers + nudges
-3. **Session 3:** Onboarding flow refinement
-4. **Session 4:** Email sequence integration
-5. **Session 5:** Help docs + in-app tooltips
-6. **Session 6:** Launch commercial production coordination
+1. **Session 1:** iPhone-moment polish + on-screen celebrations — done. Built the scope's literal
+   celebration example ("You just uncovered $X in opportunities") as an on-brand banner that fires
+   when the agent saves their book of business, using the real computed total + addressable
+   numbers, shown once (query-flag, not persistent). Polish: a shared `ScenarioStatusBadge`
+   replaces the raw `closed_won`-style enum text that was leaking into the wholesaler portal, and
+   deduplicates the three copies of the status-label map.
+2. **Session 2:** Behavioral triggers + nudges — done, built against docs/07's real specs. Section
+   6's aging system (0-7 active / 8-14 stale / 15-30 at-risk / 31+ cold, from `updatedAt` — the
+   same "activity" simplification the dashboard documents) with the doc's exact surfacing language
+   and an idle chip on open-scenario rows; section 7's five coaching triggers (inactivity,
+   pipeline concentration >50%, book activation, goal tracking vs `AgentProfile.goalIncome`,
+   strategy diversity — the doc gives no diversity threshold, 75% across 3+ estimated scenarios is
+   used) rendered in an "Atlas" card on the dashboard. Frequency caps (per-scenario 7d / weekly /
+   monthly / quarterly) are enforced by logging each surfacing to audit_log and suppressing
+   repeats inside the window; no cron exists, so nudges are computed when the agent opens the
+   dashboard rather than pushed. The doc's per-agent aging overrides and "learns preferences over
+   time" are not built (no override field, no learning loop yet). Verified end-to-end: all 5
+   triggers fired with correct math on a staged book, caps suppressed on reload while aging
+   persisted, and all surfacings hit audit_log.
+3. **Session 3:** Onboarding flow refinement — folded into earlier work rather than a separate
+   session: the Phase 2 onboarding wizard already covers the three-position messaging and the
+   Phase 4 Session 9 work already extended data collection (book-of-business quarterly updates)
+   into Settings. No doc specifies further refinements to build against.
+4. **Session 4:** Email sequence integration — done. docs/15's 7 emails transcribed verbatim into
+   `src/lib/emails/sequence-content.ts` (the one edit: email 7's literal "[next topic — maybe...]"
+   authoring placeholder was dropped rather than sent to prospects). Landing page gained a capture
+   section → `SequenceEnrollment` (email 1 due immediately, then the doc's 2-3-day cadence as 3
+   days); an admin action processes due sends through the same dev email sender everything else
+   uses (no provider is wired up, no scheduler exists — both documented gaps); every email carries
+   the doc's required one-click unsubscribe, served by a public `/sequence/unsubscribe/[id]` page.
+   The doc's Tuesday/Friday 7-8am send-time targeting and open-based re-engagement pause need a
+   scheduler and open tracking that don't exist — not built. Verified end-to-end: landing-page
+   enrollment → admin send with the doc's exact subject/body → step advance → unsubscribe link →
+   processor skips the unsubscribed prospect; unit tests walk all 7 steps to completion.
+5. **Session 5:** Help docs + in-app tooltips — **blocked, not started:** no help-doc content or
+   tooltip copy exists anywhere in this repo (docs/21 lists "help docs + onboarding videos" as
+   Jay-supplied launch collateral). Writing help content would be inventing product documentation
+   the same way inventing strategies would be — skipped per the no-fabrication principle.
+6. **Session 6:** Launch commercial production coordination — **blocked, external:**
+   docs/14-launch-commercial.md is a video production brief (script, shot list) for a real video
+   shoot, not a software feature. Nothing to build in this codebase.
 7. **Session 7:** Final QA pass
 
 ---

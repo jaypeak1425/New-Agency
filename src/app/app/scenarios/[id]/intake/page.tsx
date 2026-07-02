@@ -7,9 +7,11 @@ import { recommendStrategies } from "@/lib/recommendations";
 import { getLifeUnderwritingIntake } from "@/lib/underwriting";
 import { buildHandoffPreview } from "@/lib/wholesaler";
 import { computeExpectedCommission, computeExpectedCommissionValue } from "@/lib/commission";
+import { isAiConfigured } from "@/lib/ai";
 import {
   completeIntakeAction,
   notifyWholesalerAction,
+  parseIntakeAction,
   saveStrategyEstimateAction,
 } from "../../actions";
 import { Card } from "@/components/ui/Card";
@@ -34,10 +36,10 @@ export default async function IntakePage({
   searchParams,
 }: {
   params: Promise<{ id: string }>;
-  searchParams: Promise<{ error?: string }>;
+  searchParams: Promise<{ error?: string; parsed?: string }>;
 }) {
   const { id } = await params;
-  const { error } = await searchParams;
+  const { error, parsed } = await searchParams;
   const user = await getCurrentUser();
   if (!user) redirect("/login");
 
@@ -72,6 +74,44 @@ export default async function IntakePage({
       {error && (
         <p role="alert" className="mt-4 rounded-md bg-red-50 px-3 py-2 text-sm text-red-700">
           {error}
+        </p>
+      )}
+
+      {parsed && (
+        <div className="mt-4 max-w-2xl rounded-lg border border-gold/40 bg-gradient-to-r from-gold/15 to-gold/5 px-4 py-3">
+          <p className="text-sm text-navy">
+            Atlas filled in <span className="font-semibold">{parsed}</span> field(s) from your
+            description. Review them below, answer what it couldn&rsquo;t extract, then save.
+          </p>
+        </div>
+      )}
+
+      {isAiConfigured() ? (
+        <Card variant="dark" className="mt-6 max-w-2xl">
+          <p className="text-xs uppercase tracking-wide text-gold">Tell Atlas</p>
+          <p className="mt-2 text-sm text-cream/80">
+            Describe the client in your own words — Atlas extracts what it can into the questions
+            below, and only ever fills in what you actually said. You review everything before
+            saving.
+          </p>
+          <form action={parseIntakeAction} className="mt-4 space-y-3">
+            <input type="hidden" name="scenarioId" value={scenario.id} />
+            <textarea
+              name="description"
+              rows={4}
+              required
+              defaultValue={scenario.clientDescription ?? ""}
+              placeholder="I've got a guy. Two owners, 50 and 49, C-Corp, two key employees, average to good health. Want to set up a buy-sell and put money aside in a company reserve."
+              className="block w-full rounded-md border border-cream/20 bg-navy px-3 py-2 text-sm text-cream placeholder:text-cream/40 focus:border-gold focus:outline-none focus:ring-1 focus:ring-gold"
+            />
+            <SubmitButton pendingText="Atlas is reading…">Have Atlas fill in the intake</SubmitButton>
+          </form>
+        </Card>
+      ) : (
+        <p className="mt-4 max-w-2xl text-xs text-charcoal/50">
+          Free-text intake (&ldquo;type a paragraph, Atlas fills in the questions&rdquo;) activates
+          once the AI backend is configured — an admin can check Launch readiness for the one
+          variable it needs.
         </p>
       )}
 

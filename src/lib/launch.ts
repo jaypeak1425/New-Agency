@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma";
+import { isAiConfigured } from "@/lib/ai";
 
 // The phased Railway launch (docs/24-railway-launch-runbook.md). Each phase
 // maps to docs/20-business-plan.md's go-to-market timeline: the app is built
@@ -143,6 +144,19 @@ export async function getLaunchReadiness(): Promise<ReadinessPhase[]> {
           ok: isEmailDeliveryConfigured(),
           detail:
             "src/lib/email.ts logs to the deploy console instead of sending. Until a provider (Resend/Postmark/etc.) replaces it, copy invite and reset links out of the Railway logs.",
+        },
+      ],
+    },
+    {
+      phase: "Jarvis layer — conversational intake",
+      goal: "“I've got a guy” as free text: Atlas parses the paragraph into the intake. Off until the key exists; the structured 10-question form works either way.",
+      items: [
+        {
+          label: "AI backend (ANTHROPIC_API_KEY)",
+          ok: isAiConfigured(),
+          detail: isAiConfigured()
+            ? "callModel is live — free-text parsing is enabled on the intake page."
+            : "Set ANTHROPIC_API_KEY to enable free-text intake parsing. Models are overridable via AI_MODEL_SIMPLE / AI_MODEL_COMPLEX.",
         },
       ],
     },

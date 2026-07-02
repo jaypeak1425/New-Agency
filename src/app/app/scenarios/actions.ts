@@ -7,9 +7,12 @@ import {
   ScenarioError,
   createScenario,
   saveIntakeAnswers,
+  saveParsedIntakeDraft,
   updateScenarioStatus,
   type IntakeAnswers,
 } from "@/lib/scenarios";
+import { AiError } from "@/lib/ai";
+import { parseIntakeDescription } from "@/lib/intake-parser";
 import { WholesalerActionError, notifyWholesalerForScenario } from "@/lib/wholesaler";
 import {
   saveLifeUnderwritingIntake,
@@ -91,6 +94,34 @@ function optionalBoolean(formData: FormData, name: string) {
   if (value === "true") return true;
   if (value === "false") return false;
   return null;
+}
+
+export async function parseIntakeAction(formData: FormData) {
+  const user = await getCurrentUser();
+  if (!user) redirect("/login");
+
+  const scenarioId = String(formData.get("scenarioId") ?? "");
+  const description = String(formData.get("description") ?? "").trim();
+
+  if (!description) {
+    redirect(
+      `/app/scenarios/${scenarioId}/intake?error=${encodeURIComponent("Describe the client first — a sentence or two is enough.")}`,
+    );
+  }
+
+  let extractedCount = 0;
+  try {
+    const { answers, extractedFields } = await parseIntakeDescription(description);
+    await saveParsedIntakeDraft(user.id, scenarioId, answers, extractedFields);
+    extractedCount = extractedFields.length;
+  } catch (error) {
+    const message =
+      error instanceof AiError || error instanceof ScenarioError
+        ? error.message
+        : "Something went wrong parsing the description.";
+    redirect(`/app/scenarios/${scenarioId}/intake?error=${encodeURIComponent(message)}`);
+  }
+  redirect(`/app/scenarios/${scenarioId}/intake?parsed=${extractedCount}`);
 }
 
 export async function completeIntakeAction(formData: FormData) {

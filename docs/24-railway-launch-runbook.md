@@ -97,6 +97,24 @@ purely additive.
 
 ---
 
+## Jarvis layer — conversational "I've got a guy" intake
+
+**Goal:** the agent types a paragraph and Atlas fills in the intake. One variable, any phase:
+
+1. Set `ANTHROPIC_API_KEY` on the app service and redeploy. That's it — the "Tell Atlas" box
+   appears on the intake page. Without the key, the structured 10-question form works exactly as
+   before and the box is replaced by a note.
+2. How it stays honest: the model's only job is extraction. Everything it returns passes a
+   whitelist validator (`src/lib/intake-parser.ts`) that drops any value outside the schema's own
+   enums, so a hallucinated answer can never reach the database; the agent reviews the pre-filled
+   form before saving; each parse is audit-logged with exactly which fields it filled. Strategy
+   selection stays 100% in the deterministic engine (Brain Lock).
+3. Model routing is CLAUDE.md's locked `callModel(complexity, messages)`: Haiku for simple tasks,
+   Sonnet for complex (the parser uses complex). Override with `AI_MODEL_SIMPLE` /
+   `AI_MODEL_COMPLEX` if needed. Voice input still needs speech-to-text — not built.
+
+---
+
 ## Phase D — IMO white-label
 
 **Goal:** first IMO contract live. No new environment variables — this phase is operational:
@@ -131,5 +149,6 @@ help-doc copy · the launch commercial.
 | `STRIPE_WEBHOOK_SECRET` | B | Yes for subscription lifecycle |
 | `STRIPE_PRICE_ID_AGENT_ANNUAL` | B | Optional (enables the annual button) |
 | Email provider key | C | When switching off the dev logger |
+| `ANTHROPIC_API_KEY` | Any | Optional — enables free-text "I've got a guy" parsing |
 
 *Last updated: July 2, 2026.*

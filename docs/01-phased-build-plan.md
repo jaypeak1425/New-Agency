@@ -627,6 +627,19 @@ This document is the staged build plan for the Insurance Strategy Engine. Each p
    video-recommender content, an email provider, object storage, a cron/job runner, and the Stripe
    annual Price ID — each documented inline at the session where it blocks.
 
+   **Post-close-out update — the AI backend gap is now code-complete.** CLAUDE.md's locked
+   `callModel(complexity, messages)` abstraction exists (`src/lib/ai.ts`, Anthropic Messages API,
+   Haiku for simple / Sonnet for complex, env-overridable) along with the free-text "I've got a
+   guy" parser it unblocks (`src/lib/intake-parser.ts` + the "Tell Atlas" box on the intake page).
+   The parser is extraction-only with whitelist validation — values outside the schema's own enums
+   are dropped, every parse is audit-logged with the fields it filled, and Brain Lock is untouched
+   (strategy selection stays in the deterministic engine). It activates the moment
+   `ANTHROPIC_API_KEY` is set (see docs/24-railway-launch-runbook.md's Jarvis section); without the
+   key the structured form works as before. Verified end-to-end against a local stub of the API:
+   7 valid fields extracted and pre-filled, an invalid enum and two unknown keys (including a
+   planted "recommendedStrategy") correctly discarded, and the downstream avatar/recommendation
+   engine ran unchanged on the parsed data. Voice input still needs speech-to-text — not built.
+
 ---
 
 ## What the Dev Needs From You at the Start of Each Phase

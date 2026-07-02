@@ -121,6 +121,37 @@ export interface IntakeAnswers {
   existingPolicyTransfer: boolean | null;
 }
 
+// The free-text "I've got a guy" parser's output: saves whatever Atlas
+// extracted onto the scenario WITHOUT stamping intakeCompletedAt — the agent
+// reviews the pre-filled form, answers what the parser couldn't extract, and
+// completes the intake themselves. Auditability (CLAUDE.md): which fields
+// came from parsing is logged, so a recommendation can always be traced back
+// to whether its inputs were typed or extracted.
+export async function saveParsedIntakeDraft(
+  userId: string,
+  scenarioId: string,
+  answers: Partial<IntakeAnswers>,
+  extractedFields: string[],
+) {
+  await getScenarioForUser(userId, scenarioId);
+
+  const scenario = await prisma.scenario.update({
+    where: { id: scenarioId },
+    data: answers,
+  });
+
+  await prisma.auditLog.create({
+    data: {
+      actorId: userId,
+      action: "scenario.intake_parsed",
+      target: scenarioId,
+      metadata: { extractedFields },
+    },
+  });
+
+  return scenario;
+}
+
 export async function saveIntakeAnswers(
   userId: string,
   scenarioId: string,

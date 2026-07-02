@@ -41,9 +41,16 @@ describe("strategy library seed (Brain content)", () => {
     }
   });
 
-  it("keeps the 7 researched drafts pending_content until the human sign-off", () => {
-    const pending = strategyLibrarySeed.filter((s) => s.status === "pending_content");
-    expect(pending.map((s) => s.slug).sort()).toEqual([
+  it("ships the full library live — owner signed off on all 7 researched cards (2026-07-02)", () => {
+    // Brain Lock still holds structurally: anything pending_content is never
+    // surfaced. As of the owner's "Go live with all" sign-off there simply
+    // isn't anything pending — and each formerly-pending card records the
+    // sign-off in its notes.
+    expect(strategyLibrarySeed.filter((s) => s.status !== "documented")).toEqual([]);
+    const signedOff = strategyLibrarySeed.filter((s) =>
+      s.notes?.includes("approved live by owner sign-off 2026-07-02"),
+    );
+    expect(signedOff.map((s) => s.slug).sort()).toEqual([
       "annuity-rescue",
       "estate-funding",
       "grats",

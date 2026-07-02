@@ -32,17 +32,35 @@ async function main() {
   console.log(`Seeded admin user: ${email}`);
 
   for (const strategy of strategyLibrarySeed) {
-    // Never downgrade a live strategy's status on re-seed: "Approve & go
-    // live" (docs/09 Path A) is a human sign-off recorded in the DB, and the
-    // seed file always ships pending_content for the researched drafts. The
-    // content fields still refresh in place.
+    // Status is a one-way street on re-seed: the seed may PROMOTE a strategy
+    // to documented (it carries the owner's recorded sign-off — see the
+    // 2026-07-02 approval note in strategy-library-data.ts) but never
+    // downgrades one that's already live, since "Approve & go live"
+    // (docs/09 Path A) sign-offs live in the DB. Content refreshes in place
+    // either way.
     const { status, ...contentRefresh } = strategy;
-    await prisma.strategy.upsert({
+    const existing = await prisma.strategy.findUnique({ where: { slug: strategy.slug } });
+    const promoting = existing?.status === "pending_content" && status === "documented";
+    const row = await prisma.strategy.upsert({
       where: { slug: strategy.slug },
-      update: contentRefresh,
+      update: promoting ? strategy : contentRefresh,
       create: strategy,
     });
-    void status;
+    if (promoting) {
+      await prisma.auditLog.create({
+        data: {
+          actorId: admin.id,
+          action: "strategy.approved_live",
+          target: row.id,
+          metadata: {
+            slug: strategy.slug,
+            name: strategy.name,
+            via: "seed promotion — owner sign-off recorded in prisma/strategy-library-data.ts (docs/09 Path A)",
+          },
+        },
+      });
+      console.log(`Promoted to documented (owner sign-off): ${strategy.slug}`);
+    }
   }
 
   console.log(`Seeded strategy library: ${strategyLibrarySeed.length} strategies`);

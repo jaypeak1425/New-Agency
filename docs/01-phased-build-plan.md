@@ -670,9 +670,14 @@ This document is the staged build plan for the Insurance Strategy Engine. Each p
    strategies (Annuity Rescue, Qualified LTC) instead of dead-ending, the handoff fires on an
    eligible annuity-side strategy, and the call queue pitches it. Verified end-to-end: approve →
    QFH-legacy case recommends QWT; age-84 case pivots and recommends both annuity strategies with
-   the rule-2 warning on qualified funds; 73 Vitest tests green. **Action item for Jay:** the
-   cards are drafts pending YOUR sign-off — read each one on `/admin/strategies` (especially the
-   Estate Funding vs. Survivorship split question in its notes) before clicking Approve & go live.
+   the rule-2 warning on qualified funds; 73 Vitest tests green. **Sign-off recorded:** Jay
+   approved all 7 live on 2026-07-02 ("Go live with all"). The seed now ships them `documented`
+   (each card's notes record the sign-off), and re-seeding an existing database promotes any
+   still-pending row to documented with a `strategy.approved_live` audit entry — while never
+   downgrading a live one. The full 17-strategy library is live. One open editorial question
+   survives in the Estate Funding card's notes: whether it should stay split from Survivorship as
+   the single-life/first-death design or be merged — worth a look with Luke, but both records are
+   live and correctly gated in the meantime.
 
 ---
 

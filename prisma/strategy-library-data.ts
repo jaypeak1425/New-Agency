@@ -16,11 +16,12 @@ import type { Prisma } from "../src/generated/prisma/client";
 //     doc would. Their cards below are AI-researched drafts built from the
 //     repo's own sketches (docs/05, CLAUDE.md hard rules) plus primary-source
 //     verification (IRC, PPA 2006 §844, SECURE 2.0, OBBBA 2026 exemption).
-//     They stay `pending_content` — per the Brain Lock rule (CLAUDE.md), the
-//     recommendation engine must never surface a pending_content strategy to
-//     an agent — until a human reviewer signs off via the admin "Approve &
-//     go live" action (docs/09-prelaunch-validation.md Path A), which is what
-//     flips status to `documented`.
+//     Per the Brain Lock rule (CLAUDE.md) they shipped as `pending_content`
+//     behind the admin "Approve & go live" sign-off
+//     (docs/09-prelaunch-validation.md Path A). The owner (Jay) approved all
+//     7 live on 2026-07-02 ("Go live with all"), so they now seed as
+//     `documented`; the seed records that promotion in audit_log and never
+//     downgrades a live strategy.
 //
 // docs/21-final-handoff.md section 7 is the only place the 9 core strategies
 // are named as a complete set (5 from Jay: QWT, RMD Repositioning, Roth+Life,
@@ -87,13 +88,13 @@ export const strategyLibrarySeed: Array<
     sourceDoc: "docs/advanced-case-design-framework.md",
   },
 
-  // ---- Core (pending content — full AI-researched drafts awaiting human
-  // sign-off via the admin "Approve & go live" action, docs/09 Path A) ----
+  // ---- Core (the 7 researched cards — approved live by owner sign-off
+  // 2026-07-02 via docs/09 Path A) ----
   {
     slug: "estate-funding",
     name: "Estate Funding (Single-Life ILIT Liquidity)",
     tier: "core",
-    status: "pending_content",
+    status: "documented",
     avatarTags: ["high_net_worth"],
     clientTriggerProfile:
       "Single, widowed, or divorced client with an illiquid taxable estate — or a married client whose liquidity need lands at the FIRST death (non-citizen spouse without a QDOT, state estate tax with a low threshold, or business/buy-out obligations due at death) — needing cash at death without forced asset sales.",
@@ -117,13 +118,13 @@ export const strategyLibrarySeed: Array<
     sourceDoc:
       "docs/00-developer-brief.md, docs/21-final-handoff.md (named); mechanics/legal basis AI-researched (IRC §101(a)/§2042/§2035/§2056(d)/§2056A/§6166) — pending human sign-off",
     notes:
-      "AI-researched draft pending human sign-off. Differentiated from survivorship-second-to-die as the SINGLE-LIFE / first-death liquidity design (docs/03 and docs/15 use \"Estate Funding (Survivorship)\" as one label, docs/21 lists them separately) — Jay/Luke should confirm this split at sign-off, or merge the two records.",
+      "AI-researched card, approved live by owner sign-off 2026-07-02. Differentiated from survivorship-second-to-die as the SINGLE-LIFE / first-death liquidity design (docs/03 and docs/15 use \"Estate Funding (Survivorship)\" as one label, docs/21 lists them separately) — Jay/Luke should confirm this split at sign-off, or merge the two records.",
   },
   {
     slug: "grats",
     name: "GRATs (Grantor Retained Annuity Trusts)",
     tier: "core",
-    status: "pending_content",
+    status: "documented",
     avatarTags: ["high_net_worth"],
     clientTriggerProfile:
       "Client above the federal exemption holding assets expected to appreciate faster than the §7520 rate (pre-liquidity-event business interests, concentrated growth stock, real estate ahead of a re-zoning/sale) who wants to move the growth out of the estate without spending exemption or making a large taxable gift.",
@@ -146,13 +147,13 @@ export const strategyLibrarySeed: Array<
     ],
     sourceDoc:
       "docs/00-developer-brief.md, docs/21-final-handoff.md (named); mechanics/legal basis AI-researched (IRC §2702/§2036/§2642(f), Walton v. Comm'r, Treas. Reg. §25.2702-3) — pending human sign-off",
-    notes: "AI-researched draft pending human sign-off (docs/09 Path A).",
+    notes: "AI-researched card, approved live by owner sign-off 2026-07-02 (docs/09 Path A).",
   },
   {
     slug: "quiet-wealth-transfer",
     name: "Quiet Wealth Transfer (QWT)",
     tier: "core",
-    status: "pending_content",
+    status: "documented",
     avatarTags: ["qualified_fund_heavy"],
     clientTriggerProfile:
       "Client with $500K+ of qualified money (IRA/401(k)) they don't need to live on, whose real goal is legacy — especially post-SECURE Act, where heirs must drain an inherited IRA within 10 years at their own (often peak-earnings) tax rates.",
@@ -176,13 +177,13 @@ export const strategyLibrarySeed: Array<
     ],
     sourceDoc:
       "docs/05-product-universe-life-vs-annuity.md (SPIA-bridge sketch), CLAUDE.md hard rules 1/2/4; expanded legal basis AI-researched (§72, §401(a)(9), SECURE §401(a)(9)(H), §101(a)) — pending human sign-off",
-    notes: "AI-researched draft pending human sign-off (docs/09 Path A).",
+    notes: "AI-researched card, approved live by owner sign-off 2026-07-02 (docs/09 Path A).",
   },
   {
     slug: "rmd-repositioning",
     name: "RMD Repositioning",
     tier: "core",
-    status: "pending_content",
+    status: "documented",
     avatarTags: ["qualified_fund_heavy"],
     clientTriggerProfile:
       "Client at RMD age (73 under SECURE 2.0; 75 for those born 1960 or later, starting 2033) with $500K+ qualified, who is forced to take distributions they don't spend — the RMDs land in a taxable account and eventually back in the taxable estate.",
@@ -206,13 +207,13 @@ export const strategyLibrarySeed: Array<
     ],
     sourceDoc:
       "docs/00-developer-brief.md, docs/05-product-universe-life-vs-annuity.md (named); mechanics/legal basis AI-researched (§401(a)(9), SECURE 2.0 ages 73/75, §2503(b), §101(a)) — pending human sign-off",
-    notes: "AI-researched draft pending human sign-off (docs/09 Path A).",
+    notes: "AI-researched card, approved live by owner sign-off 2026-07-02 (docs/09 Path A).",
   },
   {
     slug: "roth-plus-life",
     name: "Roth+Life",
     tier: "core",
-    status: "pending_content",
+    status: "documented",
     avatarTags: ["qualified_fund_heavy"],
     clientTriggerProfile:
       "Client with $500K+ qualified money in a lower-bracket window (typically post-retirement, pre-RMD) willing to pre-pay income tax to convert to Roth — paired with life insurance so the conversion-tax outlay doesn't shrink the legacy.",
@@ -236,13 +237,13 @@ export const strategyLibrarySeed: Array<
     ],
     sourceDoc:
       "docs/00-developer-brief.md, docs/05-product-universe-life-vs-annuity.md (named); mechanics/legal basis AI-researched (§408A, TCJA recharacterization repeal, §408A(c)(5), §7702A) — pending human sign-off",
-    notes: "AI-researched draft pending human sign-off (docs/09 Path A).",
+    notes: "AI-researched card, approved live by owner sign-off 2026-07-02 (docs/09 Path A).",
   },
   {
     slug: "annuity-rescue",
     name: "Annuity Rescue",
     tier: "core",
-    status: "pending_content",
+    status: "documented",
     avatarTags: ["qualified_fund_heavy"],
     clientTriggerProfile:
       "Client holding an old deferred annuity that no longer fits — high fees, weak crediting, an unneeded income rider, or a large embedded gain the client never intends to spend (the classic \"annuity they bought in their 60s and forgot\").",
@@ -265,13 +266,13 @@ export const strategyLibrarySeed: Array<
     ],
     sourceDoc:
       "docs/05-product-universe-life-vs-annuity.md, CLAUDE.md hard rules 1/2; expanded legal basis AI-researched (§1035(a)(3), PPA 2006 §844, §72(e)(11), §7702B) — pending human sign-off",
-    notes: "AI-researched draft pending human sign-off (docs/09 Path A).",
+    notes: "AI-researched card, approved live by owner sign-off 2026-07-02 (docs/09 Path A).",
   },
   {
     slug: "qualified-ltc",
     name: "Qualified LTC Funding",
     tier: "core",
-    status: "pending_content",
+    status: "documented",
     avatarTags: ["qualified_fund_heavy"],
     clientTriggerProfile:
       "Client 60+ worried about long-term-care costs, holding either an old non-qualified annuity with embedded gain (the docs/05 \"§1035 annuity-to-LTC hybrid\" case) or qualified money that can fund a hybrid via distributions — self-insuring today with fully taxable dollars.",
@@ -294,7 +295,7 @@ export const strategyLibrarySeed: Array<
     ],
     sourceDoc:
       "docs/05-product-universe-life-vs-annuity.md, CLAUDE.md hard rule 8; expanded legal basis AI-researched (§7702B, PPA 2006 §844, §72(e)(11), §7702B(d)) — pending human sign-off",
-    notes: "AI-researched draft pending human sign-off (docs/09 Path A).",
+    notes: "AI-researched card, approved live by owner sign-off 2026-07-02 (docs/09 Path A).",
   },
 
   // ---- Supporting (documented) ----

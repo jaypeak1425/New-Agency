@@ -4,6 +4,7 @@ import { getCurrentUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { hasActiveAccess } from "@/lib/billing";
 import { AGENT_ANNUAL_PLAN } from "@/lib/stripe";
+import { isMonthlyBillingConfigured, isAnnualBillingConfigured } from "@/lib/launch";
 import { startCheckoutAction, openBillingPortalAction } from "./actions";
 import { SubmitButton } from "@/components/SubmitButton";
 import { Wordmark } from "@/components/ui/Wordmark";
@@ -15,7 +16,12 @@ function planLabel(plan: string | undefined) {
   return "$97/month";
 }
 
-export default async function BillingPage() {
+export default async function BillingPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ error?: string }>;
+}) {
+  const { error } = await searchParams;
   const user = await getCurrentUser();
   if (!user) redirect("/login");
   if (user.role === "wholesaler") redirect("/wholesaler");
@@ -30,6 +36,11 @@ export default async function BillingPage() {
       </Link>
       <Card className="w-full max-w-sm">
         <h1 className="text-2xl">Billing</h1>
+        {error && (
+          <p role="alert" className="mt-3 rounded-md bg-red-50 px-3 py-2 text-sm text-red-700">
+            {error}
+          </p>
+        )}
         {hasActiveAccess(subscription?.status) ? (
           <>
             <p className="mt-3 text-sm text-charcoal/80">
@@ -49,7 +60,7 @@ export default async function BillingPage() {
               </p>
             )}
           </>
-        ) : (
+        ) : isMonthlyBillingConfigured() ? (
           <>
             <p className="mt-3 text-sm text-charcoal/80">
               Subscribe to unlock the dashboard.
@@ -60,13 +71,24 @@ export default async function BillingPage() {
                 Subscribe — $97/month
               </SubmitButton>
             </form>
-            <form action={startCheckoutAction} className="mt-3">
-              <input type="hidden" name="planKey" value="annual" />
-              <SubmitButton variant="outline" pendingText="Redirecting…" className="w-full">
-                Subscribe — $970/year (save ~17%)
-              </SubmitButton>
-            </form>
+            {isAnnualBillingConfigured() && (
+              <form action={startCheckoutAction} className="mt-3">
+                <input type="hidden" name="planKey" value="annual" />
+                <SubmitButton variant="outline" pendingText="Redirecting…" className="w-full">
+                  Subscribe — $970/year (save ~17%)
+                </SubmitButton>
+              </form>
+            )}
           </>
+        ) : (
+          // Phase A pilot mode (docs/24-railway-launch-runbook.md): Stripe
+          // isn't configured yet, so self-serve signup is off and access is
+          // comped by an admin — the business plan's design-partner months.
+          <p className="mt-3 text-sm text-charcoal/80">
+            Case Atlas is in its pilot right now — access is granted by the Peakbritt team rather
+            than self-serve billing. If you&rsquo;re expecting access and don&rsquo;t have it yet,
+            reply to your invite and we&rsquo;ll switch you on.
+          </p>
         )}
         <p className="mt-6 text-sm">
           <Link href="/app" className="text-navy hover:text-gold">

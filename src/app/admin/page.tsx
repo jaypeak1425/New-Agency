@@ -61,6 +61,9 @@ export default async function AdminPage({
           <Link href="/admin/compliance" className="text-sm text-navy hover:text-gold">
             Compliance &rarr;
           </Link>
+          <Link href="/admin/launch" className="text-sm text-navy hover:text-gold">
+            Launch readiness &rarr;
+          </Link>
         </div>
       </div>
       {error && (

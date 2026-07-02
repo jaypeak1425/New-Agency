@@ -119,6 +119,10 @@ export interface IntakeAnswers {
   existingStructures: ExistingStructure[];
   urgencyDriver: UrgencyDriver | null;
   existingPolicyTransfer: boolean | null;
+  // Agent-only case numbers for the quantified improvement analysis.
+  estimatedEstateValue: number | null;
+  estimatedQualifiedBalance: number | null;
+  estimatedTaxableIncome: number | null;
 }
 
 // The free-text "I've got a guy" parser's output: saves whatever Atlas

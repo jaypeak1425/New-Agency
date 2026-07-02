@@ -540,6 +540,16 @@ model Scenario {
   // Transferring an existing policy into the trust doesn't qualify.
   existingPolicyTransfer Boolean?
 
+  // Agent-only case numbers (owner directive 2026-07-02: quantified
+  // current-path vs. with-strategy analysis on the agent's side of the
+  // glass). Rough figures the agent enters — the improvement engine
+  // (src/lib/improvement.ts) computes directional federal math from them
+  // against src/lib/tax-reference.ts, and NOTHING quantified ever reaches
+  // client-facing output (the compliance filter bans it there).
+  estimatedEstateValue     Int?
+  estimatedQualifiedBalance Int?
+  estimatedTaxableIncome   Int?
+
   lifeUnderwritingIntake LifeUnderwritingIntake?
   annuityIntake          AnnuityIntake?
   strategyEstimates      ScenarioStrategyEstimate[]

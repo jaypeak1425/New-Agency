@@ -98,7 +98,7 @@ export function IntakeForm({
   action: (formData: FormData) => Promise<void>;
   // Set by the "unlock more strategies" links on the recommendation card so
   // the targeted optional section arrives open.
-  focusSection?: "avatar" | "estate" | null;
+  focusSection?: "avatar" | "estate" | "numbers" | null;
 }) {
   const [ownerStatus, setOwnerStatus] = useState(scenario.businessOwnerStatus);
   const [progress, setProgress] = useState(() => initialProgress(scenario));
@@ -725,6 +725,47 @@ export function IntakeForm({
             </label>
           ))}
         </div>
+      </SectionToggle>
+
+      <SectionToggle
+        id="case-numbers"
+        title="Case numbers — agent-only math"
+        hint="Rough figures for the quantified improvement analysis (current path vs. with the strategy, 2026 federal tables). Never shown to clients — the pitch deck stays structural by design."
+        defaultOpen={
+          scenario.estimatedEstateValue !== null ||
+          scenario.estimatedQualifiedBalance !== null ||
+          scenario.estimatedTaxableIncome !== null ||
+          focusSection === "numbers"
+        }
+      >
+        {(
+          [
+            ["estimatedEstateValue", "Estimated estate value", "Drives the estate-tax exposure math"],
+            [
+              "estimatedQualifiedBalance",
+              "Estimated qualified balance (IRA/401(k))",
+              "Drives the 10-year-rule and repositioning math",
+            ],
+            [
+              "estimatedTaxableIncome",
+              "Estimated taxable income (household)",
+              "Drives bracket, conversion, and AMT-trap math",
+            ],
+          ] as const
+        ).map(([name, label, hint]) => (
+          <label key={name} className="mt-4 block text-sm font-medium text-charcoal">
+            {label}
+            <input
+              type="number"
+              name={name}
+              min={0}
+              defaultValue={scenario[name] ?? ""}
+              placeholder="$"
+              className={`${textInputClass} w-48`}
+            />
+            <span className="mt-0.5 block text-xs font-normal text-charcoal/50">{hint}</span>
+          </label>
+        ))}
       </SectionToggle>
 
       <div className={cn("flex items-center gap-4 border-t border-border pt-6")}>

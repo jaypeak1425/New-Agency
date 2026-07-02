@@ -21,8 +21,9 @@ import { IntakeForm } from "@/components/IntakeForm";
 import { AtlasReveal, type RevealStep } from "@/components/AtlasReveal";
 import { CPA_SCRUTINY, TIER_LABELS } from "@/lib/cpa-scrutiny";
 import { taxRef } from "@/lib/tax-reference";
+import { buildImprovementAnalysis } from "@/lib/improvement";
 import { cn } from "@/lib/cn";
-import type { Scenario, User } from "@/generated/prisma/client";
+import type { Scenario, Strategy, User } from "@/generated/prisma/client";
 
 const AVATAR_LABELS: Record<string, string> = {
   business_owner: "Business Owner",
@@ -94,7 +95,8 @@ export default async function IntakePage({
     throw err;
   }
 
-  const focusSection = focus === "avatar" || focus === "estate" ? focus : null;
+  const focusSection =
+    focus === "avatar" || focus === "estate" || focus === "numbers" ? focus : null;
   const intakeDone = Boolean(scenario.intakeCompletedAt);
   // Results-first once the intake exists: the agent lands on the case
   // design, and the form lives behind an "Update the intake" toggle —
@@ -351,6 +353,7 @@ async function RecommendationCard({ scenario }: { scenario: Scenario }) {
                       </div>
                     )}
 
+                    <ImprovementPanel scenario={scenario} strategy={strategy} />
                     <CpaScrutinyPanel slug={strategy.slug} />
 
                     <form
@@ -460,6 +463,71 @@ async function RecommendationCard({ scenario }: { scenario: Scenario }) {
         </>
       )}
     </Card>
+  );
+}
+
+// The quantified improvement analysis (owner directive 2026-07-02):
+// current-path vs. with-design math from the agent-entered case numbers and
+// the 2026 federal tables. Agent-only — the client deck stays structural.
+function ImprovementPanel({ scenario, strategy }: { scenario: Scenario; strategy: Strategy }) {
+  const analysis = buildImprovementAnalysis(scenario, strategy);
+
+  if (!analysis.available && analysis.missingInputs.length === 0) return null;
+
+  return (
+    <details className="group mt-2 rounded-md bg-navy px-3 py-2">
+      <summary className="flex cursor-pointer list-none items-center gap-2 text-xs font-medium text-cream [&::-webkit-details-marker]:hidden">
+        <span className="inline-block text-gold transition-transform group-open:rotate-90">
+          &#9656;
+        </span>
+        Improvement analysis
+        <span className="rounded-full bg-gold/25 px-2 py-0.5 text-[10px] font-medium text-gold">
+          agent-only
+        </span>
+      </summary>
+      {!analysis.available ? (
+        <p className="mt-2 text-xs text-cream/70">
+          Enter {analysis.missingInputs.join(" and ")} in the intake&rsquo;s{" "}
+          <Link
+            href={`/app/scenarios/${scenario.id}/intake?edit=1&focus=numbers#case-numbers`}
+            className="text-gold underline"
+          >
+            case numbers section
+          </Link>{" "}
+          to quantify this comparison.
+        </p>
+      ) : (
+        <div className="mt-2 grid gap-3 sm:grid-cols-2">
+          <div>
+            <p className="text-[10px] font-medium uppercase tracking-wide text-cream/50">
+              Current path
+            </p>
+            {analysis.currentPath.map((line) => (
+              <p key={line} className="mt-1 text-xs leading-relaxed text-cream/80">
+                {line}
+              </p>
+            ))}
+          </div>
+          <div>
+            <p className="text-[10px] font-medium uppercase tracking-wide text-gold">
+              With this design
+            </p>
+            {analysis.withDesign.map((line) => (
+              <p key={line} className="mt-1 text-xs leading-relaxed text-cream/90">
+                {line}
+              </p>
+            ))}
+          </div>
+        </div>
+      )}
+      <div className="mt-2 border-t border-cream/10 pt-1.5">
+        {analysis.notes.map((note) => (
+          <p key={note} className="mt-0.5 text-[10px] leading-relaxed text-cream/50">
+            {note}
+          </p>
+        ))}
+      </div>
+    </details>
   );
 }
 

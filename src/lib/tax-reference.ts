@@ -118,3 +118,81 @@ const BY_KEY = new Map(TAX_REFERENCE.map((e) => [e.key, e]));
 export function taxRef(key: string): TaxRefEntry | undefined {
   return BY_KEY.get(key);
 }
+
+// ---- Numeric 2026 engine (Rev. Proc. 2025-32) ----
+// The machine-readable side of the display table above, for the agent-only
+// improvement analysis (src/lib/improvement.ts). Same figures as the
+// display strings — a test pins them together.
+
+export type FilingStatus = "single" | "mfj";
+
+// [upper bound of bracket, rate] — last bracket unbounded.
+const BRACKETS_2026: Record<FilingStatus, Array<[number, number]>> = {
+  single: [
+    [12_400, 0.1],
+    [50_400, 0.12],
+    [105_700, 0.22],
+    [201_775, 0.24],
+    [256_225, 0.32],
+    [640_600, 0.35],
+    [Infinity, 0.37],
+  ],
+  mfj: [
+    [24_800, 0.1],
+    [100_800, 0.12],
+    [211_400, 0.22],
+    [403_550, 0.24],
+    [512_450, 0.32],
+    [768_700, 0.35],
+    [Infinity, 0.37],
+  ],
+};
+
+export const ESTATE_EXEMPTION_2026 = 15_000_000;
+export const ESTATE_TAX_RATE = 0.4;
+export const AMT_PHASEOUT_START_2026: Record<FilingStatus, number> = {
+  single: 500_000,
+  mfj: 1_000_000,
+};
+export const AMT_EXEMPTION_2026: Record<FilingStatus, number> = {
+  single: 90_100,
+  mfj: 140_200,
+};
+
+// Federal income tax on ordinary taxable income, 2026 tables.
+export function computeFederalTax2026(taxableIncome: number, status: FilingStatus): number {
+  if (taxableIncome <= 0) return 0;
+  let tax = 0;
+  let previousCap = 0;
+  for (const [cap, rate] of BRACKETS_2026[status]) {
+    const slice = Math.min(taxableIncome, cap) - previousCap;
+    if (slice <= 0) break;
+    tax += slice * rate;
+    previousCap = cap;
+  }
+  return Math.round(tax);
+}
+
+export function marginalRate2026(taxableIncome: number, status: FilingStatus): number {
+  for (const [cap, rate] of BRACKETS_2026[status]) {
+    if (taxableIncome <= cap) return rate;
+  }
+  return 0.37;
+}
+
+// The OBBBA AMT trap: AMTI above the phase-out start erodes the exemption
+// at 50¢ per dollar. Returns null when the income isn't in or past the band.
+export function amtTrapExposure2026(
+  amti: number,
+  status: FilingStatus,
+): { exemptionLost: number; exemptionRemaining: number; fullyPhasedOutAt: number } | null {
+  const start = AMT_PHASEOUT_START_2026[status];
+  if (amti <= start) return null;
+  const exemption = AMT_EXEMPTION_2026[status];
+  const exemptionLost = Math.min(exemption, (amti - start) * 0.5);
+  return {
+    exemptionLost: Math.round(exemptionLost),
+    exemptionRemaining: Math.round(exemption - exemptionLost),
+    fullyPhasedOutAt: start + exemption * 2,
+  };
+}

@@ -779,6 +779,25 @@ This document is the staged build plan for the Insurance Strategy Engine. Each p
    figures on a flagged case); 89 Vitest tests green (every narrative must carry before/after
    rows, and every cell must clear the filter without a hold).
 
+   **Post-close-out update — the quantified improvement analysis (agent-only).** The numbers
+   behind the deck's structural comparison. `src/lib/tax-reference.ts` grew a numeric engine:
+   the 2026 bracket tables machine-readable (`computeFederalTax2026`, `marginalRate2026`, pinned
+   by tests to the display strings), estate exemption/rate constants, and
+   `amtTrapExposure2026` (the 50¢-per-dollar phase-out modeled exactly). Three agent-entered
+   case numbers on Scenario (`estimatedEstateValue`, `estimatedQualifiedBalance`,
+   `estimatedTaxableIncome` — migration `20260702130000`) captured in a new agent-only
+   "Case numbers" section of the intake. `src/lib/improvement.ts` computes the current-path vs.
+   with-design math per strategy family: estate family → 40% exposure above the $15M/$30M
+   exemption (or the under-exemption growth warning); QFH family → the 10-year-rule cost at the
+   client's real marginal rate vs. the repositioning/conversion path; PPLI → the annual drag at
+   the marginal rate + NIIT; AMT-trap note appended whenever income sits in the phase-out band;
+   business-owner strategies deliberately return nothing (their numbers come from illustrations,
+   not federal tables — no invented figures). Surfaced as a dark "Improvement analysis —
+   agent-only" panel on each eligible recommendation, with a link to the case-numbers section
+   when inputs are missing, directional/CPA disclaimers always attached, and the client deck
+   verified to stay structural (the dollars never cross the glass). 100 Vitest tests green;
+   9-point Playwright flow against the production build.
+
 ---
 
 ## What the Dev Needs From You at the Start of Each Phase

@@ -131,13 +131,19 @@ export async function buildPitchDeck(
     };
   }
 
-  const agentName = user.name ?? user.email;
+  // Client-facing cover: never print the internal case label (agent shorthand
+  // like "Bob — easy close" or a structure name that would leak internal
+  // strategy and even trip the compliance filter) and never a raw login email
+  // in place of a name. Fall back to the firm alone when no agent name is set.
+  const presenter = user.name
+    ? `Presented by ${user.name} — Peakbritt Financial Group.`
+    : "Presented by Peakbritt Financial Group.";
   const rawSlides: DeckSlide[] = [
     {
       title: narrative.clientTitle,
       paragraphs: [
-        `Prepared for the ${scenario.label} conversation.`,
-        `Presented by ${agentName} — Peakbritt Financial Group.`,
+        "Prepared for our conversation.",
+        presenter,
         new Date().toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" }),
       ],
       bullets: [],

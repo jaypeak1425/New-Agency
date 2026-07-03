@@ -106,8 +106,8 @@ export default async function PitchDeckPage({
                 )}
 
                 <p className="mt-8 text-[10px] text-charcoal/40">
-                  Prepared by {user.name ?? user.email} · Peakbritt Financial Group · Educational
-                  overview — not tax or legal advice.
+                  {user.name ? `Prepared by ${user.name} · ` : ""}Peakbritt Financial Group ·
+                  Educational overview — not tax or legal advice.
                 </p>
               </section>
             ))}

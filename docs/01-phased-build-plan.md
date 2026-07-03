@@ -798,6 +798,23 @@ This document is the staged build plan for the Insurance Strategy Engine. Each p
    verified to stay structural (the dollars never cross the glass). 100 Vitest tests green;
    9-point Playwright flow against the production build.
 
+   **Post-close-out update — book-of-business import + client scoring.** docs/07 section 4's
+   self-reported avatar counts grew into the real thing: a new `/app/book` page ("Book" in the
+   agent nav) imports the agent's actual client list from CSV (tolerant headers — name/client,
+   age, business owner, co-owners, net worth, qualified funds, dependents, notes — and value
+   formats: "$2,500,000" / "2.5m" / "750k" / band words all parse; unreadable values stay blank,
+   never guessed; nameless rows skipped with row numbers; 2,000-row cap). Every imported client
+   is classified into the single best avatar by CLAUDE.md's priority order (BO → HNW → QFH →
+   Family/Legacy, mirroring the docs/03 thresholds) and scored with the locked per-avatar Y1
+   commission model; unclassifiable clients honestly get score 0. The page shows the ranked
+   list with totals (book opportunity Y1 + the 15% addressable filter) and a **"Start a case"**
+   button that promotes a book client into a Scenario with the intake pre-seeded from everything
+   the book knows (age, owner status, co-owner hint, net worth/qualified bands, dependents) —
+   book → ranked list → one click → Atlas case design. New `book_clients` table (migration
+   `20260703090000`), `book.imported`/`book.case_started` audit actions. Verified with a
+   10-point Playwright flow (upload → ranking → docs/07 scores → totals → pre-filled case →
+   audit); 106 Vitest tests green.
+
 ---
 
 ## What the Dev Needs From You at the Start of Each Phase

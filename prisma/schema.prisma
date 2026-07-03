@@ -281,6 +281,7 @@ model User {
 
   subscription            Subscription?
   scenarios               Scenario[]
+  bookClients             BookClient[]
   adminActionsTaken       AdminAction[]          @relation("AdminActionsTaken")
   adminActionsOn          AdminAction[]          @relation("AdminActionsReceived")
   auditLogEntries         AuditLog[]
@@ -552,6 +553,7 @@ model Scenario {
 
   lifeUnderwritingIntake LifeUnderwritingIntake?
   annuityIntake          AnnuityIntake?
+  bookClient             BookClient?
   strategyEstimates      ScenarioStrategyEstimate[]
   weeklyCallQueueEntries WeeklyCallQueueEntry[]
   complianceFlags        ComplianceFlag[]
@@ -777,4 +779,39 @@ model SequenceEnrollment {
   updatedAt      DateTime  @updatedAt
 
   @@map("sequence_enrollments")
+}
+
+// Book-of-business import (docs/07 section 4 made real): the agent's actual
+// client list, CSV-imported or added by hand, classified into the 4 avatars
+// and scored with the locked per-avatar Y1 commission model
+// (src/lib/book-of-business.ts). "Start a case" promotes a book client into
+// a Scenario with the intake pre-seeded from what the book already knows.
+model BookClient {
+  id     String @id @default(cuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  name                   String
+  age                    Int?
+  businessOwner          Boolean?
+  hasCoOwners            Boolean?
+  netWorthEstimate       NetWorthEstimate?
+  qualifiedFundsEstimate QualifiedFundsEstimate?
+  hasDependentsUnder18   Boolean?
+  notes                  String?
+
+  // Scored classification (best avatar by CLAUDE.md priority order) and the
+  // docs/07 per-avatar Y1 commission value. avatar null = unclassifiable
+  // from the imported fields (score 0) — never guessed.
+  avatar  Avatar?
+  scoreY1 Int     @default(0)
+
+  scenarioId String?   @unique
+  scenario   Scenario? @relation(fields: [scenarioId], references: [id], onDelete: SetNull)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+  @@map("book_clients")
 }

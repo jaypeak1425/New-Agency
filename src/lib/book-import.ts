@@ -275,6 +275,10 @@ export async function importBookCsv(user: User, csvText: string) {
   return { imported: created.length, skipped };
 }
 
+export async function countBookClients(userId: string) {
+  return prisma.bookClient.count({ where: { userId } });
+}
+
 export async function listBookClients(userId: string) {
   return prisma.bookClient.findMany({
     where: { userId },

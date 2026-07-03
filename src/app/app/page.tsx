@@ -2,8 +2,8 @@ import Link from "next/link";
 import { getCurrentUser } from "@/lib/auth";
 import { computeDashboard } from "@/lib/dashboard";
 import { computeAtlasFeed } from "@/lib/nudges";
+import { countBookClients } from "@/lib/book-import";
 import { agingStatusFor, AGING_LABELS } from "@/lib/aging";
-import { EmptyState } from "@/components/ui/EmptyState";
 import { Card } from "@/components/ui/Card";
 import { CountUp } from "@/components/CountUp";
 import { SCENARIO_STATUS_LABELS as STATUS_LABELS } from "@/components/ScenarioStatusBadge";
@@ -17,12 +17,47 @@ export default async function DashboardPage() {
   const { thisWeek, thisYear, closedThisYear, bookOpportunity } = await computeDashboard(user!.id);
 
   const hasAnyScenarios = thisYear.lines.length > 0;
-  if (!hasAnyScenarios && !bookOpportunity) {
+  // A brand-new agent — no cases, no self-reported book, and no imported
+  // book yet — gets a proper two-path start instead of a dead-end empty
+  // state: log a single case, or import the whole book at once. (Once a
+  // book is imported, the highest-value clients surface in Prospects.)
+  if (!hasAnyScenarios && !bookOpportunity && (await countBookClients(user!.id)) === 0) {
     return (
-      <EmptyState
-        title="Dashboard"
-        body="No scenarios yet. Run an “I've got a guy” intake to see your pipeline, book-of-business opportunity, and closed commissions here."
-      />
+      <div>
+        <h1 className="text-3xl">Welcome to Case Atlas</h1>
+        <p className="mt-2 max-w-2xl text-sm text-charcoal/60">
+          Two ways to start. Work a single client you have in mind, or bring your whole book in at
+          once and let Atlas rank it for you.
+        </p>
+        <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <Card>
+            <h2 className="text-lg font-medium text-navy">&ldquo;I&rsquo;ve got a guy&rdquo;</h2>
+            <p className="mt-2 text-sm text-charcoal/70">
+              Describe one client and Atlas runs the 10-question intake, classifies the avatar, and
+              designs the case — recommendations, commission math, and the wholesaler handoff.
+            </p>
+            <Link
+              href="/app/scenarios"
+              className="mt-4 inline-block rounded-md bg-navy px-4 py-2 text-sm font-medium text-cream hover:bg-navy/90"
+            >
+              Start your first case &rarr;
+            </Link>
+          </Card>
+          <Card>
+            <h2 className="text-lg font-medium text-navy">Import your book</h2>
+            <p className="mt-2 text-sm text-charcoal/70">
+              Upload a CSV of your clients. Atlas scores every one by opportunity and surfaces the
+              highest-value cases to work first — one click turns any of them into a full case.
+            </p>
+            <Link
+              href="/app/book"
+              className="mt-4 inline-block rounded-md border border-navy px-4 py-2 text-sm font-medium text-navy hover:bg-navy hover:text-cream"
+            >
+              Import your book &rarr;
+            </Link>
+          </Card>
+        </div>
+      </div>
     );
   }
 

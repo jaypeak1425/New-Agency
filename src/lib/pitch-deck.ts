@@ -205,23 +205,37 @@ export async function buildPitchDeck(
 
   if (holds.length > 0) {
     // Non-fixable client-copy violation: the deck does NOT ship. File it for
-    // the admin compliance queue with the exact matches.
-    await prisma.complianceFlag.create({
-      data: {
+    // the admin compliance queue with the exact matches. This runs inside a
+    // GET server-component render the agent can refresh repeatedly, so file
+    // at most ONE open flag per scenario+strategy (and only audit-log the
+    // hold when we actually file it) — otherwise every reload of the held
+    // deck URL would pile a duplicate into the compliance queue.
+    const existingFlag = await prisma.complianceFlag.findFirst({
+      where: {
         triggerType: "filter_caught",
-        content: `Pitch deck for "${strategy.name}" held by the compliance filter: ${holds.join("; ")}`,
+        status: "open",
         scenarioId: scenario.id,
         strategyId: strategy.id,
       },
     });
-    await prisma.auditLog.create({
-      data: {
-        actorId: user.id,
-        action: "scenario.pitch_deck_held",
-        target: scenario.id,
-        metadata: { strategySlug: strategy.slug, holds },
-      },
-    });
+    if (!existingFlag) {
+      await prisma.complianceFlag.create({
+        data: {
+          triggerType: "filter_caught",
+          content: `Pitch deck for "${strategy.name}" held by the compliance filter: ${holds.join("; ")}`,
+          scenarioId: scenario.id,
+          strategyId: strategy.id,
+        },
+      });
+      await prisma.auditLog.create({
+        data: {
+          actorId: user.id,
+          action: "scenario.pitch_deck_held",
+          target: scenario.id,
+          metadata: { strategySlug: strategy.slug, holds },
+        },
+      });
+    }
     return {
       ready: false,
       reason:

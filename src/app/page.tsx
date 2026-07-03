@@ -1,9 +1,24 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { Wordmark } from "@/components/ui/Wordmark";
 import { buttonClassName } from "@/components/ui/button-styles";
 import { Card } from "@/components/ui/Card";
 import { SubmitButton } from "@/components/SubmitButton";
+import { MarketingFooter } from "@/components/MarketingFooter";
+import { SITE_NAME, SITE_DESCRIPTION, SITE_TAGLINE, SITE_URL } from "@/lib/seo";
 import { enrollInSequenceAction } from "./sequence-actions";
+
+export const metadata: Metadata = {
+  title: `${SITE_NAME} — ${SITE_TAGLINE}`,
+  description: SITE_DESCRIPTION,
+  alternates: { canonical: "/" },
+  openGraph: {
+    title: `${SITE_NAME} — ${SITE_TAGLINE}`,
+    description: SITE_DESCRIPTION,
+    url: "/",
+    type: "website",
+  },
+};
 
 const AVATARS = [
   {
@@ -64,8 +79,50 @@ export default async function Home({
   searchParams: Promise<{ enrolled?: string; sequenceError?: string }>;
 }) {
   const { enrolled, sequenceError } = await searchParams;
+
+  // Structured data for AI search and rich results: what the product is,
+  // what it costs, and the FAQ — extractable by Google, Perplexity, and
+  // ChatGPT search. Reuses the same FAQS the page renders so they never
+  // drift.
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "SoftwareApplication",
+        name: SITE_NAME,
+        applicationCategory: "BusinessApplication",
+        operatingSystem: "Web",
+        description: SITE_DESCRIPTION,
+        url: SITE_URL,
+        offers: {
+          "@type": "Offer",
+          price: "97",
+          priceCurrency: "USD",
+          description: "Monthly subscription with a 30-day money-back guarantee.",
+        },
+        publisher: {
+          "@type": "Organization",
+          name: "Peakbritt Financial Group",
+          url: SITE_URL,
+        },
+      },
+      {
+        "@type": "FAQPage",
+        mainEntity: FAQS.map((faq) => ({
+          "@type": "Question",
+          name: faq.q,
+          acceptedAnswer: { "@type": "Answer", text: faq.a },
+        })),
+      },
+    ],
+  };
+
   return (
     <div className="flex min-h-full flex-col">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       <header className="border-b border-border bg-surface">
         <div className="mx-auto flex max-w-5xl items-center justify-between px-6 py-4">
           <Wordmark />
@@ -257,24 +314,7 @@ export default async function Home({
         </section>
       </main>
 
-      <footer className="border-t border-border bg-surface px-6 py-8 text-xs text-charcoal/60">
-        <div className="mx-auto max-w-5xl space-y-2">
-          <p>
-            Case Atlas is a software product. It does not provide tax, legal, or investment
-            advice.
-          </p>
-          <p>
-            All benefit claims non-taxable while the policy remains in force. Final strategy
-            subject to underwriting and client decision.
-          </p>
-          <p>Past case results do not guarantee future commissions or production.</p>
-          <p>
-            Peakbritt Financial Group is not a CPA firm, law firm, or registered investment
-            advisor. COI relationships are the responsibility of the agent.
-          </p>
-          <p className="pt-2">&copy; {new Date().getFullYear()} Peakbritt Financial Group.</p>
-        </div>
-      </footer>
+      <MarketingFooter />
     </div>
   );
 }

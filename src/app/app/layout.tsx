@@ -9,6 +9,11 @@ import { SubmitButton } from "@/components/SubmitButton";
 import { AppNav } from "@/components/AppNav";
 import { AppShell } from "@/components/AppShell";
 import { Wordmark } from "@/components/ui/Wordmark";
+import type { Metadata } from "next";
+
+// The authenticated app is private — keep it out of search indexes (robots.ts
+// also disallows the whole /app tree; this is belt-and-suspenders).
+export const metadata: Metadata = { robots: { index: false, follow: false } };
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
   const user = await getCurrentUser();

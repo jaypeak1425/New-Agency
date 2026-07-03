@@ -283,6 +283,20 @@ export async function listBookClients(userId: string) {
   });
 }
 
+// The highest-opportunity clients still sitting in the imported book with no
+// case started yet — so the weekly call queue surfaces "who to work next"
+// from the whole book, not just the scenarios the agent has already opened.
+// Un-started (scenarioId null) and actually scored (scoreY1 > 0, i.e. the
+// import could classify an avatar); ranked by the locked per-avatar Y1
+// commission model.
+export async function getTopBookOpportunities(userId: string, limit = 3) {
+  return prisma.bookClient.findMany({
+    where: { userId, scenarioId: null, scoreY1: { gt: 0 } },
+    orderBy: [{ scoreY1: "desc" }, { name: "asc" }],
+    take: limit,
+  });
+}
+
 // "Start a case": promotes a book client into a Scenario with the intake
 // pre-seeded from everything the book already knows — the agent lands on
 // the intake with the avatar questions answered and Atlas ready to run.

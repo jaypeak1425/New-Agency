@@ -1,21 +1,27 @@
 @import "tailwindcss";
 
 :root {
-  /* Premium Elegance palette — docs/10-brand-package.md */
-  --color-navy: #1a2332;
-  --color-navy-light: #26334a;
-  --color-gold: #c9a961;
-  --color-gold-light: #ddc48c;
-  --color-cream: #f5f1e8;
-  --color-charcoal: #2c2c2c;
+  /* Case Atlas brand palette — Case_Atlas_Brand_Guidelines (2026):
+     Atlas Navy (primary), Deep Ocean (secondary), Prestige Gold (accent),
+     Steel Blue (support), Cloud White (backgrounds). */
+  --color-navy: #0b132b; /* Atlas Navy */
+  --color-navy-light: #1d2d44; /* Deep Ocean */
+  --color-gold: #d4af37; /* Prestige Gold */
+  --color-gold-light: #e6c866;
+  --color-cream: #f5f7fa; /* Cloud White (token name kept for compatibility) */
+  --color-steel: #64748b; /* Steel Blue — support/muted */
+  --color-charcoal: #0b132b; /* primary text = Atlas Navy on Cloud White */
 
   --color-background: var(--color-cream);
   --color-foreground: var(--color-charcoal);
   --color-surface: #ffffff;
   --color-surface-dark: var(--color-navy);
-  --color-border: #ded6c4;
+  --color-border: #e2e8f0;
 
-  --font-serif: var(--font-playfair), Georgia, serif;
+  /* Headlines: Montserrat SemiBold. Body & dashboards: Inter. The token is
+     still named --font-serif for compatibility with existing font-serif
+     utility usages, but now resolves to the brand display face. */
+  --font-serif: var(--font-montserrat), system-ui, sans-serif;
   --font-sans: var(--font-inter), system-ui, sans-serif;
 }
 
@@ -25,6 +31,7 @@
   --color-gold: var(--color-gold);
   --color-gold-light: var(--color-gold-light);
   --color-cream: var(--color-cream);
+  --color-steel: var(--color-steel);
   --color-charcoal: var(--color-charcoal);
   --color-background: var(--color-background);
   --color-foreground: var(--color-foreground);

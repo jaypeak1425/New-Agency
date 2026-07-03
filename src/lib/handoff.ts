@@ -2,6 +2,7 @@ import type { LifeUnderwritingIntake, Scenario, Strategy, User } from "@/generat
 import type { AvatarClassification } from "@/lib/avatars";
 import type { UnderwritingEstimate } from "@/lib/underwriting";
 import { CPA_SCRUTINY, TIER_LABELS } from "@/lib/cpa-scrutiny";
+import { buildImprovementAnalysis } from "@/lib/improvement";
 
 // docs/06-wholesaler-handoff.md section 2's full template needs commission
 // math (explicitly Phase 4 — CLAUDE.md's "Progress tracker + revenue
@@ -44,6 +45,11 @@ export interface HandoffContent {
   // and ultimately the client's CPA — sees the documentation the case will
   // need before implementation, from src/lib/cpa-scrutiny.ts.
   documentationLines: string[];
+  // The quantified current-path-vs-design upside for the primary strategy
+  // (src/lib/improvement.ts). Agent/wholesaler-facing only — these federal
+  // dollar figures are exactly what the compliance filter bans from client
+  // copy, which is why they ship in the internal handoff, not the deck.
+  improvementLines: string[];
   complianceNote: string;
   agentContactLines: string[];
 }
@@ -132,6 +138,33 @@ export function buildHandoffContent(
     }
   }
 
+  // Quantified upside: the current-path-vs-design federal math from the
+  // agent-entered case numbers, shipped to the wholesaler so the request
+  // carries the "why this size" story. Surface the STRONGEST available
+  // story in the stack — the first eligible strategy that actually has a
+  // federal-table computation — since several strategies (Qualified LTC,
+  // buy-sell, key person) legitimately have no bracket-spread math and the
+  // alphabetically-primary one may be one of them. If none are computable
+  // yet only because numbers are missing, name what would unlock it.
+  const improvementLines: string[] = [];
+  let missingPrompt: string | null = null;
+  for (const strategy of eligibleStrategies) {
+    const analysis = buildImprovementAnalysis(scenario, strategy);
+    if (analysis.available) {
+      improvementLines.push(`${strategy.name} — current path:`);
+      for (const line of analysis.currentPath) improvementLines.push(`• ${line}`);
+      improvementLines.push("With the design:");
+      for (const line of analysis.withDesign) improvementLines.push(`• ${line}`);
+      break;
+    }
+    if (!missingPrompt && analysis.missingInputs.length > 0) {
+      missingPrompt = `Quantified upside for ${strategy.name} unlocks once the case numbers are entered: ${analysis.missingInputs.join(", ")}.`;
+    }
+  }
+  if (improvementLines.length === 0 && missingPrompt) {
+    improvementLines.push(missingPrompt);
+  }
+
   const complianceNote =
     "For internal illustration purposes only. Final strategy subject to underwriting, full case " +
     "review, and client decision. All benefit claims non-taxable while the policy remains in force.";
@@ -149,6 +182,7 @@ export function buildHandoffContent(
     strategyRequestedLines,
     coiNotes,
     documentationLines,
+    improvementLines,
     complianceNote,
     agentContactLines,
   };

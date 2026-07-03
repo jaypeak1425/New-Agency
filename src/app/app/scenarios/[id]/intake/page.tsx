@@ -657,6 +657,18 @@ async function HandoffPreviewCard({ user, scenario }: { user: User; scenario: Sc
                 ))}
               </div>
             )}
+            {preview.content.improvementLines.length > 0 && (
+              <div>
+                <p className="font-medium text-navy">
+                  Quantified upside (agent-only — federal, directional)
+                </p>
+                {preview.content.improvementLines.map((line) => (
+                  <p key={line} className={line.startsWith("•") ? "pl-3 text-xs" : "mt-1"}>
+                    {line}
+                  </p>
+                ))}
+              </div>
+            )}
             <p className="text-xs text-charcoal/50">{preview.content.complianceNote}</p>
           </div>
 

@@ -28,6 +28,7 @@ export function wholesalerCaseNotificationEmail(params: {
       ${section("Scenario summary", handoffContent.scenarioSummaryLines)}
       ${section("COI notes", handoffContent.coiNotes)}
       ${section("CPA readiness — documentation this case will need", handoffContent.documentationLines)}
+      ${section("Quantified upside (agent-only — federal, directional)", handoffContent.improvementLines)}
       <p style="margin: 16px 0 4px; font-weight: bold; color: #1a2332;">Compliance note</p>
       <p style="margin: 0 0 8px; font-size: 13px; color: #8a8378;">${handoffContent.complianceNote}</p>
       ${section("Agent contact", handoffContent.agentContactLines)}

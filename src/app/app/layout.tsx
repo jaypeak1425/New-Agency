@@ -7,6 +7,7 @@ import { needsOnboarding } from "@/lib/onboarding";
 import { logOutAction } from "../(auth)/actions";
 import { SubmitButton } from "@/components/SubmitButton";
 import { AppNav } from "@/components/AppNav";
+import { AppShell } from "@/components/AppShell";
 import { Wordmark } from "@/components/ui/Wordmark";
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
@@ -46,28 +47,29 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   const imo = user.imoId ? await prisma.imo.findUnique({ where: { id: user.imoId } }) : null;
 
   return (
-    <div className="flex min-h-full">
-      <nav className="flex w-60 flex-col gap-6 bg-navy px-4 py-6 print:hidden">
-        <div className="px-2">
-          <Wordmark
-            variant="dark"
-            withByline={Boolean(imo?.byline)}
-            logoUrl={imo?.logoUrl}
-            accentColor={imo?.accentColor}
-            byline={imo?.byline}
-          />
-        </div>
-        <AppNav />
-        <div className="mt-auto space-y-3 border-t border-cream/10 px-2 pt-4 text-sm">
+    <AppShell
+      brand={
+        <Wordmark
+          variant="dark"
+          withByline={Boolean(imo?.byline)}
+          logoUrl={imo?.logoUrl}
+          accentColor={imo?.accentColor}
+          byline={imo?.byline}
+        />
+      }
+      nav={<AppNav />}
+      footer={
+        <>
           <p className="truncate text-cream/70">{user.email}</p>
           <form action={logOutAction}>
             <SubmitButton variant="outline-on-dark" pendingText="Logging out…" className="w-full">
               Log out
             </SubmitButton>
           </form>
-        </div>
-      </nav>
-      <main className="flex-1 bg-cream px-10 py-10 print:bg-white print:p-0">{children}</main>
-    </div>
+        </>
+      }
+    >
+      {children}
+    </AppShell>
   );
 }

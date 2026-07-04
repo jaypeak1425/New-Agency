@@ -1,10 +1,11 @@
 import type { Metadata } from "next";
 import { Montserrat, Inter } from "next/font/google";
-import { SITE_URL, SITE_NAME, SITE_DESCRIPTION, SITE_TAGLINE } from "@/lib/seo";
 import "./globals.css";
 
-// Brand typography (Case_Atlas_Brand_Guidelines): Montserrat SemiBold for
-// headlines, Inter for body and dashboards.
+// Slice 1 — real brand fonts kept (Montserrat/Inter fetch from Google at
+// BUILD time, a classic Railway build failure, so the skeleton exercises
+// it), but the full SEO metadata (@/lib/seo, share images, robots/sitemap)
+// returns with the marketing/SEO slice. See docs/26-incremental-deploy.md.
 const montserrat = Montserrat({
   variable: "--font-montserrat",
   subsets: ["latin"],
@@ -17,36 +18,8 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL(SITE_URL),
-  title: {
-    default: `${SITE_NAME} | Peakbritt Financial Group`,
-    template: `%s | ${SITE_NAME}`,
-  },
-  description: SITE_DESCRIPTION,
-  applicationName: SITE_NAME,
-  keywords: [
-    "insurance case design software",
-    "life insurance strategy engine",
-    "annuity case design",
-    "estate planning strategies for producers",
-    "wholesaler handoff",
-    "insurance sales software",
-    "Peakbritt Financial Group",
-    "Case Atlas",
-  ],
-  authors: [{ name: "Peakbritt Financial Group" }],
-  openGraph: {
-    type: "website",
-    siteName: SITE_NAME,
-    title: `${SITE_NAME} — ${SITE_TAGLINE}`,
-    description: SITE_DESCRIPTION,
-    url: SITE_URL,
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: `${SITE_NAME} — ${SITE_TAGLINE}`,
-    description: SITE_DESCRIPTION,
-  },
+  title: "Case Atlas | Peakbritt Financial Group",
+  description: "The strategy engine for the producer who's done guessing.",
 };
 
 export default function RootLayout({

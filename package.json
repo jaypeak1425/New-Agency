@@ -12,7 +12,8 @@
     "lint": "eslint",
     "db:seed": "tsx prisma/seed.ts",
     "test": "vitest run",
-    "test:e2e": "playwright test"
+    "test:e2e": "playwright test",
+    "postinstall": "prisma generate"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"

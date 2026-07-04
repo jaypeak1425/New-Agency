@@ -1,0 +1,817 @@
+// Case Atlas — Phase 1 schema (Skeleton).
+// Scope per phase-1-sessions/PHASE-1.md Session 1: users, subscriptions,
+// admin_actions, audit_log, and a scenarios stub (fleshed out in Phase 3).
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum UserRole {
+  user
+  admin
+  wholesaler
+  // docs/08-master-dashboard.md section 5 — the IMO principal login, scoped
+  // to their own agents/MRR/seats via User.principalOfImoId below.
+  imo_principal
+}
+
+enum UserStatus {
+  active
+  suspended
+}
+
+enum SubscriptionStatus {
+  incomplete
+  trialing
+  active
+  past_due
+  canceled
+}
+
+enum AdminActionType {
+  grant
+  revoke
+  suspend
+  reactivate
+  create_wholesaler
+  assign_wholesaler
+  unassign_wholesaler
+}
+
+enum TenureBand {
+  under_1yr
+  yr_1_3
+  yr_3_5
+  yr_5_10
+  yr_10_plus
+}
+
+enum IncomeBand {
+  under_50k
+  band_50k_100k
+  band_100k_250k
+  band_250k_500k
+  over_500k
+}
+
+enum InteractionPreference {
+  type
+  voice
+}
+
+enum OutputPreference {
+  pdf
+  slide_deck
+  one_pager
+}
+
+enum ReminderFrequency {
+  none
+  weekly
+  daily
+}
+
+enum Avatar {
+  high_net_worth
+  business_owner
+  qualified_fund_heavy
+  family_legacy
+}
+
+// docs/03-intake-flow.md section 2 — the 10-question "I've got a guy" intake.
+// Modeled as a structured wizard for now rather than free-text NLP parsing:
+// the doc's "type a paragraph, Atlas parses it" experience needs an AI
+// backend (CLAUDE.md's callModel(complexity, messages) abstraction), which
+// hasn't been chosen/wired up yet. These fields capture the same 10 answers
+// through real form fields so avatar classification (Session 5) has
+// structured data to work with; the free-text layer can be added later
+// without changing this schema.
+enum HealthRating {
+  good
+  average
+  health_issues
+}
+
+enum TobaccoUse {
+  none
+  occasional
+  regular
+}
+
+enum BusinessOwnerStatus {
+  business_owner
+  employee
+  neither
+}
+
+enum BusinessStructure {
+  c_corp
+  s_corp
+  partnership
+  llc
+  sole_prop
+}
+
+enum IntakeGoal {
+  retirement_income
+  business_continuity
+  key_employee_retention
+  estate_planning
+  legacy
+  other
+  // Added for the recommendation engine (Session 6) — vocabulary from
+  // docs/advanced-case-design-framework.md section 2's "Primary goal" parser
+  // target, layered onto the existing Q8 "select all that apply" list.
+  minimize_estate_tax
+  charitable_intent
+  estate_liquidity
+}
+
+enum ExistingRelationship {
+  existing
+  new_prospect
+}
+
+// docs/07-progress-dashboard-math.md section 3's close-rate table needs a
+// finer relationship category than Q9's existing/new_prospect split. Kept as
+// a separate optional field rather than redefining Q9, since Q9 is one of
+// the fixed 10 questions.
+enum RelationshipType {
+  existing_strong
+  existing_first_meeting
+  existing_second_meeting
+  cold_first_meeting
+  cold_second_meeting
+  referral_warm
+}
+
+enum IncomeRevenueRange {
+  under_250k
+  range_250k_1m
+  range_1m_5m
+  over_5m
+}
+
+// docs/03-intake-flow.md section 3's avatar classification table needs net
+// worth and qualified-fund balance, which aren't among the fixed 10
+// questions — the doc's own worked example has Atlas ask about these as a
+// natural follow-up ("I don't have visibility into their qualified
+// balances..."). These are optional supplementary fields for that follow-up,
+// not an 11th/12th required question.
+enum NetWorthEstimate {
+  under_500k
+  range_500k_2m
+  range_2m_5m
+  over_5m
+}
+
+enum QualifiedFundsEstimate {
+  under_500k
+  over_500k
+}
+
+// docs/advanced-case-design-framework.md section 2 — the "Scenario Input
+// Parameters" the doc itself designs as the parser target for the 8 HNW
+// estate-planning (supporting) strategies' matchingParameters. Optional
+// follow-up fields, same pattern as the Session 5 avatar fields above: asked
+// only when a HNW-tagged strategy's gate needs them, not part of the fixed
+// 10 questions.
+enum MaritalStatus {
+  married
+  single
+}
+
+enum BeneficiaryStructure {
+  spouse_only
+  children
+  grandchildren_multigenerational
+  charity
+}
+
+enum ControlPreference {
+  relinquish_control
+  retained_access_or_control
+}
+
+enum FundingPreference {
+  gift_or_exemption
+  financing_or_loan
+  employer_funded
+}
+
+enum ExistingStructure {
+  ilit
+  grantor_trust
+  qualified_plan
+  business_entity
+}
+
+enum UrgencyDriver {
+  legislative_exemption_sunset
+  liquidity_event
+  health_change
+  business_sale
+  generational_transfer_event
+  none
+}
+
+// docs/00-developer-brief.md: "a locked library of 9 core + 8 supporting
+// strategies." core vs. supporting per the enumeration in
+// docs/21-final-handoff.md section 7 (the only place the 9 core strategies
+// are named as a complete set); supporting = the 8 HNW estate-planning
+// strategies fully detailed in docs/advanced-case-design-framework.md.
+enum StrategyTier {
+  core
+  supporting
+}
+
+// The canonical brain doc (README + Knowledge Base + Quick Reference Index)
+// referenced throughout the docs was never delivered into this repo — it's
+// noted in docs/21-final-handoff.md as "provided in the source conversation."
+// Only 10 of the 17 locked strategies have real mechanics/legal-basis content
+// (from docs/advanced-case-design-framework.md). The other 7 are named in the
+// docs but undocumented. `pending_content` strategies exist as a placeholder
+// row so the schema and admin view are complete, but per the Brain Lock rule
+// (CLAUDE.md) the recommendation engine (Phase 3 Session 6+) must never
+// surface a pending_content strategy to an agent — only `documented` ones.
+enum StrategyStatus {
+  documented
+  pending_content
+}
+
+model Strategy {
+  id                   String         @id @default(cuid())
+  slug                 String         @unique
+  name                 String
+  tier                 StrategyTier
+  status               StrategyStatus @default(pending_content)
+  avatarTags           Avatar[]       @default([])
+  clientTriggerProfile String? // plain-language "who this is for"
+  legalBasis           String? // IRC citations / legal grounding
+  mechanics            String? // how the strategy works
+  whyUsed              String? // rationale for when it's chosen
+  matchingParameters   Json? // structured trigger-condition flags (docs/advanced-case-design-framework.md section 5)
+  uplineQuestions      String[]       @default([])
+  sourceDoc            String? // which doc this content was ingested from, for traceability
+  notes                String? // known ambiguities, e.g. possible overlap with another strategy
+  createdAt            DateTime       @default(now())
+  updatedAt            DateTime       @updatedAt
+
+  scenarioEstimates ScenarioStrategyEstimate[]
+  complianceFlags   ComplianceFlag[]
+
+  @@map("strategies")
+}
+
+model User {
+  id           String     @id @default(cuid())
+  email        String     @unique
+  passwordHash String
+  name         String?
+  role         UserRole   @default(user)
+  status       UserStatus @default(active)
+  lastLoginAt  DateTime?
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+
+  subscription            Subscription?
+  scenarios               Scenario[]
+  bookClients             BookClient[]
+  adminActionsTaken       AdminAction[]          @relation("AdminActionsTaken")
+  adminActionsOn          AdminAction[]          @relation("AdminActionsReceived")
+  auditLogEntries         AuditLog[]
+  passwordResetTokens     PasswordResetToken[]
+  agentProfile            AgentProfile?
+  weeklyCallQueueEntries  WeeklyCallQueueEntry[]
+  complianceFlagsResolved ComplianceFlag[]       @relation("ComplianceFlagResolver")
+
+  // One wholesaler per agent (docs/23-wholesaler-assignment.md). Only
+  // meaningful when this user's role is "user" (an agent); assignedWholesaler
+  // should always point at a user with role "wholesaler", enforced in
+  // src/lib/wholesaler.ts rather than at the DB level.
+  assignedWholesalerId String?
+  assignedWholesaler   User?   @relation("AgentWholesalerAssignment", fields: [assignedWholesalerId], references: [id])
+  assignedAgents       User[]  @relation("AgentWholesalerAssignment")
+
+  // docs/08-master-dashboard.md section 7 — an agent occupying a seat on an
+  // IMO's white-label contract. A seated agent gets dashboard access via the
+  // IMO's contract rather than their own Stripe Subscription (see
+  // src/lib/imo.ts's hasImoSeatAccess).
+  imoId String?
+  imo   Imo?    @relation(fields: [imoId], references: [id])
+
+  // docs/08-master-dashboard.md section 5 — the IMO principal login. Distinct
+  // from imoId/imo above (a seated agent): the principal isn't a seat, they
+  // own/view the contract. One principal per IMO.
+  principalOfImoId String? @unique
+  principalOfImo   Imo?    @relation("ImoPrincipal", fields: [principalOfImoId], references: [id])
+
+  @@map("users")
+}
+
+// docs/08-master-dashboard.md section 7's `imos` table + docs/20-business-plan.md's
+// "$75/seat/month, tiered by seat count (50/100/500+)" — the 50/100/500+
+// figures are illustrative typical contract sizes (small/mid/large IMO), not
+// a discount schedule; the doc gives no per-tier rate, so every seat bills
+// flat at $75/mo regardless of `seatsPurchased`.
+enum ImoOrgType {
+  imo
+  fmo
+  bga
+  ga
+}
+
+model Imo {
+  id                  String     @id @default(cuid())
+  name                String
+  organizationType    ImoOrgType
+  primaryContactName  String?
+  primaryContactEmail String?
+  seatsPurchased      Int
+  // docs/08-master-dashboard.md section 5: IMO contracts are sold, not
+  // self-serve Stripe checkouts — "your contract" sets the pricing. No IMO
+  // billing integration exists yet; seat changes are logged to audit_log as
+  // the "billing event" the doc describes, for the sales/ops team to invoice
+  // against manually.
+  contractTerms       String?
+
+  // docs/00-developer-brief.md's white-label branding engine: "logo, color,
+  // byline per IMO." `logoUrl` is a hosted image URL the IMO supplies rather
+  // than an uploaded file — no object storage (S3/Supabase Storage/etc.) is
+  // configured anywhere in this repo, so a real upload pipeline is a gap of
+  // the same shape as the missing AI backend, not fabricated here.
+  logoUrl     String?
+  accentColor String? // hex, e.g. "#1a5fb4"
+  byline      String? // replaces "by Peakbritt Financial Group" in the nav
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  agents    User[]
+  principal User?  @relation("ImoPrincipal")
+
+  @@map("imos")
+}
+
+// Onboarding profile per docs/03-intake-flow.md section 11 and
+// docs/00-developer-brief.md's "Agent onboarding and customization" layer.
+// completedAt null = onboarding not yet finished (including skipped).
+model AgentProfile {
+  id                      String                @id @default(cuid())
+  userId                  String                @unique
+  user                    User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tenureBand              TenureBand?
+  currentIncomeBand       IncomeBand?
+  goalIncome              Int?
+  avatarMix               Avatar[]              @default([])
+  interactionPreference   InteractionPreference @default(type)
+  outputPreference        OutputPreference      @default(pdf)
+  reminderFrequency       ReminderFrequency     @default(weekly)
+  hasCpaRelationship      Boolean               @default(false)
+  hasAttorneyRelationship Boolean               @default(false)
+  imoAffiliation          String?
+  skipped                 Boolean               @default(false)
+
+  // docs/07-progress-dashboard-math.md edge case 1: the agent can override
+  // the default commission rate table with a single flat percentage used
+  // "everywhere" — a real per-carrier/per-product override table is a
+  // future refinement, not what the doc's own edge case describes.
+  commissionRateOverridePercent Float?
+  // docs/07-progress-dashboard-math.md edge case 2 — same pattern for the
+  // close rate table.
+  closeRateOverridePercent      Float?
+
+  // docs/07-progress-dashboard-math.md section 4 — the book-of-business
+  // opportunity ("unmined gold") is self-reported per-avatar client counts,
+  // collected in onboarding or updated quarterly. Average client age/net
+  // worth/revenue and existing coverage in force are also listed in the doc
+  // as data to collect, but the doc's own calculation and worked example
+  // never use them — only the per-avatar counts feed the formula — so
+  // they're not modeled here to avoid fields nothing reads.
+  businessOwnersWithCoOwnersCount      Int?
+  businessOwnersSoloCount              Int?
+  hnwIndividualsCount                  Int?
+  qualifiedFundHeavyCount              Int?
+  familyLegacyCount                    Int?
+  bookAddressableFilterOverridePercent Float?
+
+  completedAt DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@map("agent_profiles")
+}
+
+model PasswordResetToken {
+  id        String    @id @default(cuid())
+  userId    String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tokenHash String    @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  @@map("password_reset_tokens")
+}
+
+model Subscription {
+  id                   String             @id @default(cuid())
+  userId               String             @unique
+  user                 User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  stripeCustomerId     String?            @unique
+  stripeSubscriptionId String?            @unique
+  status               SubscriptionStatus @default(incomplete)
+  plan                 String             @default("agent_monthly_97")
+  currentPeriodEnd     DateTime?
+  createdAt            DateTime           @default(now())
+  updatedAt            DateTime           @updatedAt
+
+  @@map("subscriptions")
+}
+
+model AdminAction {
+  id           String          @id @default(cuid())
+  adminId      String
+  admin        User            @relation("AdminActionsTaken", fields: [adminId], references: [id])
+  targetUserId String
+  targetUser   User            @relation("AdminActionsReceived", fields: [targetUserId], references: [id])
+  action       AdminActionType
+  reason       String?
+  createdAt    DateTime        @default(now())
+
+  @@map("admin_actions")
+}
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  actorId   String?
+  actor     User?    @relation(fields: [actorId], references: [id])
+  action    String
+  target    String
+  metadata  Json?
+  createdAt DateTime @default(now())
+
+  @@map("audit_log")
+}
+
+// Records every processed Stripe webhook event by its Stripe event id, so a
+// retried/duplicate delivery is a no-op instead of double-applying the event.
+model WebhookEvent {
+  id          String   @id
+  type        String
+  processedAt DateTime @default(now())
+
+  @@map("webhook_events")
+}
+
+// docs/07-progress-dashboard-math.md section 1 lists "proposal sent, in
+// underwriting, closed, lost" as the pipeline statuses. Split "closed" into
+// won/lost per section 5's edge cases 4/5, since the dashboard's "Closed This
+// Year" widget (actual commissions earned) only makes sense for won cases.
+enum ScenarioStatus {
+  draft
+  active
+  in_underwriting
+  closed_won
+  closed_lost
+}
+
+// label/notes are the minimal case record from Phase 3 Session 3 (still used
+// for the wholesaler-notify bridge action). The intake* fields below are the
+// structured 10-question "I've got a guy" answers (docs/03-intake-flow.md
+// section 2) — avatar classification (Session 5) and the recommendation
+// engine (Session 6) still need to be wired up to read from them.
+model Scenario {
+  id                   String         @id @default(cuid())
+  userId               String
+  user                 User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  label                String
+  notes                String?
+  status               ScenarioStatus @default(draft)
+  closedAt             DateTime?
+  wholesalerNotifiedAt DateTime?
+
+  // Q1-Q10 answers
+  clientDescription    String? // opening line: "Tell me about this person..."
+  primaryAge           Int? // Q1
+  healthRating         HealthRating? // Q2
+  healthNotes          String?
+  tobaccoUse           TobaccoUse? // Q3
+  tobaccoNotes         String?
+  businessOwnerStatus  BusinessOwnerStatus? // Q4
+  businessStructure    BusinessStructure? // Q5 (if business owner)
+  coOwnersNotes        String? // Q6 (if business owner): ages/ownership %
+  keyEmployeesCount    Int? // Q7 (if business owner)
+  keyEmployeesNotes    String?
+  primaryGoals         IntakeGoal[]          @default([]) // Q8
+  goalsNotes           String?
+  existingRelationship ExistingRelationship? // Q9
+  incomeRevenueRange   IncomeRevenueRange? // Q10
+  intakeCompletedAt    DateTime?
+
+  // Optional pipeline-math follow-up (docs/07-progress-dashboard-math.md section 3)
+  relationshipType RelationshipType?
+
+  // Optional avatar-classification follow-ups (docs/03-intake-flow.md section 3)
+  netWorthEstimate       NetWorthEstimate?
+  qualifiedFundsEstimate QualifiedFundsEstimate?
+  hasDependentsUnder18   Boolean?
+
+  // Optional recommendation-engine follow-ups (docs/advanced-case-design-framework.md
+  // section 2) — only needed to gate-check the 8 HNW estate-planning (supporting)
+  // strategies; most scenarios will never fill these in.
+  maritalStatus                MaritalStatus?
+  stateOfResidence             String?
+  illiquidNetWorth             Boolean?
+  estateExceedsExemption       Boolean?
+  concentratedLowBasisPosition Boolean?
+  beneficiaryStructure         BeneficiaryStructure?
+  controlPreference            ControlPreference?
+  fundingPreference            FundingPreference?
+  existingStructures           ExistingStructure[]   @default([])
+  urgencyDriver                UrgencyDriver?
+
+  // CLAUDE.md hard rule 4 / docs/hard-rules.ts: the ILIT must be the
+  // original owner of the policy to avoid the §2035 3-year lookback.
+  // Transferring an existing policy into the trust doesn't qualify.
+  existingPolicyTransfer Boolean?
+
+  // Agent-only case numbers (owner directive 2026-07-02: quantified
+  // current-path vs. with-strategy analysis on the agent's side of the
+  // glass). Rough figures the agent enters — the improvement engine
+  // (src/lib/improvement.ts) computes directional federal math from them
+  // against src/lib/tax-reference.ts, and NOTHING quantified ever reaches
+  // client-facing output (the compliance filter bans it there).
+  estimatedEstateValue     Int?
+  estimatedQualifiedBalance Int?
+  estimatedTaxableIncome   Int?
+
+  lifeUnderwritingIntake LifeUnderwritingIntake?
+  annuityIntake          AnnuityIntake?
+  bookClient             BookClient?
+  strategyEstimates      ScenarioStrategyEstimate[]
+  weeklyCallQueueEntries WeeklyCallQueueEntry[]
+  complianceFlags        ComplianceFlag[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("scenarios")
+}
+
+// docs/00-developer-brief.md's "This week, call these 3 prospects with these
+// pitches" + docs/01-phased-build-plan.md's "weekly call queue auto-generates
+// each Monday." No cron/job runner exists in this repo, so generation is lazy
+// (computed the first time the agent opens /app/prospects in a given week)
+// rather than a scheduled background job — but once generated, the week's 3
+// entries are persisted and stay fixed even if the ranking shifts later that
+// week, matching "auto-generates each Monday" (a stable weekly snapshot).
+model WeeklyCallQueueEntry {
+  id                String   @id @default(cuid())
+  userId            String
+  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  scenarioId        String
+  scenario          Scenario @relation(fields: [scenarioId], references: [id], onDelete: Cascade)
+  weekStart         DateTime
+  rank              Int
+  // Snapshotted at generation time so re-viewing the queue later in the week
+  // doesn't re-run (and re-audit-log) the recommendation engine for entries
+  // that are already pinned.
+  pitchStrategyName String?
+  createdAt         DateTime @default(now())
+
+  @@unique([userId, weekStart, scenarioId])
+  @@map("weekly_call_queue_entries")
+}
+
+// docs/04-field-underwriting.md section 2 — the 12-question life insurance
+// intake. Age (Q1) and tobacco (Q3) are already collected on Scenario by the
+// 10-question intake (same questions, same wording) — not duplicated here.
+// Medications (Q4) aren't modeled as free-text-to-condition parsing (that
+// needs the AI backend that isn't wired up yet, same gap as the "I've got a
+// guy" free-text layer) — majorDiagnoses captures the underwriting-relevant
+// signal directly instead.
+enum MajorDiagnosis {
+  heart_attack_or_stroke
+  cancer
+  diabetes_type_1
+  diabetes_type_2_controlled
+  autoimmune
+  mental_health_hospitalization
+  none
+}
+
+enum DuiHistory {
+  none
+  single_5_plus_years_ago
+  within_3_years
+  multiple
+}
+
+model LifeUnderwritingIntake {
+  id                               String           @id @default(cuid())
+  scenarioId                       String           @unique
+  scenario                         Scenario         @relation(fields: [scenarioId], references: [id], onDelete: Cascade)
+  heightInches                     Int? // Q2
+  weightLbs                        Int? // Q2
+  majorDiagnoses                   MajorDiagnosis[] @default([]) // Q4/Q5 (condition-level signal, not raw medication parsing)
+  hospitalizationsOrSurgeriesNotes String? // Q6
+  familyHistoryEarlyDeath          Boolean? // Q7: parent/sibling died before 60 from cardiac/cancer/stroke
+  occupation                       String? // Q8
+  hazardousOccupation              Boolean? // Q8
+  hobbies                          String? // Q9
+  hazardousHobby                   Boolean? // Q9
+  duiHistory                       DuiHistory? // Q10
+  foreignTravelPlanned             Boolean? // Q11
+  foreignTravelNotes               String? // Q11
+  existingLifeInsuranceNotes       String? // Q12
+  completedAt                      DateTime?
+  createdAt                        DateTime         @default(now())
+  updatedAt                        DateTime         @updatedAt
+
+  @@map("life_underwriting_intakes")
+}
+
+// docs/04-field-underwriting.md section 4 — the 9-question annuity intake.
+// No documented strategy in this library is annuity-funded yet (QWT, Annuity
+// Rescue, Qualified LTC are all pending_content), so this has nothing to
+// trigger from automatically — built as standalone infrastructure, ready for
+// when that content lands.
+enum SourceOfFunds {
+  qualified
+  non_qualified
+  mixed
+}
+
+enum IncomeStartTiming {
+  immediately
+  deferred_5_years
+  deferred_to_retirement_age
+  deferred_accumulation
+}
+
+enum TaxBracket {
+  under_22
+  range_22_32
+  range_32_37
+  above_37
+}
+
+enum EstatePlanningIntent {
+  legacy
+  income_only
+}
+
+model AnnuityIntake {
+  id                            String                @id @default(cuid())
+  scenarioId                    String                @unique
+  scenario                      Scenario              @relation(fields: [scenarioId], references: [id], onDelete: Cascade)
+  liquidNetWorthRange           IncomeRevenueRange? // Q1 — same buckets the doc itself uses
+  sourceOfFunds                 SourceOfFunds? // Q2
+  allocationAmount              Int? // Q3
+  desiredIncomeStartDate        IncomeStartTiming? // Q5
+  existingAnnuityContractsNotes String? // Q6
+  taxBracket                    TaxBracket? // Q7
+  estatePlanningIntent          EstatePlanningIntent? // Q8
+  needsLiquidityWithin5to7Years Boolean? // Q9
+  completedAt                   DateTime?
+  createdAt                     DateTime              @default(now())
+  updatedAt                     DateTime              @updatedAt
+
+  @@map("annuity_intakes")
+}
+
+// docs/07-progress-dashboard-math.md section 2 — neither Scenario nor
+// Strategy track case-size numbers (premium/face amount), so this captures
+// the agent's per-strategy estimate once a strategy is recommended. COLI
+// commissions are computed off faceAmount; every other product type off
+// annualPremium (see src/lib/commission.ts).
+enum ProductType {
+  permanent_life
+  term_life
+  survivorship_life
+  annuity
+  coli_face_amount
+  executive_bonus_162
+  disability_income
+  ltc_hybrid
+}
+
+model ScenarioStrategyEstimate {
+  id            String      @id @default(cuid())
+  scenarioId    String
+  scenario      Scenario    @relation(fields: [scenarioId], references: [id], onDelete: Cascade)
+  strategyId    String
+  strategy      Strategy    @relation(fields: [strategyId], references: [id])
+  productType   ProductType
+  annualPremium Int?
+  faceAmount    Int?
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+
+  @@unique([scenarioId, strategyId])
+  @@map("scenario_strategy_estimates")
+}
+
+// docs/08-master-dashboard.md section 4 — the Compliance Flag Queue. The
+// doc's Trigger 1 (a live compliance-filter catch on client-facing output)
+// has no real client-facing pipeline to fire from yet — every text output
+// this repo currently generates (the wholesaler handoff email) is agent/
+// wholesaler-facing internal tooling, not client copy (see Phase 3 Session 8's
+// note in docs/01-phased-build-plan.md) — so `filter_caught` flags exist in
+// the model/queue but nothing creates one automatically yet. Trigger 2
+// (pre-launch new strategy) and Trigger 3 (periodic audit of generated
+// outputs) are both real and wired up: Trigger 2 against the 7
+// `pending_content` strategies awaiting real content, Trigger 3 sampling real
+// sent wholesaler handoffs.
+enum ComplianceFlagTrigger {
+  filter_caught
+  pre_launch
+  periodic_audit
+}
+
+enum ComplianceFlagStatus {
+  open
+  cleared
+  rejected
+  escalated
+}
+
+model ComplianceFlag {
+  id              String                @id @default(cuid())
+  triggerType     ComplianceFlagTrigger
+  status          ComplianceFlagStatus  @default(open)
+  content         String
+  scenarioId      String?
+  scenario        Scenario?             @relation(fields: [scenarioId], references: [id], onDelete: Cascade)
+  strategyId      String?
+  strategy        Strategy?             @relation(fields: [strategyId], references: [id], onDelete: Cascade)
+  resolverId      String?
+  resolver        User?                 @relation("ComplianceFlagResolver", fields: [resolverId], references: [id])
+  resolutionNotes String?
+  createdAt       DateTime              @default(now())
+  resolvedAt      DateTime?
+
+  @@map("compliance_flags")
+}
+
+// docs/15-email-sequence.md — a prospect (not a user) enrolled in the
+// 7-email soap-opera sequence via the landing-page capture form. Email 1 is
+// due immediately; each later email is due 3 days after the previous send
+// (the doc's "every 2-3 days, ~18 days total"). No cron/job runner exists,
+// so due sends are processed by an admin action, not a scheduler; the doc's
+// "Tuesday/Friday 7-8am local" send-time targeting and open-based
+// re-engagement pause both need infrastructure (a scheduler, open tracking)
+// this repo doesn't have.
+model SequenceEnrollment {
+  id             String    @id @default(cuid())
+  email          String    @unique
+  nextStep       Int       @default(1)
+  nextSendAt     DateTime  @default(now())
+  completedAt    DateTime?
+  unsubscribedAt DateTime?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  @@map("sequence_enrollments")
+}
+
+// Book-of-business import (docs/07 section 4 made real): the agent's actual
+// client list, CSV-imported or added by hand, classified into the 4 avatars
+// and scored with the locked per-avatar Y1 commission model
+// (src/lib/book-of-business.ts). "Start a case" promotes a book client into
+// a Scenario with the intake pre-seeded from what the book already knows.
+model BookClient {
+  id     String @id @default(cuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  name                   String
+  age                    Int?
+  businessOwner          Boolean?
+  hasCoOwners            Boolean?
+  netWorthEstimate       NetWorthEstimate?
+  qualifiedFundsEstimate QualifiedFundsEstimate?
+  hasDependentsUnder18   Boolean?
+  notes                  String?
+
+  // Scored classification (best avatar by CLAUDE.md priority order) and the
+  // docs/07 per-avatar Y1 commission value. avatar null = unclassifiable
+  // from the imported fields (score 0) — never guessed.
+  avatar  Avatar?
+  scoreY1 Int     @default(0)
+
+  scenarioId String?   @unique
+  scenario   Scenario? @relation(fields: [scenarioId], references: [id], onDelete: SetNull)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+  @@map("book_clients")
+}

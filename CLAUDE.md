@@ -30,6 +30,18 @@ separate portal).
 - **Wholesaler assignment (Phase 3):** admin assigns one login-capable wholesaler per agent. The
   wholesaler gets a portal (`/wholesaler`) showing their assigned agents' cases and is notified
   (in-app + email) at the wholesaler-handoff moment. See `docs/23-wholesaler-assignment.md`.
+- **Deploy debugging — the incremental Railway bring-up (PROVEN 2026-07-04, use it):** when the
+  host fails to deploy while the local build is green, the cause is environment/build/infra, not
+  git history — splitting the same final code into more commits changes nothing, because the host
+  builds the branch tip regardless of commit count. Instead, tag the current app (`full-app`),
+  then rebuild the deploy branch from a bare skeleton upward in ~11 verifiable slices: each slice
+  is a complete, buildable app (restore files forward from the tag, `npm run build` to green
+  locally before every push), and you pause after each push for a human to confirm the host went
+  green. Whichever slice turns the host red is the exact culprit; hold known suspects (big assets,
+  SEO metadata, the DB layer, Edge middleware) to their own late slices to isolate them. This ran
+  clean end to end and pinned the real cause to infra (Node `engines` pin · `DATABASE_URL`
+  reference · `SESSION_SECRET` · Prisma engine fetch), not code and not the 1.2 MB share images.
+  Full reusable playbook + slice order: **`docs/26-incremental-deploy.md`**.
 
 ## The 6-phase plan (canonical — from the Master Developer Brief)
 

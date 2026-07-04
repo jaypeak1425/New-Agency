@@ -1,12 +1,15 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 
-// Slice 2 — DB-aware health check. Proves the database layer end to end:
-// prisma generate at build, `prisma migrate deploy` in the start command,
-// the DATABASE_URL reference, and live connectivity. If this deploy goes
-// red, the database layer (not app code) is the cause. The SESSION_SECRET
-// gate returns with the auth slice, so this slice isolates the DB alone.
+// Railway's deploy health check (railway.json healthcheckPath). Fails — and
+// therefore rolls the deploy back — when either of the two things every
+// request path depends on is missing: the database and the session-signing
+// secret. Anything less critical (Stripe, email) degrades gracefully and is
+// reported on /admin/launch instead; this endpoint is public, so it only
+// exposes booleans, never values or error internals.
 export async function GET() {
+  const sessionSecret = Boolean(process.env.SESSION_SECRET);
+
   let db = "connected";
   let dbOk = true;
   try {
@@ -15,5 +18,10 @@ export async function GET() {
     db = "unreachable";
     dbOk = false;
   }
-  return NextResponse.json({ status: dbOk ? "ok" : "error", db, slice: 2 }, { status: dbOk ? 200 : 503 });
+
+  const ok = dbOk && sessionSecret;
+  return NextResponse.json(
+    { status: ok ? "ok" : "error", db, sessionSecret },
+    { status: ok ? 200 : 503 },
+  );
 }

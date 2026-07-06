@@ -1,12 +1,13 @@
 # PeakBritt Financial Group × Case Atlas — Investor Pack
-## $300,000 investment · Prepared for Magellan Financial
+## $300,000 investment · Prepared for a prospective investor / front-man partner
 
 > Companion documents: docs/27-business-plan-297.md (full business plan),
 > docs/28-marketing-plan-297.md (marketing plan, SWOT, competitive landscape),
 > docs/29-ad-suite-297.md (ad & script suite the investor will deliver as front man).
 >
 > **Brand wall:** PeakBritt Financial Group and Case Atlas are self-contained brands. No other
-> affiliation or upline is named in any public material. Magellan Financial appears in investor
+> affiliation or upline is named in any public material. Magellan Financial — **PeakBritt's
+> upline partner, not the investor** — appears in investor
 > and partnership documents only — never in consumer/agent-facing marketing.
 >
 > All forward-looking figures are management estimates, not promises. The deal terms in §8 are
@@ -107,7 +108,7 @@ EBITDA isn't flattered by unpaid founder labor. Figures rounded to the nearest $
 | **Total COGS** | **3.2** | **7.3** | **12.6** | **16.2** | **39.3** |
 | **Gross profit** | **50.7** | **117.0** | **198.5** | **248.7** | **614.9** *(94% margin)* |
 | **Operating expenses** | | | | | |
-| Paid media (video production in-kind from Magellan Financial — see §8) | 12.0 | 12.0 | 18.0 | 18.0 | **60.0** |
+| Paid media (video production in-kind from Magellan Financial, our upline partner — see §8) | 12.0 | 12.0 | 18.0 | 18.0 | **60.0** |
 | Team (Tracy case ops from M3; part-time admin) | 7.5 | 12.0 | 14.3 | 14.2 | **48.0** |
 | CPE seminars (venue, CE sponsorship, materials) | 3.0 | 4.0 | 4.0 | 4.0 | **15.0** |
 | Tools & software | 2.4 | 2.4 | 2.4 | 2.4 | **9.6** |
@@ -144,7 +145,7 @@ MRR + override on a 50-producer roster) become the base so enterprise value isn'
 
 | Allocation | Amount | Why |
 |---|---:|---|
-| Paid media (12 months) | $60K | The demo-led ad engine (docs/29); production costs are in-kind from Magellan Financial, so this is pure distribution spend |
+| Paid media (12 months) | $60K | The demo-led ad engine (docs/29); production costs are in-kind from our upline partner Magellan Financial, so this is pure distribution spend |
 | Team | $48K | Tracy (licensing + case ops) and part-time admin — the operational floor under the founders |
 | Working capital & commission-lag buffer | $80K | Commissions pay on placement with underwriting lag (6–10 weeks) and chargeback exposure; this buffer means the plan never depends on a case closing on time |
 | CPE seminar program | $15K | 10 seminars — the CPA network that feeds the $45K/case channel |
@@ -171,12 +172,14 @@ to a hired voice as Stage-2 revenue supports it). An advisor option grant (0.5�
 monthly over the service period) compensates the services separately from the invested capital
 — clean cap table, clean expectations.
 
-**Magellan Financial in-kind contribution:** video production and marketing resources —
-studio/shoot capability, editing, creative support — are provided by Magellan Financial at no
-cash cost to PeakBritt. Effect on the model: the $300K buys **distribution** (media spend)
-rather than production overhead, roughly doubling effective marketing throughput per dollar.
-Scope, usage rights, and brand separation (Magellan is never named in consumer/agent-facing
-assets) are documented in the same services agreement.
+**Upline-partner in-kind resources (not part of the investor's contribution):** video
+production and marketing resources — studio/shoot capability, editing, creative support — are
+provided at no cash cost to PeakBritt by **Magellan Financial, our upline partner**, under the
+partnership relationship. Effect on the model: the $300K buys **distribution** (media spend)
+rather than production overhead, roughly doubling effective marketing throughput per dollar —
+and the resource commitment stands independent of this investment. For diligence: the scope,
+usage rights, and duration of the Magellan resource commitment are available in writing, and
+brand separation holds (Magellan is never named in consumer/agent-facing assets).
 
 **Why this alignment works:** the investor's stake appreciates on exactly the metrics the
 front-man role drives (subscribers, applications, contracted producers), and the founders'

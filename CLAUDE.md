@@ -33,8 +33,9 @@ separate portal).
   network built through CPE seminars** (COI referrals — also taught to contracted agents).
   Stage-1 goal: **$50K/month**. **Tracy holds the contracts only** (licensed contract holder,
   Stage 1). **The $300K investor is the front man during the transition** (services agreement;
-  succession to a hired voice at month ~9), and **Magellan Financial provides video production
-  + marketing resources in-kind** — Magellan appears in investor/partnership documents ONLY,
+  succession to a hired voice at month ~9), and **Magellan Financial — PeakBritt's UPLINE
+  PARTNER, not the investor — provides video production + marketing resources in-kind**
+  independent of the raise. Magellan appears in investor/partnership documents ONLY,
   never in consumer- or agent-facing assets. Offer wording is always **"no cost"**, never
   "free". Never mention CRI or Level Four anywhere — PeakBritt and Case Atlas are separate
   brands. See docs/27 (business plan), docs/28 (marketing plan), docs/29 (ad suite),

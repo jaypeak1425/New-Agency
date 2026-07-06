@@ -99,10 +99,10 @@ from month 4 gets there by month 10–12.
 - Legal hygiene: PeakBritt producer agreement (override schedule, no-cost-software clause,
   mentorship terms), E&O verification requirement, carrier appointment paperwork templates.
 - **Close the $300K investment (docs/30-investor-pack-300k.md):** the investor serves as
-  **the front man during the transition** (see §8), and **Magellan Financial provides video
-  production and marketing resources in-kind** — so the raised capital buys distribution
-  (media spend), not production overhead. Luke and Jay's calendars stay on production and
-  mentorship.
+  **the front man during the transition** (see §8), and **our upline partner Magellan
+  Financial provides video production and marketing resources in-kind** — so the raised
+  capital buys distribution (media spend), not production overhead. Luke and Jay's calendars
+  stay on production and mentorship.
 - **Book the first CPE seminar dates** (see §7): the CPA-network channel has the longest lead
   time of anything in the plan, so the calendar work starts now.
 - Instrument everything: subscription events, demo-watched, contract-application-started, in
@@ -203,9 +203,10 @@ The engine behind Channel 3, and a mentorship deliverable for Channel 2:
   converts the role to a hired voice once Stage-2 revenue supports it. An advisor option
   grant (0.5–1.0%, vesting monthly over the service period) compensates the services
   separately from the invested capital.
-- **Magellan Financial in-kind:** video production and marketing resources — studio/shoot
-  capability, editing, creative support — are provided by Magellan Financial at no cash cost
-  to PeakBritt. Brand wall holds: Magellan Financial appears in investor and partnership
+- **Magellan Financial in-kind (upline partner — NOT the investor):** video production and
+  marketing resources — studio/shoot capability, editing, creative support — are provided at
+  no cash cost to PeakBritt by Magellan Financial through the upline partnership, independent
+  of the investment. Brand wall holds: Magellan Financial appears in investor and partnership
   documents only, never in consumer- or agent-facing assets.
 - **Why this alignment works:** producers' calendars monetize at ~$45K/personal case and in
   mentorship overrides — not in retake sessions — and the investor's stake appreciates on
@@ -247,7 +248,7 @@ docs/28 §3):
 ## 10. Costs, risks, and the honest version
 
 **Stage-1 monthly cost envelope:** ads $3–6K (media only — **video production and marketing
-resources are provided in-kind by Magellan Financial** per the investment agreement),
+resources are provided in-kind by our upline partner Magellan Financial**),
 tools/hosting/AI <$1K, Tracy licensing one-time <$1.5K, founder + Tracy time (sweat).
 Break-even on cash costs at ~25 subscribers — everything past that funds ad scale.
 

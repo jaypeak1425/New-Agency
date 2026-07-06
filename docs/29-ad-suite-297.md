@@ -179,7 +179,8 @@ scenario tonight — if it doesn't find an opportunity in 30 days, full refund, 
 
 Every on-camera and hosted asset in this suite is written for **the front man** — during the
 transition, **the investor** (docs/30-investor-pack-300k.md), with video production and
-marketing resources provided in-kind by Magellan Financial (never named on screen) — not for
+marketing resources provided in-kind by our upline partner Magellan Financial (never named on
+screen) — not for
 Luke or Jay. Delivery rules:
 - The front man speaks AS the agency ("This is PeakBritt", "the people who built this"),
   never as the producer ("I write million-dollar cases" is reserved for Luke/Jay on-screen).

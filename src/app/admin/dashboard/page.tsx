@@ -169,7 +169,7 @@ export default async function MasterDashboardPage() {
             <div key={entry.user.id} className="flex items-center justify-between border-b border-border pb-2">
               <p className="text-sm text-navy">{entry.user.name ?? entry.user.email}</p>
               <p className="text-xs text-charcoal/50">
-                Cancelled {formatDate(entry.subscription.updatedAt)} — $97/mo lost
+                Cancelled {formatDate(entry.subscription.updatedAt)} — $297/mo lost
               </p>
             </div>
           ))}

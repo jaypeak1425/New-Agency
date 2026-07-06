@@ -27,7 +27,7 @@ export function GET() {
 
 ## Pricing
 
-- $97/month, cancel anytime, with a 30-day money-back guarantee. Later tiers include annual billing and per-seat IMO/BGA white-label licensing.
+- $297/month, cancel anytime, with a 30-day money-back guarantee. Complimentary for producers contracted through Peakbritt Financial Group. Later tiers include annual billing and per-seat IMO/BGA white-label licensing.
 
 ## Key pages
 

@@ -38,7 +38,7 @@ This document is a working index of everything we have built, decided, and saved
 - 2-product universe: life insurance (fully underwritten) + annuity (financially underwritten)
 
 ### Go-to-market
-- v1: Direct-to-agent at $97/month, marketing IS the demo
+- v1: Direct-to-agent at $297/month, marketing IS the demo
 - v2: White-label distribution to IMOs/FMOs/BGAs (per-seat monthly fee)
 - Brand vibe: "we're already living in 2030 and you're not" (iPhone launch energy)
 

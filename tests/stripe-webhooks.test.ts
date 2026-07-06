@@ -166,7 +166,7 @@ describe("Stripe webhook route", () => {
     expect(res.status).toBe(200);
 
     const sub = await prisma.subscription.findUnique({ where: { userId: user.id } });
-    expect(sub?.plan).toBe("agent_annual_970");
+    expect(sub?.plan).toBe("agent_annual_2970");
 
     await prisma.webhookEvent.deleteMany({ where: { id: checkoutEventId } });
   });

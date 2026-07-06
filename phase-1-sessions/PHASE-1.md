@@ -33,9 +33,9 @@ routes redirect when logged out.
 Prospects, Settings.
 **Done when:** login lands on the dashboard; logout returns to marketing/login; guards enforced.
 
-## Session 4 — Stripe billing at $97/mo (test mode)
-**Goal:** A user subscribes at $97/mo and gains access.
-**In scope:** Stripe Checkout for a $97/mo product; customer portal link; gate `/app/*` on active
+## Session 4 — Stripe billing at $297/mo (test mode)
+**Goal:** A user subscribes at $297/mo and gains access.
+**In scope:** Stripe Checkout for a $297/mo product; customer portal link; gate `/app/*` on active
 subscription; store `subscriptions` row.
 **Constraints:** Test keys via env. No annual/IMO pricing yet (Phase 5). Do not auto-send anything.
 **Done when:** test card subscribes; access granted; portal opens; canceling revokes access.

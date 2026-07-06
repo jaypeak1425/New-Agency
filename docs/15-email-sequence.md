@@ -110,7 +110,7 @@ You walk into the next meeting with everything ready. The next meeting isn't a d
 
 This isn't AI inventing strategies on the fly. The engine reasons from a locked, curated library built on real case-design thinking. Every recommendation is non-taxable. Every claim is conditioned on the policy remaining in force. The compliance is built in.
 
-The producers who break through have a system. This is the system. And it's $97/month.
+The producers who break through have a system. This is the system. And it's $297/month.
 
 I'll show you the actual output tomorrow.
 
@@ -183,7 +183,7 @@ You don't need more years. You need a brain in your pocket.
 
 — Jay
 
-**P.S.** The brain is software now. $97/month. Try it.
+**P.S.** The brain is software now. $297/month. Try it.
 
 ---
 
@@ -203,7 +203,7 @@ Here's what I haven't asked: do you want to try it?
 
 If you do, here's what happens:
 
-- You sign up for $97/month
+- You sign up for $297/month
 - You run your first "I've got a guy" tonight
 - The engine returns the full case design
 - You see the opportunities sitting in your book that you didn't know were there
@@ -231,7 +231,7 @@ If you've been reading these emails, you know what I'm building. A strategy engi
 
 You've seen the demo. You've seen the "I've got a guy" scenario. You've seen the false belief destroyed.
 
-If you want to try it, the link is [URL]. $97/month. 30-day money-back. No questions asked.
+If you want to try it, the link is [URL]. $297/month. 30-day money-back. No questions asked.
 
 If you have questions, reply to this email. I read every reply.
 

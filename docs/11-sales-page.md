@@ -15,7 +15,7 @@ The long-form sales page that lives at the URL where the demo is the centerpiece
 
 **Subhead:** "Type 'I've got a guy.' Get the full case design — strategy, pitch deck, illustrations, order of operations for the sales meeting."
 
-**Primary CTA:** "Try Case Atlas — $97/month, 30-day money-back"
+**Primary CTA:** "Try Case Atlas — $297/month, 30-day money-back"
 
 **Secondary CTA:** "Watch the 60-second demo"
 
@@ -192,7 +192,7 @@ You need a brain in your pocket that thinks like a $1M producer. The engine is t
 
 ## Section 10: The Price
 
-**Headline:** "$97/month. Cancel anytime. 30-day money-back guarantee."
+**Headline:** "$297/month. Cancel anytime. 30-day money-back guarantee."
 
 **Body:**
 Less than the cost of one missed opportunity in your book.
@@ -218,7 +218,7 @@ That's how confident we are.
 
 **Headline:** "Try Case Atlas for 30 days."
 
-**Subhead:** "Run your first 'I've got a guy' tonight. See what the engine finds in your book. $97/month. Money back if you don't find an opportunity."
+**Subhead:** "Run your first 'I've got a guy' tonight. See what the engine finds in your book. $297/month. Money back if you don't find an opportunity."
 
 **Primary CTA:** "Start your 30-day trial"
 

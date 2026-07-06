@@ -11,9 +11,9 @@ import { Wordmark } from "@/components/ui/Wordmark";
 import { Card } from "@/components/ui/Card";
 
 function planLabel(plan: string | undefined) {
-  if (plan === AGENT_ANNUAL_PLAN) return "$970/year";
+  if (plan === AGENT_ANNUAL_PLAN) return "$2,970/year";
   if (plan === "comped") return "comped by an admin";
-  return "$97/month";
+  return "$297/month";
 }
 
 export default async function BillingPage({
@@ -68,14 +68,14 @@ export default async function BillingPage({
             <form action={startCheckoutAction} className="mt-6">
               <input type="hidden" name="planKey" value="monthly" />
               <SubmitButton pendingText="Redirecting…" className="w-full">
-                Subscribe — $97/month
+                Subscribe — $297/month
               </SubmitButton>
             </form>
             {isAnnualBillingConfigured() && (
               <form action={startCheckoutAction} className="mt-3">
                 <input type="hidden" name="planKey" value="annual" />
                 <SubmitButton variant="outline" pendingText="Redirecting…" className="w-full">
-                  Subscribe — $970/year (save ~17%)
+                  Subscribe — $2,970/year (save ~17%)
                 </SubmitButton>
               </form>
             )}

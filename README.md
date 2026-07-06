@@ -18,7 +18,7 @@ This package bootstraps the build in Claude Code. Drop it into an empty repo and
 ## What's decided (so Claude Code doesn't ask)
 
 Integrated SaaS · Atlas typer is native · Next.js + Supabase + Stripe · deploy Railway ·
-$97/mo · AI routed by complexity · names are placeholders (bot = Atlas).
+$297/mo · AI routed by complexity · names are placeholders (bot = Atlas).
 
 ## The one open dependency
 

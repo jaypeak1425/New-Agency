@@ -113,7 +113,7 @@ infra, or credential action · **[Blocked]** = needs an input you haven't provid
 - **[Claude]** Admin/master dashboard (clients, revenue, activity, churn, support, compliance
   modules); Opportunity Flow + **Learning Loop** (verify/modify → engine learns, event log);
   **Compliance Flag Queue** UI (filter-caught / new-strategy / periodic-audit triggers); annual
-  billing (~$970–980); IMO per-seat tiers (50/100/500+); white-label branding engine (logo/color/
+  billing (~$2,970); IMO per-seat tiers (50/100/500+); white-label branding engine (logo/color/
   byline per IMO); per-seat usage tracking; IMO-principal reporting; **Pre-Launch Validation**
   workflow (9-step, 12 diagnostic Qs, 3 review paths).
 - **[You/Dev]** Compliance officer hired/contracted to work the queue; pilot IMO to test white-label.

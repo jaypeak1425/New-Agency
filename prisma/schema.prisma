@@ -426,7 +426,7 @@ model Subscription {
   stripeCustomerId     String?            @unique
   stripeSubscriptionId String?            @unique
   status               SubscriptionStatus @default(incomplete)
-  plan                 String             @default("agent_monthly_97")
+  plan                 String             @default("agent_monthly_297")
   currentPeriodEnd     DateTime?
   createdAt            DateTime           @default(now())
   updatedAt            DateTime           @updatedAt

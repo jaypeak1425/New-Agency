@@ -6,9 +6,9 @@ import { engagementScoreFor, type EngagementScore } from "@/lib/engagement";
 import type { User, Subscription, AgentProfile } from "@/generated/prisma/client";
 
 const DAY_MS = 24 * 60 * 60 * 1000;
-const MONTHLY_PRICE = 97;
+const MONTHLY_PRICE = 297;
 // docs/08-master-dashboard.md section 2, Widget 1: "annual prepay ($X ÷ 12)."
-const ANNUAL_PRICE = 970;
+const ANNUAL_PRICE = 2970;
 const ANNUAL_MONTHLY_EQUIVALENT = ANNUAL_PRICE / 12;
 
 function daysSince(date: Date | null | undefined, now: number): number {

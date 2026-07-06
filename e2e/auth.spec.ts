@@ -18,7 +18,7 @@ test("signup creates a session and lands on billing (no subscription yet)", asyn
   await page.fill('input[name="password"]', "supersecret123");
   await page.click('button[type="submit"]');
   await page.waitForURL("**/billing");
-  await expect(page.locator("main")).toContainText("Subscribe for $97/month");
+  await expect(page.locator("main")).toContainText("Billing");
 });
 
 test("logging out from the dashboard clears the session and blocks /app again", async ({

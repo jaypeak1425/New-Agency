@@ -226,7 +226,7 @@ export default async function Home({
             </p>
             <div className="mkt-cta mt-9 flex flex-col items-start gap-4 sm:flex-row sm:items-center">
               <Link href="/signup" className={buttonClassName("primary")}>
-                Try Case Atlas — $97/month
+                Try Case Atlas — $297/month
               </Link>
               <Link href="#atlas-live" className={buttonClassName("outline-on-dark")}>
                 Watch Atlas think
@@ -401,7 +401,8 @@ export default async function Home({
               The future arrives either way. Arrive <span className="italic text-gold">equipped.</span>
             </h2>
             <p className="mt-4 text-cream/80">
-              $97/month. Cancel anytime. Less than the cost of one missed opportunity in your book.
+              $297/month. Cancel anytime. Less than the cost of one missed opportunity in your book.
+              Contracted Peakbritt producers get Case Atlas included at no cost.
               If the engine finds one you would have missed, it paid for itself for years. If it
               doesn&rsquo;t in your first 30 days, we refund you — no questions asked.
             </p>

@@ -3,7 +3,7 @@ Insurance Strategy Engine — Complete Package
 
 1. Handoff at a Glance
 
-What we built: A complete, shareable spec for a Jarvis-style AI strategy engine for life insurance and annuity producers. The product is a SaaS with three-position positioning (recruiting / retention / revenue) priced at $97/mo for individual agents and $75/seat/month for IMO white-label, targeting $30K MRR by month 12.
+What we built: A complete, shareable spec for a Jarvis-style AI strategy engine for life insurance and annuity producers. The product is a SaaS with three-position positioning (recruiting / retention / revenue) priced at $297/mo for individual agents and $75/seat/month for IMO white-label, targeting $30K MRR by month 12.
 
 What's in the package: 12 documents totaling ~30,000 words. Every doc is written so a developer, compliance officer, sales hire, or co-founder can read it and know what to do.
 

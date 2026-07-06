@@ -52,7 +52,7 @@ export default function TermsPage() {
 
       <LegalH2>4. Subscriptions and billing</LegalH2>
       <LegalUL>
-        <li>The Service is offered on a paid subscription (currently $97/month, billed through our payment processor).</li>
+        <li>The Service is offered on a paid subscription (currently $297/month, billed through our payment processor).</li>
         <li>Subscriptions renew automatically until canceled; you may cancel at any time, effective at the end of the current billing period.</li>
         <li>Our 30-day money-back guarantee, where offered, is described at the point of sale and governs refunds for the initial period.</li>
       </LegalUL>

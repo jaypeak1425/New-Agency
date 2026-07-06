@@ -9,7 +9,7 @@ This is the consolidation document your developer reads first. It ties together 
 
 ## 1. The Product in One Paragraph
 
-A Jarvis-style AI strategy engine for life insurance and annuity producers, built on a locked library of 9 core + 8 supporting strategies (see the brain doc). The agent types or speaks a client scenario — "I've got a guy" — and the engine returns a full case design with pitch deck, marketing pieces, illustrations needed, and the order of operations for the sales meeting. v1 is direct-to-agent at $97/month; v2 is white-label distribution to IMOs/FMOs/BGAs at $75/seat/month, tiered by seat count.
+A Jarvis-style AI strategy engine for life insurance and annuity producers, built on a locked library of 9 core + 8 supporting strategies (see the brain doc). The agent types or speaks a client scenario — "I've got a guy" — and the engine returns a full case design with pitch deck, marketing pieces, illustrations needed, and the order of operations for the sales meeting. v1 is direct-to-agent at $297/month; v2 is white-label distribution to IMOs/FMOs/BGAs at $75/seat/month, tiered by seat count.
 
 **Three-position positioning (confirmed):**
 1. **Recruiting tool** — for individual agents at $100K+ for 3-5 years who want to expand
@@ -78,8 +78,8 @@ A Jarvis-style AI strategy engine for life insurance and annuity producers, buil
 ## 8. Operational / Billing Layer (Phase 1 + Phase 5)
 
 - **Login system** with admin control (grant, revoke, suspend access at any time)
-- **Monthly billing** at $97/mo for individual agents
-- **Annual billing** with ~16-20% discount for annual prepay (target $970-$980/yr)
+- **Monthly billing** at $297/mo for individual agents
+- **Annual billing** with ~16-20% discount for annual prepay (target $2,970/yr)
 - **Special pricing for participating IMOs** — tiered per-seat rate at $75/seat/month base (50/100/500+ seats)
 - **Admin dashboard:** logins, activity, churn, prospects added, strategies recommended, pitches built
 - **Master dashboard:** every client (agent and IMO), channel attribution, MRR by segment, activity, churn, support, opportunity flow with verification + modification + learning loop, compliance flag queue
@@ -88,7 +88,7 @@ A Jarvis-style AI strategy engine for life insurance and annuity producers, buil
 
 | Phase | Milestone | What ships |
 |---|---|---|
-| 1 | The Skeleton | Web app, login, Stripe billing at $97/mo, admin controls |
+| 1 | The Skeleton | Web app, login, Stripe billing at $297/mo, admin controls |
 | 2 | The Brand | Name, tagline, visual, marketing site, branded UI |
 | 3 | The Brain | Strategy library ingested, intake flow, avatar matching, recommendations, pivots, compliance guardrails, 9 hard rules enforced, pre-launch validation |
 | 4 | The Output | Pitch deck generator, per-prospect decks, marketing pieces, progress dashboard, prospecting list, weekly call queue, video recommender |

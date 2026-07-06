@@ -7,8 +7,8 @@
 
 | Segment | Price | Notes |
 |---|---|---|
-| **Individual agents (direct)** | $97/mo | No setup fee. 30-day money-back guarantee as hesitation-killer. |
-| **Individual agents (annual)** | ~$970–$980/yr | ~16–20% discount for annual prepay. |
+| **Individual agents (direct)** | $297/mo | No setup fee. 30-day money-back guarantee as hesitation-killer. |
+| **Individual agents (annual)** | ~$2,970/yr | ~16–20% discount for annual prepay. |
 | **IMO/FMO/BGA/GA white-label** | $75/seat/month | Gives IMO markup room. Tiered by seat count (50 / 100 / 500+). |
 
 BGA, FMO, IMO, and GA are the same thing — different vocabulary in the industry.
@@ -18,8 +18,12 @@ BGA, FMO, IMO, and GA are the same thing — different vocabulary in the industr
 ## 2. Path to $30,000 MRR
 
 ### Path 1 — Individual Agents Only
-- $30,000 ÷ $97 = **~310 paying individual agents**
-- Possible but slow
+- $30,000 ÷ $297 = **~101 paying individual agents**
+- Very achievable at the $297 price point
+
+> **Superseded by docs/27-business-plan-297.md** — the current plan targets **$50K/month in
+> Stage 1** by pairing $297 subscriptions with PeakBritt contracting overrides ($2K average
+> override per placed case). This document remains as the original SaaS-only model.
 
 ### Path 2 — IMOs at $75/seat/month (the leverage play)
 
@@ -138,7 +142,7 @@ BGA, FMO, IMO, and GA are the same thing — different vocabulary in the industr
 
 ## 6. The Recruiting Engine — Marketing Stack
 
-### For individual agents ($97/mo direct)
+### For individual agents ($297/mo direct)
 - One-pager: "The 5-min intro"
 - Slide deck: 8–10 slides, demo-first pitch
 - Demo video: 60–90s, the "you're in your car after an appointment" scenario

@@ -57,16 +57,16 @@ yourself.
 
 ---
 
-## Phase B — Paid launch ($97/mo self-serve)
+## Phase B — Paid launch ($297/mo self-serve)
 
 **Goal:** the billing page switches from pilot mode to live Stripe checkout. Until every item here
 is set, the billing page shows pilot copy instead of subscribe buttons — flipping this phase on is
 purely additive.
 
 1. In Stripe (test mode first):
-   - Create a product "Case Atlas" with a **$97/month** recurring price → copy the price id into
+   - Create a product "Case Atlas" with a **$297/month** recurring price → copy the price id into
      `STRIPE_PRICE_ID_AGENT_MONTHLY`.
-   - Optionally create the **$970/year** price → `STRIPE_PRICE_ID_AGENT_ANNUAL`. The annual
+   - Optionally create the **$2,970/year** price → `STRIPE_PRICE_ID_AGENT_ANNUAL`. The annual
      button only appears once this is set.
    - Copy the API secret key → `STRIPE_SECRET_KEY`.
 2. **Webhook endpoint**: Stripe Dashboard → Developers → Webhooks → Add endpoint →

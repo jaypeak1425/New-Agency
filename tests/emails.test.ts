@@ -29,7 +29,7 @@ describe("email templates", () => {
   it("billing alert varies subject and body by type", () => {
     const subscribed = billingAlertEmail({ type: "subscribed", appBaseUrl: "http://localhost:3000" });
     expect(subscribed.subject).toContain("subscribed");
-    expect(subscribed.html).toContain("$97/month");
+    expect(subscribed.html).toContain("$297/month");
 
     const failed = billingAlertEmail({ type: "payment_failed", appBaseUrl: "http://localhost:3000" });
     expect(failed.subject).toContain("Action needed");

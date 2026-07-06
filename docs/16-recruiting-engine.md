@@ -1,7 +1,7 @@
 # Recruiting Engine Spec
 
 ## Purpose
-The Recruiting Engine is the marketing system that brings agents and IMOs in. It's not the product itself — it's the assets and funnels that market the product. The system has two halves: the individual agent marketing (drives sign-ups to the $97/mo direct offer) and the IMO marketing (drives white-label contracts at $75/seat).
+The Recruiting Engine is the marketing system that brings agents and IMOs in. It's not the product itself — it's the assets and funnels that market the product. The system has two halves: the individual agent marketing (drives sign-ups to the $297/mo direct offer) and the IMO marketing (drives white-label contracts at $75/seat).
 
 **This doc is what the marketing team and the developer build against.** It includes the per-avatar offer stack, the per-avatar channel mix, the asset list per segment, the launch playbooks, the KPIs, and the integration with the master dashboard.
 
@@ -32,7 +32,7 @@ Jay's voice. Honest, plain-spoken, calm. No guru language. No "unlock your poten
 
 ## 2. The Per-Avatar Offer Stack (Individual Agents)
 
-The $97/mo direct offer is positioned differently for each avatar:
+The $297/mo direct offer is positioned differently for each avatar:
 
 ### For the Stuck Producer ($100K+ for 3-5 years)
 **The promise:** "Find the opportunities in your book you've been missing."
@@ -48,7 +48,7 @@ The $97/mo direct offer is positioned differently for each avatar:
 
 ### For the New Producer (less than 3 years)
 **The promise:** "Skip the 5-year plateau. Start with a system, not just a product catalog."
-**The hook:** "You're learning the business. The producers who break through fast have a system. The producers who plateau are guessing. Here's the system, and it's $97/mo."
+**The hook:** "You're learning the business. The producers who break through fast have a system. The producers who plateau are guessing. Here's the system, and it's $297/mo."
 **The CTA:** "Try it for 30 days. If you don't find an opportunity in your first month, money back."
 **The asset:** The 30-day guarantee positioning, the "first-year fast track" angle.
 
@@ -205,7 +205,7 @@ The IMO's gain from the engine:
 **Template 1: The "iPhone moment" ad**
 - 15-30 second video
 - Shows the agent typing "I've got a guy" and the engine returning the case design
-- Caption: "The strategy engine in your pocket. $97/mo."
+- Caption: "The strategy engine in your pocket. $297/mo."
 - CTA: "See it work in 60 seconds."
 
 **Template 2: The "stuck at $100K" ad**

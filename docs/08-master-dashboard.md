@@ -30,9 +30,9 @@ The internal team view has six modules, accessible from a top nav:
 **Agents tab columns:**
 - Name
 - Email
-- Plan (monthly $97 / annual $970-$980)
+- Plan (monthly $297 / annual $2,970)
 - Status (active / past due / cancelled / suspended)
-- MRR contribution ($97 or annual ÷ 12)
+- MRR contribution ($297 or annual ÷ 12)
 - Signup date
 - Channel (organic / paid / referral / IMO-sourced / Dream 100 / etc.)
 - Last login
@@ -61,7 +61,7 @@ The internal team view has six modules, accessible from a top nav:
 
 **Widget 1: Total MRR**
 - Big number at the top: total monthly recurring revenue
-- Breakdown: individual agents ($97 × active monthly count) + annual prepay ($X ÷ 12) + IMO white-label ($75 × active seats)
+- Breakdown: individual agents ($297 × active monthly count) + annual prepay ($X ÷ 12) + IMO white-label ($75 × active seats)
 - Trend: line chart showing MRR over time (last 30 / 90 / 365 days)
 - Goal tracking: if there's a $30K MRR target, show progress
 

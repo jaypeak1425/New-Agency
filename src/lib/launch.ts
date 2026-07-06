@@ -109,7 +109,7 @@ export async function getLaunchReadiness(): Promise<ReadinessPhase[]> {
     },
     {
       phase: "Phase B — Paid launch",
-      goal: "Public $97/mo signups through Stripe. Until this is green, the billing page runs in pilot mode.",
+      goal: "Public $297/mo signups through Stripe. Until this is green, the billing page runs in pilot mode.",
       items: [
         {
           label: "Stripe secret key",
@@ -117,7 +117,7 @@ export async function getLaunchReadiness(): Promise<ReadinessPhase[]> {
           detail: "STRIPE_SECRET_KEY (test mode first, then live).",
         },
         {
-          label: "Monthly price ($97/mo)",
+          label: "Monthly price ($297/mo)",
           ok: Boolean(process.env.STRIPE_PRICE_ID_AGENT_MONTHLY),
           detail: "STRIPE_PRICE_ID_AGENT_MONTHLY — create the Price in Stripe, paste its id.",
         },
@@ -128,7 +128,7 @@ export async function getLaunchReadiness(): Promise<ReadinessPhase[]> {
             "STRIPE_WEBHOOK_SECRET — add an endpoint for /api/webhooks/stripe; without it renewals, cancellations, and payment failures never reach the app.",
         },
         {
-          label: "Annual price ($970/yr) — optional",
+          label: "Annual price ($2,970/yr) — optional",
           ok: Boolean(process.env.STRIPE_PRICE_ID_AGENT_ANNUAL),
           detail:
             "STRIPE_PRICE_ID_AGENT_ANNUAL — the annual button only appears once this is set.",

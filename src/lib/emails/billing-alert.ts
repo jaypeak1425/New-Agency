@@ -5,9 +5,9 @@ export type BillingAlertType = "subscribed" | "payment_failed" | "canceled";
 const COPY: Record<BillingAlertType, { subject: string; preheader: string; body: string }> = {
   subscribed: {
     subject: "You're subscribed to Case Atlas",
-    preheader: "Your $97/month subscription is active.",
+    preheader: "Your $297/month subscription is active.",
     body: `
-      <p style="margin: 0 0 16px;">Your Case Atlas subscription is active — $97/month.</p>
+      <p style="margin: 0 0 16px;">Your Case Atlas subscription is active — $297/month.</p>
       <p style="margin: 0 0 16px;">
         Run your first &ldquo;I&rsquo;ve got a guy&rdquo; scenario tonight. See what&rsquo;s
         sitting in your book.

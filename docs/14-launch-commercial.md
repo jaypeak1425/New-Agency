@@ -62,7 +62,7 @@ The pitch deck appears. The wholesaler handoff email appears. The COI action app
 
 **On-screen text:**
 "Case Atlas"
-"$97/month. 30-day money-back."
+"$297/month. 30-day money-back."
 "[URL]"
 
 ---
@@ -99,7 +99,7 @@ Inserted after the walk-in. Visual: The producer in their car again, but this ti
 
 **Scene 4 (0:12-0:15):** Brand mark + price.
 
-**On-screen text throughout:** "The strategy engine for the producer who's done guessing. $97/month."
+**On-screen text throughout:** "The strategy engine for the producer who's done guessing. $297/month."
 
 ### 30-Second Version (for paid social / YouTube pre-roll)
 

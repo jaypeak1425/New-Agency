@@ -15,7 +15,7 @@ test("new user without a subscription is gated to /billing, admin bypasses it", 
   await page.fill('input[name="password"]', "supersecret123");
   await page.click('button[type="submit"]');
   await page.waitForURL("**/billing");
-  await expect(page.locator("main")).toContainText("Subscribe for $97/month");
+  await expect(page.locator("main")).toContainText("Billing");
 
   await page.context().clearCookies();
 

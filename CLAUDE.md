@@ -11,7 +11,7 @@ One integrated SaaS for life-insurance & annuity producers. A producer types a p
 client scenario ("I've got a guy…"), the in-app assistant **Atlas** runs a 10-question intake,
 classifies the prospect into avatars, recommends strategies from a **locked strategy library
 (the Brain)**, decides life vs. annuity vs. hybrid, surfaces COI actions, drafts a wholesaler
-handoff email, builds a pitch deck, and tracks pipeline. Sold direct at **$97/mo**; later
+handoff email, builds a pitch deck, and tracks pipeline. Sold direct at **$297/mo**; later
 white-labeled to IMOs at **$75/seat**.
 
 "Atlas typer" = the in-app "I've got a guy" intake feature. It is native to THIS product (not a
@@ -23,7 +23,14 @@ separate portal).
   deploy to **Railway**. Build host-agnostic; Railway is the target.
 - **AI:** routed by complexity — simple tasks → cheap/fast model, complex → capable model.
   Single provider abstraction; model choice behind one `callModel(complexity, messages)` function.
-- **Pricing:** $97/mo direct (Phase 1). Annual (~$970–980) and IMO per-seat ($75) come in Phase 5.
+- **Pricing (repriced 2026-07-06):** $297/mo direct · annual $2,970 (~17% off). **FREE for
+  producers contracted through PeakBritt** — the software is the hook, the PeakBritt contract +
+  one-on-one mentorship is the upsell (see docs/27–29). IMO per-seat ($75) comes in Phase 5.
+- **GTM (locked 2026-07-06):** ICP = agents earning $100K+ who want to become million-dollar
+  producers. Unit economics: PeakBritt average override 20% × $10K average target commission =
+  **$2K override per placed case**. Stage-1 goal: **$50K/month**. Never mention CRI or Level Four
+  anywhere — PeakBritt and Case Atlas are separate brands. See docs/27 (business plan),
+  docs/28 (marketing plan), docs/29 (ad suite).
 - **Names — locked:** Agency = **Peakbritt Financial Group**. Software = **Case Atlas**. Bot = **Atlas**.
 - **Build method:** one Copilot/Claude-Code session = one user story = 5–10 related changes. State
   goal, files in scope, constraints, definition of done up front.
@@ -45,7 +52,7 @@ separate portal).
 
 ## The 6-phase plan (canonical — from the Master Developer Brief)
 
-1. **Skeleton** — app, auth, Stripe $97/mo, admin controls, audit log, empty dashboard.
+1. **Skeleton** — app, auth, Stripe $297/mo, admin controls, audit log, empty dashboard.
 2. **Brand** — design system, marketing site, onboarding, branded UI/emails.
 3. **Brain** — strategy library ingested; 10-question intake; avatar classify; recommend; pivot;
    compliance filter; 9 hard rules; life+annuity UW intake; wholesaler-handoff trigger.
@@ -106,6 +113,6 @@ Full source specs live in `/docs`. Read `/docs/00-developer-brief.md` first, the
 working. Do not invent behavior that contradicts a doc; if a doc is silent, ask.
 
 ## Definition of done for Phase 1
-See `/phase-1-sessions/`. Ship: signup → pay $97/mo (Stripe test) → login → empty dashboard →
+See `/phase-1-sessions/`. Ship: signup → pay $297/mo (Stripe test) → login → empty dashboard →
 logout; admin can grant/revoke/suspend; Stripe webhooks handle create/cancel/payment-failed; all
 routes secured; deployed to a Railway staging URL; `audit_log` capturing admin actions.

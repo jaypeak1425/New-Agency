@@ -33,7 +33,7 @@ This document is the staged build plan for the Insurance Strategy Engine. Each p
 - **Guardrail system** — compliance engine, brain lock, client profile filter
 - **Three-position positioning** — recruiting / retention / revenue
 - **Brand rules** — elegant premium feel, no false claims, no "Firm Advantage," no CPA-on-staff language
-- **Operational/billing layer** — login, admin control, monthly $97, annual $970-$980, IMO tiered pricing
+- **Operational/billing layer** — login, admin control, monthly $297, annual $2,970, IMO tiered pricing
 - **4 avatars** — HNW, Business Owner, Qualified Fund Heavy, Family/Legacy
 - **2-product universe** — life insurance (underwritten) + annuity (financially underwritten)
 - **9 non-negotiable hard rules** — including the annuity→life direct §1035 prohibition
@@ -47,7 +47,7 @@ This document is the staged build plan for the Insurance Strategy Engine. Each p
 ### What's in scope
 - Web app framework (Next.js or equivalent)
 - User login (email/password) with "forgot password" reset
-- Stripe billing wired up at $97/mo subscription
+- Stripe billing wired up at $297/mo subscription
 - Admin login with grant/revoke/suspend access
 - Empty dashboard placeholder with logo + nav
 - Database for users, subscriptions, and admin actions
@@ -64,7 +64,7 @@ This document is the staged build plan for the Insurance Strategy Engine. Each p
 - IMO pricing tiers
 
 ### Definition of done
-- [ ] A new user can sign up, pay $97/mo, log in, see an empty dashboard, log out
+- [ ] A new user can sign up, pay $297/mo, log in, see an empty dashboard, log out
 - [ ] An admin can log in, see all users, suspend or revoke access
 - [ ] Stripe webhook correctly handles subscription events (created, canceled, payment failed)
 - [ ] All routes are secure (auth required for user pages, admin required for admin pages)
@@ -74,7 +74,7 @@ This document is the staged build plan for the Insurance Strategy Engine. Each p
 1. **Session 1:** Scaffold the Next.js app, set up the database schema for users/subscriptions/admin actions, deploy to staging
 2. **Session 2:** Build the signup/login flow with email/password, including "forgot password" reset
 3. **Session 3:** Build the empty dashboard with placeholder nav and protected routes
-4. **Session 4:** Integrate Stripe billing at $97/mo subscription, including the customer portal
+4. **Session 4:** Integrate Stripe billing at $297/mo subscription, including the customer portal
 5. **Session 5:** Build the admin login, admin dashboard, and grant/revoke/suspend access controls
 6. **Session 6:** Stripe webhook handling for subscription lifecycle events
 7. **Session 7:** End-to-end testing, fix any bugs, polish the auth UX
@@ -83,7 +83,7 @@ This document is the staged build plan for the Insurance Strategy Engine. Each p
 
 ## Phase 2 — The Brand
 **Milestone:** "This looks real."
-**Goal:** The empty dashboard looks like something an agent would pay $97/mo to use. The three-position positioning shows up in the messaging.
+**Goal:** The empty dashboard looks like something an agent would pay $297/mo to use. The three-position positioning shows up in the messaging.
 
 ### What's in scope
 - Final name, tagline, and visual identity (agency, software, bot)
@@ -396,7 +396,7 @@ This document is the staged build plan for the Insurance Strategy Engine. Each p
 
 ### What's in scope
 - Admin dashboard (logins, activity, churn, prospects added, strategies recommended, pitches built)
-- Annual billing with discount (~$970-$980/yr)
+- Annual billing with discount (~$2,970/yr)
 - IMO/FMO/BGA/GA white-label pricing tiers (50 / 100 / 500+ seats)
 - White-label branding engine (logo, color, byline per IMO)
 - Compliance review pipeline (every output tagged for compliance sign-off)
@@ -410,7 +410,7 @@ This document is the staged build plan for the Insurance Strategy Engine. Each p
 
 ### Definition of done
 - [ ] Admin dashboard shows all the metrics the IMO principal cares about
-- [ ] Annual billing works at the discount target ($970-$980/yr)
+- [ ] Annual billing works at the discount target ($2,970/yr)
 - [ ] IMO white-label pricing tiers work (50/100/500+ seats)
 - [ ] White-label branding engine lets an IMO upload their logo, pick their color, and ship a branded version of the app
 - [ ] Compliance review pipeline flags every output for sign-off
@@ -432,24 +432,24 @@ This document is the staged build plan for the Insurance Strategy Engine. Each p
    fixed a real bug during verification: signup establishes a session directly without calling
    `logIn()`, so every fresh signup read as "never logged in" and permanently appeared on the
    at-risk churn list — fixed by stamping `lastLoginAt` at signup too. Verified end-to-end: a real
-   $97/mo subscription, a canceled one, and an admin-comped one correctly show $97 total MRR (comped
-   excluded), $97 churned MRR, ~50% churn rate, and the comped/canceled agents don't appear as
+   $297/mo subscription, a canceled one, and an admin-comped one correctly show $297 total MRR (comped
+   excluded), $297 churned MRR, ~50% churn rate, and the comped/canceled agents don't appear as
    active MRR contributors.
 2. **Session 2:** Add annual billing with the discount target — done. Added a
-   `agent_annual_970` plan ($970/yr, the low end of CLAUDE.md/docs/20-business-plan.md's locked
-   "~$970-980/yr, ~16-20% discount" range) alongside the existing $97/mo plan. Both `createCheckoutSession`
+   `agent_annual_2970` plan ($2,970/yr, the low end of CLAUDE.md/docs/20-business-plan.md's locked
+   "$2,970/yr, ~16-20% discount" range) alongside the existing $297/mo plan. Both `createCheckoutSession`
    and the two places that write a subscription row after checkout (the success-redirect sync in
    `src/lib/billing.ts` and the `checkout.session.completed` webhook handler) now read which plan
    was purchased off the Checkout session's `metadata.planKey` — Stripe's session payload doesn't
    otherwise carry the price/plan without an extra expand+API call. The billing page offers both
    plans side by side. Updated the Session 1 master dashboard's MRR math to add the annual segment
-   (`$970 ÷ 12` per docs/08-master-dashboard.md's own formula) to Total/New/Churned MRR and the
+   (`$2,970 ÷ 12` per docs/08-master-dashboard.md's own formula) to Total/New/Churned MRR and the
    "MRR by segment" breakdown. **Not verified via a live Stripe Checkout redirect** — no
    `STRIPE_PRICE_ID_AGENT_ANNUAL` Stripe Price object exists in this sandbox (creating one would
    mean writing to the user's real Stripe account without being asked), so the webhook-side plan
    mapping is covered by a new vitest case in `tests/stripe-webhooks.test.ts` instead (same rigor
-   as the existing $97/mo webhook tests), and the billing-page UI + master-dashboard MRR math were
-   verified by writing a subscription row directly (bypassing Stripe), confirming $970/yr displays
+   as the existing $297/mo webhook tests), and the billing-page UI + master-dashboard MRR math were
+   verified by writing a subscription row directly (bypassing Stripe), confirming $2,970/yr displays
    correctly and contributes $81/mo (rounded) to Total MRR. A real Price ID needs to be created and
    set in `.env` before this can process a live annual purchase.
 3. **Session 3:** Build the IMO pricing tier system (50/100/500+) — done. Added the `Imo` model

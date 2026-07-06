@@ -95,7 +95,7 @@ Three complete pitch decks, written so a sales hire or Jay can walk into a meeti
 **Speaker notes:** "If you're with an IMO today, ask them if they have this. If they don't, ask them why not."
 
 ### Slide 13: The Price
-**Headline:** "$97/month. Cancel anytime. 30-day money-back guarantee."
+**Headline:** "$297/month. Cancel anytime. 30-day money-back guarantee."
 **Subhead:** "Less than the cost of one missed opportunity in your book."
 **Visual:** Premium price card
 **Speaker notes:** "If the engine finds one opportunity you would have missed, it paid for itself for years. The book-of-business opportunity dashboard shows you the math."
@@ -114,7 +114,7 @@ Three complete pitch decks, written so a sales hire or Jay can walk into a meeti
 
 ### Slide 16: The CTA
 **Headline:** "Try Case Atlas for 30 days."
-**Subhead:** "[Insert URL]. $97/month. Money back if you don't find an opportunity."
+**Subhead:** "[Insert URL]. $297/month. Money back if you don't find an opportunity."
 **Visual:** CTA card, premium style
 **Speaker notes:** "Sign up today. Run your first 'I've got a guy' tonight. See what the engine finds in your book."
 
@@ -301,7 +301,7 @@ This is the deck used on the actual discovery call. It's shorter, more visual, a
 
 ### Slide 8: The Close
 **Headline:** "Want to see what this looks like with your own book?"
-**Subhead:** "Sign up today. $97/month. Run your first 'I've got a guy' tonight."
+**Subhead:** "Sign up today. $297/month. Run your first 'I've got a guy' tonight."
 **Visual:** CTA card
 **Speaker notes:** "Sign up now. I'll send you the link. Run your first scenario tonight. Email me the result — I want to see what the engine finds for you."
 

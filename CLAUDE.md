@@ -32,10 +32,13 @@ separate portal).
   production** at a 90% contract × $50K average sale ≈ **$45K/case**, sourced via a **CPA
   network built through CPE seminars** (COI referrals — also taught to contracted agents).
   Stage-1 goal: **$50K/month**. **Tracy holds the contracts only** (licensed contract holder,
-  Stage 1). A hired **front man** is the public voice of the agency in Phase 1. Offer wording
-  is always **"no cost"**, never "free". Never mention CRI or Level Four anywhere — PeakBritt
-  and Case Atlas are separate brands. See docs/27 (business plan), docs/28 (marketing plan),
-  docs/29 (ad suite).
+  Stage 1). **The $300K investor is the front man during the transition** (services agreement;
+  succession to a hired voice at month ~9), and **Magellan Financial provides video production
+  + marketing resources in-kind** — Magellan appears in investor/partnership documents ONLY,
+  never in consumer- or agent-facing assets. Offer wording is always **"no cost"**, never
+  "free". Never mention CRI or Level Four anywhere — PeakBritt and Case Atlas are separate
+  brands. See docs/27 (business plan), docs/28 (marketing plan), docs/29 (ad suite),
+  docs/30 (investor pack: use of funds, quarterly P&L with COGS/EBITDA, proposed terms).
 - **Names — locked:** Agency = **Peakbritt Financial Group**. Software = **Case Atlas**. Bot = **Atlas**.
 - **Build method:** one Copilot/Claude-Code session = one user story = 5–10 related changes. State
   goal, files in scope, constraints, definition of done up front.

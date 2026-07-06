@@ -98,9 +98,11 @@ from month 4 gets there by month 10–12.
   licensing is a Stage-1 deliverable but the clock starts now.
 - Legal hygiene: PeakBritt producer agreement (override schedule, no-cost-software clause,
   mentorship terms), E&O verification requirement, carrier appointment paperwork templates.
-- **Cast the front man** (see §8): the public voice of PeakBritt for Phase 1 — commercials,
-  webinars, YouTube. Luke and Jay's calendars belong to production and mentorship, not to
-  being on camera; the brand needs one consistent face from the first ad onward.
+- **Close the $300K investment (docs/30-investor-pack-300k.md):** the investor serves as
+  **the front man during the transition** (see §8), and **Magellan Financial provides video
+  production and marketing resources in-kind** — so the raised capital buys distribution
+  (media spend), not production overhead. Luke and Jay's calendars stay on production and
+  mentorship.
 - **Book the first CPE seminar dates** (see §7): the CPA-network channel has the longest lead
   time of anything in the plan, so the calendar work starts now.
 - Instrument everything: subscription events, demo-watched, contract-application-started, in
@@ -189,21 +191,30 @@ The engine behind Channel 3, and a mentorship deliverable for Channel 2:
   bought leads forever — which is both the strongest retention hook in the offer and the
   strongest proof that the mentorship is real.
 
-## 8. The front man — the voice of the agency (Phase-1 hire)
+## 8. The front man — the investor, during the transition
 
 - **What:** one consistent public face for PeakBritt: delivers the commercials (docs/29),
   hosts the webinars, fronts the YouTube channel, voices the brand. Luke and Jay appear as
   the million-dollar mentors they are; the front man carries the show.
-- **Why:** producers' calendars monetize at ~$45K/personal case and in mentorship overrides —
-  not in retake sessions. A dedicated voice also keeps the brand consistent as content volume
-  scales, and separates "the talent" from "the practitioners" the way every serious media
-  operation does.
-- **Profile:** on-camera comfort, insurance literacy (licensed or willing to get licensed is
-  a plus, not required for the role), sales-psychology fluency; comfortable working from
-  scripts with NLP structure intact (docs/29 is written to be delivered, not improvised).
-- **Comp envelope (Stage 1):** contract/part-time — per-shoot day rate or small monthly
-  retainer + performance kicker tied to funnel metrics the content drives. Full-time is a
-  Stage-2/3 decision made on channel CAC data.
+- **Who (updated with the $300K raise — docs/30-investor-pack-300k.md):** **the investor
+  serves as the front man while we transition** (target: months 1–9, extendable by mutual
+  agreement). The role is formalized in a services agreement alongside the investment —
+  defined shoot days and webinars per month, a defined window, and a succession plan that
+  converts the role to a hired voice once Stage-2 revenue supports it. An advisor option
+  grant (0.5–1.0%, vesting monthly over the service period) compensates the services
+  separately from the invested capital.
+- **Magellan Financial in-kind:** video production and marketing resources — studio/shoot
+  capability, editing, creative support — are provided by Magellan Financial at no cash cost
+  to PeakBritt. Brand wall holds: Magellan Financial appears in investor and partnership
+  documents only, never in consumer- or agent-facing assets.
+- **Why this alignment works:** producers' calendars monetize at ~$45K/personal case and in
+  mentorship overrides — not in retake sessions — and the investor's stake appreciates on
+  exactly the metrics the front-man role drives (subscribers, applications, contracted
+  producers). Everyone is paid by the same scoreboard, and the brand gets one consistent
+  face from the first ad onward.
+- **Succession profile (the Stage-2 hire, decided on data at month 9):** on-camera comfort,
+  insurance literacy, sales-psychology fluency; comfortable delivering scripts with the NLP
+  structure intact (docs/29 is written to be delivered, not improvised).
 
 ## 9. Why agents fail — and why this offer is built the way it is
 
@@ -235,9 +246,16 @@ docs/28 §3):
 
 ## 10. Costs, risks, and the honest version
 
-**Stage-1 monthly cost envelope:** ads $3–6K, tools/hosting/AI <$1K, Tracy licensing one-time
-<$1.5K, founder + Tracy time (sweat). Break-even on cash costs at ~25 subscribers — everything
-past that funds ad scale.
+**Stage-1 monthly cost envelope:** ads $3–6K (media only — **video production and marketing
+resources are provided in-kind by Magellan Financial** per the investment agreement),
+tools/hosting/AI <$1K, Tracy licensing one-time <$1.5K, founder + Tracy time (sweat).
+Break-even on cash costs at ~25 subscribers — everything past that funds ad scale.
+
+**Capital:** a **$300K investment** funds the year — full use-of-funds, quarterly P&L with
+COGS and EBITDA, proposed terms, and the investor's front-man services role are in
+**docs/30-investor-pack-300k.md**. Headline: ~$654K Year-1 revenue under plan, 94% gross
+margin, ~$241K EBITDA after explicit founder draws, breakeven inside Q2, and a downside case
+that still lands at a ~$40K/mo run-rate one quarter late.
 
 **Top risks:**
 1. **Founder-calendar bottleneck** — 1-on-1 mentorship doesn't scale. Mitigation: Stage-2

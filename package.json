@@ -7,7 +7,7 @@
   },
   "scripts": {
     "dev": "next dev",
-    "build": "prisma migrate deploy && tsx prisma/seed.ts && next build",
+    "build": "node scripts/db-deploy.mjs && next build",
     "start": "next start",
     "lint": "eslint",
     "db:seed": "tsx prisma/seed.ts",

@@ -133,7 +133,7 @@ export default async function IntakePage({
               placeholder="I've got a guy. Two owners, 50 and 49, C-Corp, two key employees, average to good health. Want to set up a buy-sell and put money aside in a company reserve."
               className="block w-full rounded-md border border-cream/20 bg-navy px-3 py-2 text-sm text-cream placeholder:text-cream/40 focus:border-gold focus:outline-none focus:ring-1 focus:ring-gold"
             />
-            <SubmitButton pendingText="Atlas is reading…">Have Atlas fill in the intake</SubmitButton>
+            <SubmitButton pendingText="Atlas is reading…">Design It</SubmitButton>
           </form>
         </Card>
       ) : (

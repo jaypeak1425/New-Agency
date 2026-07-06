@@ -23,14 +23,19 @@ separate portal).
   deploy to **Railway**. Build host-agnostic; Railway is the target.
 - **AI:** routed by complexity — simple tasks → cheap/fast model, complex → capable model.
   Single provider abstraction; model choice behind one `callModel(complexity, messages)` function.
-- **Pricing (repriced 2026-07-06):** $297/mo direct · annual $2,970 (~17% off). **FREE for
+- **Pricing (repriced 2026-07-06):** $297/mo direct · annual $2,970 (~17% off). **NO COST for
   producers contracted through PeakBritt** — the software is the hook, the PeakBritt contract +
   one-on-one mentorship is the upsell (see docs/27–29). IMO per-seat ($75) comes in Phase 5.
 - **GTM (locked 2026-07-06):** ICP = agents earning $100K+ who want to become million-dollar
-  producers. Unit economics: PeakBritt average override 20% × $10K average target commission =
-  **$2K override per placed case**. Stage-1 goal: **$50K/month**. Never mention CRI or Level Four
-  anywhere — PeakBritt and Case Atlas are separate brands. See docs/27 (business plan),
-  docs/28 (marketing plan), docs/29 (ad suite).
+  producers. **Three sales channels:** (1) software $297/mo; (2) override on recruited agents —
+  20% × $10K average target commission = **$2K/placed case**; (3) **Luke & Jay personal
+  production** at a 90% contract × $50K average sale ≈ **$45K/case**, sourced via a **CPA
+  network built through CPE seminars** (COI referrals — also taught to contracted agents).
+  Stage-1 goal: **$50K/month**. **Tracy holds the contracts only** (licensed contract holder,
+  Stage 1). A hired **front man** is the public voice of the agency in Phase 1. Offer wording
+  is always **"no cost"**, never "free". Never mention CRI or Level Four anywhere — PeakBritt
+  and Case Atlas are separate brands. See docs/27 (business plan), docs/28 (marketing plan),
+  docs/29 (ad suite).
 - **Names — locked:** Agency = **Peakbritt Financial Group**. Software = **Case Atlas**. Bot = **Atlas**.
 - **Build method:** one Copilot/Claude-Code session = one user story = 5–10 related changes. State
   goal, files in scope, constraints, definition of done up front.

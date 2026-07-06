@@ -29,11 +29,11 @@ contract, a seminar, or a lead program, this is real mentorship, not marketing h
 **The three sentences every asset orbits:**
 1. "You don't need more leads. You need bigger cases."
 2. "Watch the software think." (the demo IS the ad)
-3. "Contract with PeakBritt and the software is free — plus a million-dollar producer in your
+3. "Contract with PeakBritt and the software comes at no cost — plus a million-dollar producer in your
    corner, one-on-one."
 
 **Price architecture (anchoring):** $297/mo is real and defensible on its own ROI story (one
-found case pays for years of it). Its second job is to make "free with contract" land as a
+found case pays for years of it). Its second job is to make "no cost with contract" land as a
 $3,564/year gift that signals how much PeakBritt invests in its producers — the reciprocity
 trigger that opens the contracting conversation.
 
@@ -86,7 +86,7 @@ rule governs all of it: **every claim must be literally true and deliverable.** 
 architecture, never fabrication; that's what "exclusive and real" means.
 
 **Influence principles (Cialdini):**
-- **Reciprocity** — free case-design webinars; the $3,564/yr software gift inside the contract.
+- **Reciprocity** — no-cost case-design webinars; the $3,564/yr software gift inside the contract.
 - **Commitment/consistency** — micro-commitments: watch demo → trial → run one live case →
   application. Each step self-identifies them as "a producer who invests in craft."
 - **Social proof** — anonymized case wins ("a producer in Ohio found a $40K case in a book
@@ -98,7 +98,7 @@ architecture, never fabrication; that's what "exclusive and real" means.
   floor. We publicly decline applicants. Never fake counters.
 - **Loss aversion** — "the case you missed last month was worth more than this software costs
   in a decade" / "every month at the plateau costs you the delta."
-- **Anchoring** — $297 anchors free-with-contract; $10K average case anchors $297 as trivial.
+- **Anchoring** — $297 anchors no-cost-with-contract; $10K average case anchors $297 as trivial.
 - **Identity (the deepest lever)** — sell the transition from "agent who sells policies" to
   "advisor who designs cases." People act to become who they believe they are.
 
@@ -129,7 +129,7 @@ to do." Software = proof; mentorship = relationship; contract = belonging.
 **Strengths**
 - Working, demonstrable product — the demo closes; nobody else's pitch can be *watched*.
 - Founders/mentors genuinely produce at the level being sold (authority is real).
-- Two-lane model: SaaS cash flow + override upside; free-with-contract is a moat competitors
+- Two-lane model: SaaS cash flow + override upside; no-cost-with-contract is a moat competitors
   with pure-SaaS or pure-BGA economics can't cheaply copy.
 - Compliance engineered in (3-layer guardrail) — a real E&O talking point for recruits.
 - Tiny and fast: offer, price, and curriculum can change in a week.
@@ -166,26 +166,32 @@ from day one (W4); build testimonial capture into the 90-day sprint so W1 dies b
 ## 6. Funnel & channels (Stage 1)
 
 **Funnel:** Ad (software demo) → landing page (watch Atlas think → trial CTA) → $297 trial
-(30-day money-back) → in-app "aha" (first case design; case-desk touch from Tracy) → invite
+(30-day money-back) → in-app "aha" (first case design; a case-desk touch from Luke or Jay) → invite
 webinar / 1-on-1 case review → **Founding Producer application** → interview → contract →
-free software + 90-day mentorship sprint → placed cases → referrals + testimonials → loop.
+no-cost software + 90-day mentorship sprint → placed cases → referrals + testimonials → loop.
 
 **Working targets (measure and re-set monthly):** landing→trial 5–8% · trial→retained sub
 60%+ · sub→application 15% over 90 days · application→contract ~50% (we decline half —
 enforced selectivity) · contracted→producing ≥80% by day 90.
 
 **Channels, in priority order:**
-1. **Meta + YouTube paid** (the docs/29 demo commercials) — interest/lookalike targeting on
-   agent signals; YouTube pre-roll on insurance-sales content. Budget $3–6K/mo Stage 1.
-2. **Founder-led organic** — LinkedIn + short-form: one real case design/week ("I've got a
-   guy" → screen recording → design). The content IS the product demo.
-3. **Webinars (2/mo)** — "Design a million-dollar producer's case live." Reciprocity engine +
-   application harvest.
-4. **Direct outreach** — 20 hand-picked plateaued producers/mo (docs/29 DM/email scripts).
+1. **Meta + YouTube paid** (the docs/29 demo commercials, delivered by the front man —
+   docs/27 §8) — interest/lookalike targeting on agent signals; YouTube pre-roll on
+   insurance-sales content. Budget $3–6K/mo Stage 1.
+2. **Front-man organic** — LinkedIn + short-form: one real case design/week ("I've got a
+   guy" → screen recording → design), fronted by the agency's voice with Luke/Jay cameos as
+   the producing mentors. The content IS the product demo.
+3. **Webinars (2/mo)** — "Design a million-dollar producer's case live." Front man hosts;
+   Luke or Jay designs. Reciprocity engine + application harvest.
+4. **CPE seminars → CPA/COI network (docs/27 §7)** — Luke and Jay teach CPAs advanced-planning
+   topics for CE credit; the room becomes the referral network that feeds Channel-3 personal
+   production ($50K avg cases). The same seminar system is packaged as a mentorship module so
+   contracted producers build their own COI referral engines (docs/29 §10).
+5. **Direct outreach** — 20 hand-picked plateaued producers/mo (docs/29 DM/email scripts).
    High-touch lane that also pressure-tests the pitch.
-5. **Email** — the existing 7-part sequence (docs/15, now at $297) for non-buyers; a parallel
+6. **Email** — the existing 7-part sequence (docs/15, now at $297) for non-buyers; a parallel
    5-part contracting sequence for subscribers (docs/29 §6).
-6. **Referrals (from month 4)** — "who's the best producer you know who's stuck?" wired into
+7. **Referrals (from month 4)** — "who's the best producer you know who's stuck?" wired into
    the mentorship sprint's day-60 session.
 
 **Measurement:** CAC per channel, sub→contract rate, cost per contracted producer, placed
@@ -224,4 +230,6 @@ their paper.
   a handoff email.
 - **Anti-hype as an aesthetic.** The category screams; we demonstrate. "Real mentorship, not
   marketing hype" is a voice instruction, not just a tagline.
-- **Named humans.** Jay. Tracy. The mentor. Institutions are the competition's voice.
+- **Named humans.** The front man carries the public voice (docs/27 §8); Luke and Jay appear
+  as the producing mentors; Tracy holds the contracts behind the scenes. Institutions are the
+  competition's voice.

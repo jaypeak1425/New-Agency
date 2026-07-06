@@ -40,7 +40,7 @@ export default async function DashboardPage() {
               href="/app/scenarios"
               className="mt-4 inline-block rounded-md bg-navy px-4 py-2 text-sm font-medium text-cream hover:bg-navy/90"
             >
-              Start your first case &rarr;
+              Design It &rarr;
             </Link>
           </Card>
           <Card>

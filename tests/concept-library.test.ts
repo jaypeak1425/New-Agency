@@ -65,3 +65,34 @@ describe("concept library", () => {
     }
   });
 });
+
+describe("sales playbook (docs/31 field layer)", () => {
+  it("every playbook entry is complete and keyed to a known slug", async () => {
+    const { SALES_PLAYBOOK } = await import("../src/lib/sales-playbook");
+    const seededSlugs = strategyLibrarySeed.map((s) => s.slug as string);
+    // Growth-log candidates (docs/31): playbook content ships dormant until
+    // the strategy enters the Brain via the validation workflow.
+    const growthLogCandidates = ["cash-balance-plan", "surety-bonding"];
+    for (const [slug, entry] of Object.entries(SALES_PLAYBOOK)) {
+      expect(
+        [...seededSlugs, ...growthLogCandidates],
+        `playbook entry for unknown slug ${slug}`,
+      ).toContain(slug);
+      expect(entry.whatItIs.length, slug).toBeGreaterThan(30);
+      expect(entry.idealClient.length, slug).toBeGreaterThan(20);
+      expect(entry.hook.length, slug).toBeGreaterThan(20);
+      expect(entry.positioning.length, slug).toBeGreaterThan(20);
+      expect(entry.pitch.length, slug).toBeGreaterThan(40);
+      expect(entry.objections.length, slug).toBeGreaterThan(0);
+      for (const o of entry.objections) {
+        expect(o.objection.length, slug).toBeGreaterThan(5);
+        expect(o.response.length, slug).toBeGreaterThan(20);
+      }
+      expect(entry.crossSell.length, slug).toBeGreaterThan(0);
+      expect(entry.coi.length, slug).toBeGreaterThan(10);
+      // The playbook's own compliance standard: never "tax-free" in a talk track.
+      const allText = [entry.whatItIs, entry.hook, entry.positioning, entry.pitch].join(" ");
+      expect(allText.toLowerCase().includes("tax-free"), `${slug} says tax-free`).toBe(false);
+    }
+  });
+});

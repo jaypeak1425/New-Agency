@@ -2,6 +2,7 @@ import Link from "next/link";
 import { listDocumentedStrategies } from "@/lib/strategies";
 import { groupStrategiesByCategory, CATEGORY_LABELS, conceptEntry } from "@/lib/concept-library";
 import { CLIENT_PITCH } from "@/lib/pitch-deck-content";
+import { fieldPlaybook } from "@/lib/sales-playbook";
 import { Card } from "@/components/ui/Card";
 
 // The Concept Library (owner directive 2026-07-06): every live strategy in
@@ -45,6 +46,7 @@ export default async function LibraryPage() {
                     Internal concept · {hasOnePager ? "client one-pager · " : ""}case study
                     {" · "}
                     {entry.topQuestions.length} CPA/client questions
+                    {fieldPlaybook(strategy.slug) ? " · field playbook" : ""}
                   </p>
                   <Link
                     href={`/app/library/${strategy.slug}`}

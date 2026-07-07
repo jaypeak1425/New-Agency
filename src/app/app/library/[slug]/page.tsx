@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { conceptEntry, CATEGORY_LABELS } from "@/lib/concept-library";
 import { CLIENT_PITCH } from "@/lib/pitch-deck-content";
 import { CPA_SCRUTINY, TIER_LABELS } from "@/lib/cpa-scrutiny";
+import { fieldPlaybook } from "@/lib/sales-playbook";
 import { Card } from "@/components/ui/Card";
 import { cn } from "@/lib/cn";
 
@@ -21,6 +22,7 @@ export default async function ConceptPage({ params }: { params: Promise<{ slug: 
 
   const scrutiny = CPA_SCRUTINY[slug];
   const hasOnePager = Boolean(CLIENT_PITCH[slug]);
+  const playbook = fieldPlaybook(slug);
 
   return (
     <div className="max-w-3xl">
@@ -103,6 +105,63 @@ export default async function ConceptPage({ params }: { params: Promise<{ slug: 
           </div>
         )}
       </Card>
+
+      {/* Field playbook (docs/31 — the sales layer: hook, pitch, objections) */}
+      {playbook && (
+        <Card variant="dark" className="mt-6">
+          <h2 className="text-lg font-medium text-cream">Field playbook — how to sell it</h2>
+          <p className="mt-1 text-xs text-cream/60">
+            docs/31 talk tracks. Compliance built in: non-taxable (never tax-free), claims
+            conditioned while in force, no structure names in client copy — diagnose first.
+          </p>
+          <p className="mt-4 text-xs font-medium uppercase tracking-wide text-gold">
+            Ideal client / trigger
+          </p>
+          <p className="mt-1 text-sm text-cream/90">{playbook.idealClient}</p>
+          <p className="mt-4 text-xs font-medium uppercase tracking-wide text-gold">
+            Why it sells (the hook)
+          </p>
+          <p className="mt-1 text-sm text-cream/90">{playbook.hook}</p>
+          <p className="mt-4 text-xs font-medium uppercase tracking-wide text-gold">
+            Positioning (compliant)
+          </p>
+          <p className="mt-1 text-sm text-cream/90">{playbook.positioning}</p>
+          <p className="mt-4 text-xs font-medium uppercase tracking-wide text-gold">The pitch</p>
+          <blockquote className="mt-1 border-l-2 border-gold pl-3 text-sm italic leading-relaxed text-cream/90">
+            &ldquo;{playbook.pitch}&rdquo;
+          </blockquote>
+          <p className="mt-4 text-xs font-medium uppercase tracking-wide text-gold">
+            Objections &rarr; responses
+          </p>
+          <div className="mt-1 space-y-2">
+            {playbook.objections.map((o) => (
+              <p key={o.objection} className="text-sm leading-relaxed text-cream/90">
+                <span className="font-medium text-cream">&ldquo;{o.objection}&rdquo;</span>
+                {" → "}
+                {o.response}
+              </p>
+            ))}
+          </div>
+          <div className="mt-4 grid gap-4 sm:grid-cols-2">
+            <div>
+              <p className="text-xs font-medium uppercase tracking-wide text-gold">
+                Cross-sell / next
+              </p>
+              <ul className="mt-1 list-inside list-disc space-y-0.5">
+                {playbook.crossSell.map((item) => (
+                  <li key={item} className="text-sm text-cream/90">
+                    {item}
+                  </li>
+                ))}
+              </ul>
+            </div>
+            <div>
+              <p className="text-xs font-medium uppercase tracking-wide text-gold">COI needed</p>
+              <p className="mt-1 text-sm text-cream/90">{playbook.coi}</p>
+            </div>
+          </div>
+        </Card>
+      )}
 
       {/* 2 — Case study */}
       <Card className="mt-6">

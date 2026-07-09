@@ -26,6 +26,8 @@ export default async function BillingPage({
   if (!user) redirect("/login");
   if (user.role === "wholesaler") redirect("/wholesaler");
   if (user.role === "imo_principal") redirect("/imo-principal");
+  // Approval gate: nobody pays before Jay signs off on the account.
+  if (user.role !== "admin" && user.status === "pending") redirect("/pending-approval");
 
   const subscription = await prisma.subscription.findUnique({ where: { userId: user.id } });
 

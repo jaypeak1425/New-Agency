@@ -1,4 +1,9 @@
 import { welcomeEmail } from "./emails/welcome";
+import {
+  applicationReceivedEmail,
+  adminNewSignupEmail,
+  accountApprovedEmail,
+} from "./emails/approval";
 import { passwordResetEmail } from "./emails/password-reset";
 import { billingAlertEmail, type BillingAlertType } from "./emails/billing-alert";
 import { wholesalerInviteEmail } from "./emails/wholesaler-invite";
@@ -16,6 +21,30 @@ async function sendEmail(to: string, subject: string, html: string) {
 
 export async function sendWelcomeEmail(to: string, name: string | null, appBaseUrl: string) {
   const { subject, html } = welcomeEmail({ name, appBaseUrl });
+  await sendEmail(to, subject, html);
+}
+
+export async function sendApplicationReceivedEmail(to: string, name: string | null) {
+  const { subject, html } = applicationReceivedEmail({ name });
+  await sendEmail(to, subject, html);
+}
+
+export async function sendAdminNewSignupEmail(
+  to: string,
+  applicantEmail: string,
+  applicantName: string | null,
+  appBaseUrl: string,
+) {
+  const { subject, html } = adminNewSignupEmail({ applicantEmail, applicantName, appBaseUrl });
+  await sendEmail(to, subject, html);
+}
+
+export async function sendAccountApprovedEmail(
+  to: string,
+  name: string | null,
+  appBaseUrl: string,
+) {
+  const { subject, html } = accountApprovedEmail({ name, appBaseUrl });
   await sendEmail(to, subject, html);
 }
 

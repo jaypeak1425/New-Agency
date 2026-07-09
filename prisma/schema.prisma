@@ -21,6 +21,11 @@ enum UserRole {
 }
 
 enum UserStatus {
+  // Self-serve signups start here: no /app or /billing access until an admin
+  // approves the account. Case Atlas and the training library are proprietary,
+  // so the owner signs off on every agent before they see inside. Admin-created
+  // accounts (wholesalers, IMO principals, seeded admin) default to active.
+  pending
   active
   suspended
 }
@@ -34,6 +39,7 @@ enum SubscriptionStatus {
 }
 
 enum AdminActionType {
+  approve
   grant
   revoke
   suspend

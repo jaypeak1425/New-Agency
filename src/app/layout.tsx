@@ -1,10 +1,18 @@
 import type { Metadata } from "next";
-import { Montserrat, Inter } from "next/font/google";
+import { Montserrat, Inter, Playfair_Display } from "next/font/google";
 import { SITE_URL, SITE_NAME, SITE_DESCRIPTION, SITE_TAGLINE } from "@/lib/seo";
 import "./globals.css";
 
-// Brand typography (Case_Atlas_Brand_Guidelines): Montserrat SemiBold for
-// headlines, Inter for body and dashboards.
+// Brand typography, aligned with the PeakBritt marketing site
+// (site/peakbritt-site.html): Playfair Display for display headlines,
+// Montserrat for UI emphasis, Inter for body and dashboards. The app is the
+// members' side of the same brand — same serif voice as the front door.
+const playfair = Playfair_Display({
+  variable: "--font-playfair",
+  subsets: ["latin"],
+  weight: ["500", "600", "700"],
+});
+
 const montserrat = Montserrat({
   variable: "--font-montserrat",
   subsets: ["latin"],
@@ -55,7 +63,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${montserrat.variable} ${inter.variable} h-full antialiased`}>
+    <html
+      lang="en"
+      className={`${playfair.variable} ${montserrat.variable} ${inter.variable} h-full antialiased`}
+    >
       <body className="min-h-full flex flex-col">{children}</body>
     </html>
   );

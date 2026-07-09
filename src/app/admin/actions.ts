@@ -3,7 +3,14 @@
 import { redirect } from "next/navigation";
 import { headers } from "next/headers";
 import { getCurrentUser } from "@/lib/auth";
-import { AdminActionError, suspendUser, reactivateUser, grantAccess, revokeAccess } from "@/lib/admin";
+import {
+  AdminActionError,
+  approveUser,
+  suspendUser,
+  reactivateUser,
+  grantAccess,
+  revokeAccess,
+} from "@/lib/admin";
 import {
   WholesalerActionError,
   createWholesalerAccount,
@@ -29,6 +36,18 @@ async function getAppBaseUrl() {
 
 function targetUserId(formData: FormData) {
   return String(formData.get("userId") ?? "");
+}
+
+export async function approveUserAction(formData: FormData) {
+  const admin = await requireAdmin();
+  const appBaseUrl = await getAppBaseUrl();
+  try {
+    await approveUser(admin, targetUserId(formData), appBaseUrl);
+  } catch (error) {
+    const message = error instanceof AdminActionError ? error.message : "Something went wrong.";
+    redirect(`/admin?error=${encodeURIComponent(message)}`);
+  }
+  redirect("/admin");
 }
 
 export async function suspendUserAction(formData: FormData) {

@@ -2,7 +2,11 @@ import { randomBytes, createHash } from "crypto";
 import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/prisma";
 import { setSessionCookie, clearSessionCookie, getSession } from "@/lib/session";
-import { sendPasswordResetEmail, sendWelcomeEmail } from "@/lib/email";
+import {
+  sendPasswordResetEmail,
+  sendApplicationReceivedEmail,
+  sendAdminNewSignupEmail,
+} from "@/lib/email";
 
 const PASSWORD_RESET_TTL_MS = 1000 * 60 * 30; // 30 minutes
 
@@ -34,8 +38,18 @@ export async function signUp(
   // agent would read as "never logged in" and permanently show up on the
   // master dashboard's at-risk churn list (docs/08-master-dashboard.md
   // Module 4) from day one.
+  // Self-serve signups are applications, not accounts: they sit in
+  // pending until an admin approves them (approveUser in src/lib/admin.ts).
+  // Case Atlas + the training library are proprietary, so nobody gets past
+  // /pending-approval without the owner's sign-off.
   const user = await prisma.user.create({
-    data: { email: normalizedEmail, passwordHash, name, lastLoginAt: new Date() },
+    data: {
+      email: normalizedEmail,
+      passwordHash,
+      name,
+      status: "pending",
+      lastLoginAt: new Date(),
+    },
   });
 
   await prisma.auditLog.create({
@@ -50,7 +64,11 @@ export async function signUp(
   await setSessionCookie({ sub: user.id, role: user.role });
 
   if (appBaseUrl) {
-    await sendWelcomeEmail(user.email, user.name, appBaseUrl);
+    await sendApplicationReceivedEmail(user.email, user.name);
+    const admins = await prisma.user.findMany({ where: { role: "admin" } });
+    for (const admin of admins) {
+      await sendAdminNewSignupEmail(admin.email, user.email, user.name, appBaseUrl);
+    }
   }
 
   return user;

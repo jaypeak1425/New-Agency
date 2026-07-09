@@ -14,6 +14,8 @@ export default async function OnboardingPage() {
   if (!user) redirect("/login");
   if (user.role === "wholesaler") redirect("/wholesaler");
   if (user.role === "imo_principal") redirect("/imo-principal");
+  // Approval gate: onboarding is already inside the product experience.
+  if (user.role !== "admin" && user.status === "pending") redirect("/pending-approval");
 
   return (
     <main className="flex min-h-full flex-col items-center bg-cream px-6 py-16">

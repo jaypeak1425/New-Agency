@@ -40,6 +40,11 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   // needs an active (or trialing) subscription, or an active IMO seat
   // (docs/08-master-dashboard.md section 7), to reach the dashboard.
   if (user.role !== "admin") {
+    // Approval gate first: a pending signup sees nothing proprietary — not
+    // the dashboard, not billing, not onboarding — until an admin approves.
+    if (user.status === "pending") {
+      redirect("/pending-approval");
+    }
     const subscription = await prisma.subscription.findUnique({ where: { userId: user.id } });
     if (!hasActiveAccess(subscription?.status) && !hasImoSeatAccess(user)) {
       redirect("/billing");

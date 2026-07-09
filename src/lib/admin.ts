@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma";
+import { sendAccountApprovedEmail } from "@/lib/email";
 import type { User } from "@/generated/prisma/client";
 
 export class AdminActionError extends Error {}
@@ -12,7 +13,7 @@ function assertAdmin(actor: User) {
 async function recordAdminAction(
   admin: User,
   targetUserId: string,
-  action: "grant" | "revoke" | "suspend" | "reactivate",
+  action: "approve" | "grant" | "revoke" | "suspend" | "reactivate",
   auditAction: string,
   metadata: Record<string, string | number | boolean | null> = {},
 ) {
@@ -24,6 +25,28 @@ async function recordAdminAction(
       data: { actorId: admin.id, action: auditAction, target: targetUserId, metadata },
     }),
   ]);
+}
+
+// The approval gate: self-serve signups sit in `pending` (no /app or /billing
+// access) until an admin signs off. Approval activates the account and emails
+// the agent — it does NOT grant a subscription; they still pay (or get comped
+// via grantAccess for PeakBritt-contracted producers).
+export async function approveUser(admin: User, targetUserId: string, appBaseUrl: string) {
+  assertAdmin(admin);
+
+  const target = await prisma.user.findUnique({ where: { id: targetUserId } });
+  if (!target) {
+    throw new AdminActionError("User not found.");
+  }
+  if (target.status !== "pending") {
+    throw new AdminActionError("Only pending accounts can be approved.");
+  }
+
+  await prisma.user.update({ where: { id: targetUserId }, data: { status: "active" } });
+  await recordAdminAction(admin, targetUserId, "approve", "admin.user_approved", {
+    email: target.email,
+  });
+  await sendAccountApprovedEmail(target.email, target.name, appBaseUrl);
 }
 
 export async function suspendUser(admin: User, targetUserId: string) {

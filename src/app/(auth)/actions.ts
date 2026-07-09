@@ -25,7 +25,9 @@ export async function signUpAction(formData: FormData) {
     redirect(`/signup?error=${encodeURIComponent(message)}`);
   }
 
-  redirect("/app");
+  // Signups are applications — they wait on admin approval before any of
+  // /app, /billing, or /onboarding will let them through.
+  redirect("/pending-approval");
 }
 
 export async function logInAction(formData: FormData) {

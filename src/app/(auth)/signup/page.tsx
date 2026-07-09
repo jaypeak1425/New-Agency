@@ -12,7 +12,11 @@ export default async function SignupPage({
 
   return (
     <>
-      <h1 className="text-2xl">Sign up</h1>
+      <h1 className="text-2xl">Apply for access</h1>
+      <p className="mt-2 text-sm text-charcoal/70">
+        Case Atlas is by approval — we review every producer personally. Create your account
+        and you&rsquo;ll hear back within a business day.
+      </p>
       {error && (
         <p role="alert" className="mt-3 rounded-md bg-red-50 px-3 py-2 text-sm text-red-700">
           {error}

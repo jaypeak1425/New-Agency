@@ -1,16 +1,16 @@
 @import "tailwindcss";
 
 :root {
-  /* Case Atlas brand palette — Case_Atlas_Brand_Guidelines (2026):
-     Atlas Navy (primary), Deep Ocean (secondary), Prestige Gold (accent),
-     Steel Blue (support), Cloud White (backgrounds). */
-  --color-navy: #0b132b; /* Atlas Navy */
-  --color-navy-light: #1d2d44; /* Deep Ocean */
-  --color-gold: #d4af37; /* Prestige Gold */
-  --color-gold-light: #e6c866;
-  --color-cream: #f5f7fa; /* Cloud White (token name kept for compatibility) */
+  /* Brand palette, aligned with the PeakBritt marketing site
+     (site/peakbritt-site.html) so the app reads as the members' side of the
+     same brand: PeakBritt Navy, Prestige Gold, warm Ivory. */
+  --color-navy: #0a1226; /* PeakBritt Navy (site --navy) */
+  --color-navy-light: #13233d; /* site --navy-2 */
+  --color-gold: #d4af37; /* Prestige Gold (identical on both) */
+  --color-gold-light: #e8d9b5; /* site --gold-soft */
+  --color-cream: #f7f5f0; /* warm Ivory (site --ivory; token name kept) */
   --color-steel: #64748b; /* Steel Blue — support/muted */
-  --color-charcoal: #0b132b; /* primary text = Atlas Navy on Cloud White */
+  --color-charcoal: #0a1226; /* primary text = PeakBritt Navy on Ivory */
 
   --color-background: var(--color-cream);
   --color-foreground: var(--color-charcoal);
@@ -18,10 +18,10 @@
   --color-surface-dark: var(--color-navy);
   --color-border: #e2e8f0;
 
-  /* Headlines: Montserrat SemiBold. Body & dashboards: Inter. The token is
-     still named --font-serif for compatibility with existing font-serif
-     utility usages, but now resolves to the brand display face. */
-  --font-serif: var(--font-montserrat), system-ui, sans-serif;
+  /* Headlines: Playfair Display — the same serif voice as the PeakBritt
+     marketing site, so the app feels like an extension of it rather than a
+     separate product. Body & dashboards stay on Inter for data density. */
+  --font-serif: var(--font-playfair), "Didot", Georgia, serif;
   --font-sans: var(--font-inter), system-ui, sans-serif;
 }
 

@@ -3,6 +3,7 @@ import { listWholesalersForAdmin } from "@/lib/wholesaler";
 import { hasActiveAccess } from "@/lib/billing";
 import { getSequenceStats } from "@/lib/sequence";
 import {
+  approveUserAction,
   suspendUserAction,
   reactivateUserAction,
   grantAccessAction,
@@ -121,8 +122,16 @@ export default async function AdminPage({
                   <td className="px-4 py-3">{user.email}</td>
                   <td className="px-4 py-3">{user.role}</td>
                   <td className="px-4 py-3">
-                    <Badge tone={user.status === "active" ? "positive" : "negative"}>
-                      {user.status}
+                    <Badge
+                      tone={
+                        user.status === "active"
+                          ? "positive"
+                          : user.status === "pending"
+                            ? "neutral"
+                            : "negative"
+                      }
+                    >
+                      {user.status === "pending" ? "awaiting approval" : user.status}
                     </Badge>
                   </td>
                   <td className="px-4 py-3">{user.subscription?.plan ?? "—"}</td>
@@ -157,7 +166,15 @@ export default async function AdminPage({
                   </td>
                   <td className="px-4 py-3">
                     <div className="flex flex-wrap gap-2">
-                      {user.status === "active" ? (
+                      {user.status === "pending" && (
+                        <form action={approveUserAction}>
+                          <input type="hidden" name="userId" value={user.id} />
+                          <SubmitButton pendingText="Approving…" className={smallButton}>
+                            Approve
+                          </SubmitButton>
+                        </form>
+                      )}
+                      {user.status === "active" && (
                         <form action={suspendUserAction}>
                           <input type="hidden" name="userId" value={user.id} />
                           <SubmitButton
@@ -168,7 +185,8 @@ export default async function AdminPage({
                             Suspend
                           </SubmitButton>
                         </form>
-                      ) : (
+                      )}
+                      {user.status === "suspended" && (
                         <form action={reactivateUserAction}>
                           <input type="hidden" name="userId" value={user.id} />
                           <SubmitButton

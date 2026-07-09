@@ -1,0 +1,50 @@
+# Weekly blog automation: regenerates the PeakBritt Insights blog from the
+# strategy library (the Brain) and pushes any changes. New strategies that go
+# live in the Brain automatically get their client + advisor articles, the
+# indexes update, and the sitemap regrows. The compliance filter runs inside
+# the generator — a HOLD violation fails this job instead of publishing.
+#
+# If the static site is hosted on GitHub-connected hosting (e.g. Vercel), the
+# push auto-deploys, making the whole chain hands-off. A Wix-editor-hosted
+# site cannot pull from GitHub and would need a manual re-import.
+name: Refresh Insights blog
+
+on:
+  schedule:
+    # Mondays 11:07 UTC (off-hour minute on purpose)
+    - cron: "7 11 * * 1"
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Regenerate blog, sitemap, robots (compliance filter enforced)
+        run: npx tsx scripts/generate-insights.mts
+
+      - name: Commit and push if anything changed
+        run: |
+          # sitemap lastmod alone isn't content — don't commit date-only churn
+          if git diff --quiet -- site/ ':(exclude)site/sitemap.xml'; then
+            echo "No blog changes this week."
+            git checkout -- site/sitemap.xml
+            exit 0
+          fi
+          git config user.name "peakbritt-blog-bot"
+          git config user.email "actions@github.com"
+          git add site/
+          git commit -m "chore: weekly Insights refresh (generated from the strategy library)"
+          git push

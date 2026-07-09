@@ -1,0 +1,928 @@
+<style>
+  @property --spin { syntax:'<angle>'; initial-value:0deg; inherits:false; }
+  :root{
+    --navy:#0A1226; --navy-2:#13233D; --space:#04070f;
+    --gold:#D4AF37; --gold-soft:#E8D9B5; --ivory:#F7F5F0;
+    --ink:#1c2436; --ink-soft:#55607a;
+    --cream-70:rgba(247,245,240,.72); --cream-45:rgba(247,245,240,.45); --cream-25:rgba(247,245,240,.25);
+    --hair:rgba(212,175,55,.28); --line-ivory:#e4ddcd;
+    --maxw:1160px;
+    --serif:"Playfair Display","Didot","Bodoni 72","Hoefler Text",Georgia,serif;
+    --sans:"Montserrat","Avenir Next","Avenir",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+    color-scheme:dark;
+  }
+  :root[data-theme="light"],:root[data-theme="dark"]{color-scheme:dark;}
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{margin:0;background:var(--space);color:var(--ivory);font-family:var(--sans);font-size:17px;line-height:1.7;
+    -webkit-font-smoothing:antialiased;overflow-x:hidden;}
+  h1,h2,h3{font-family:var(--serif);font-weight:500;margin:0;text-wrap:balance;line-height:1.06;}
+  p{margin:0;} a{color:inherit;text-decoration:none;} button{font-family:var(--sans);}
+  ::selection{background:var(--gold);color:var(--navy);}
+  .wrap{max-width:var(--maxw);margin:0 auto;padding:0 24px;position:relative;}
+
+  /* film grain */
+  .grain{position:fixed;inset:-50%;z-index:96;pointer-events:none;opacity:.05;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='0.6'/%3E%3C/svg%3E");
+    animation:grain 7s steps(6) infinite;}
+  @keyframes grain{0%,100%{transform:translate(0,0)}20%{transform:translate(-4%,3%)}40%{transform:translate(3%,-4%)}60%{transform:translate(-3%,-3%)}80%{transform:translate(4%,4%)}}
+
+  /* preloader */
+  #loader{position:fixed;inset:0;z-index:200;background:var(--space);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:26px;transition:opacity .8s ease,visibility .8s;}
+  #loader.done{opacity:0;visibility:hidden;}
+  #loader .pb{font-family:var(--serif);font-size:64px;font-weight:600;letter-spacing:.02em;
+    background:linear-gradient(180deg,#f0dfa6,#D4AF37 55%,#a9822a);-webkit-background-clip:text;background-clip:text;color:transparent;
+    animation:pbfloat 2.4s ease-in-out infinite;}
+  @keyframes pbfloat{0%,100%{transform:translateY(0) scale(1)}50%{transform:translateY(-6px) scale(1.02)}}
+  #loader .bar{width:180px;height:1px;background:rgba(232,217,181,.15);overflow:hidden;border-radius:2px;}
+  #loader .bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,transparent,var(--gold));animation:load 1.3s ease forwards;}
+  @keyframes load{to{width:100%}}
+  #loader .cal{font-size:10px;letter-spacing:.44em;text-transform:uppercase;color:var(--cream-45);}
+  #loader .cal .y{color:var(--gold);}
+
+  /* scroll progress + cursor */
+  #progress{position:fixed;top:0;left:0;height:2px;width:0;background:linear-gradient(90deg,var(--gold),var(--gold-soft));z-index:120;box-shadow:0 0 12px rgba(212,175,55,.6);}
+  #cursor,#cursor2{position:fixed;top:0;left:0;pointer-events:none;z-index:150;border-radius:50%;display:none;}
+  #cursor{width:8px;height:8px;background:var(--gold);transform:translate(-50%,-50%);mix-blend-mode:screen;}
+  #cursor2{width:38px;height:38px;border:1px solid rgba(212,175,55,.5);transform:translate(-50%,-50%);transition:width .25s,height .25s,border-color .25s;}
+  body.cursor-on #cursor,body.cursor-on #cursor2{display:block;}
+  body.cursor-on.cursor-hot #cursor2{width:64px;height:64px;border-color:var(--gold);}
+
+  /* type devices */
+  .eyebrow{font-size:11.5px;letter-spacing:.36em;text-transform:uppercase;color:var(--gold);font-weight:600;display:inline-flex;align-items:center;gap:12px;}
+  .eyebrow::before{content:"";width:26px;height:1px;background:var(--gold);opacity:.7;}
+  .eyebrow.center{justify-content:center;}
+  .hud{font-size:9.5px;letter-spacing:.3em;text-transform:uppercase;color:var(--cream-25);font-weight:600;}
+  .hud b{color:var(--gold);font-weight:600;}
+  .lede{font-size:clamp(1.05rem,1.6vw,1.22rem);color:var(--cream-70);max-width:60ch;}
+  .section{padding:clamp(4.5rem,9vw,8.5rem) 0;position:relative;}
+  .section-head h2{font-size:clamp(2rem,4.6vw,3.3rem);margin:22px 0 20px;}
+  .spark{width:1em;height:1em;fill:var(--gold);flex:none;}
+
+  /* buttons — magnetic */
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;font-size:12.5px;letter-spacing:.18em;text-transform:uppercase;font-weight:600;
+    padding:18px 32px;border-radius:2px;cursor:pointer;border:1px solid transparent;min-height:54px;line-height:1;position:relative;overflow:hidden;
+    transition:transform .25s cubic-bezier(.2,.7,.2,1),background .3s,color .3s,border-color .3s,box-shadow .3s;will-change:transform;}
+  .btn .shine{position:absolute;inset:0;background:linear-gradient(105deg,transparent 40%,rgba(255,255,255,.35) 50%,transparent 60%);transform:translateX(-120%);transition:transform .7s ease;}
+  .btn:hover .shine{transform:translateX(120%);}
+  .btn-primary{background:var(--gold);color:var(--navy);box-shadow:0 10px 34px -10px rgba(212,175,55,.65);}
+  .btn-primary:hover{background:var(--gold-soft);box-shadow:0 18px 50px -12px rgba(212,175,55,.8);}
+  .btn-ghost{border-color:rgba(232,217,181,.4);color:var(--gold-soft);backdrop-filter:blur(6px);}
+  .btn-ghost:hover{border-color:var(--gold);color:var(--gold);}
+  .btn:focus-visible{outline:2px solid var(--gold);outline-offset:3px;}
+
+  /* nav */
+  .nav{position:fixed;inset:0 0 auto 0;z-index:110;transition:background .4s,box-shadow .4s,padding .4s,backdrop-filter .4s;padding:22px 0;}
+  .nav.scrolled{background:rgba(4,7,15,.78);backdrop-filter:blur(16px);box-shadow:0 1px 0 var(--hair);padding:12px 0;}
+  .nav .wrap{display:flex;align-items:center;justify-content:space-between;gap:24px;}
+  .brand{display:flex;flex-direction:column;line-height:1;}
+  .brand .bmark{font-family:var(--serif);font-size:21px;letter-spacing:.04em;font-weight:600;}
+  .brand .bmark .peak{color:#c9ccd6;} .brand .bmark .britt{color:var(--gold);}
+  .brand .bsub{font-size:8.5px;letter-spacing:.42em;text-transform:uppercase;color:var(--cream-45);margin-top:5px;}
+  .navlinks{display:flex;align-items:center;gap:28px;}
+  .navlinks a{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--cream-70);font-weight:500;position:relative;padding:6px 0;transition:color .3s;}
+  .navlinks a::after{content:"";position:absolute;left:0;bottom:0;height:1px;width:0;background:var(--gold);transition:width .3s;}
+  .navlinks a:hover{color:var(--ivory);} .navlinks a:hover::after{width:100%;}
+  .nav .btn{padding:12px 22px;min-height:44px;}
+  .navtoggle{display:none;background:none;border:0;color:var(--ivory);cursor:pointer;padding:8px;}
+  .navtoggle svg{width:26px;height:26px;stroke:currentColor;fill:none;stroke-width:1.4;}
+  .mobilemenu{position:fixed;inset:0;z-index:130;background:var(--space);display:none;flex-direction:column;padding:26px 24px;}
+  .mobilemenu.open{display:flex;}
+  .mobilemenu .mm-top{display:flex;justify-content:space-between;align-items:center;}
+  .mobilemenu nav{display:flex;flex-direction:column;gap:6px;margin-top:12vh;}
+  .mobilemenu nav a{font-family:var(--serif);font-size:30px;color:var(--ivory);padding:12px 0;border-bottom:1px solid rgba(232,217,181,.12);}
+  .mobilemenu nav a .idx{font-family:var(--sans);font-size:11px;color:var(--gold);letter-spacing:.2em;margin-right:14px;vertical-align:middle;}
+  .mobilemenu .btn{margin-top:28px;}
+
+  /* HERO */
+  .hero{position:relative;min-height:100svh;display:flex;align-items:center;overflow:hidden;padding:130px 0 90px;
+    background:radial-gradient(120% 90% at 75% 8%,rgba(212,175,55,.14),transparent 55%),
+               radial-gradient(80% 70% at 8% 100%,rgba(19,35,61,.95),transparent 65%),
+               linear-gradient(180deg,#04070f,#0A1226 55%,#04070f);}
+  #stars{position:absolute;inset:0;z-index:0;}
+  .hero .veil{position:absolute;inset:0;z-index:1;background:radial-gradient(90% 70% at 50% 45%,transparent 30%,rgba(4,7,15,.55) 100%);pointer-events:none;}
+  .hero .wrap{position:relative;z-index:2;}
+  .hero-hud{display:flex;justify-content:space-between;gap:14px;flex-wrap:wrap;margin-bottom:clamp(30px,6vh,64px);}
+  .hero-inner{max-width:880px;}
+  .hero h1{font-size:clamp(2.8rem,7.4vw,5.6rem);line-height:1.0;margin:26px 0 0;}
+  .hero h1 .w{display:inline-block;opacity:0;transform:translateY(40px) rotate(2deg);filter:blur(6px);}
+  .hero.on h1 .w{opacity:1;transform:none;filter:none;transition:opacity .9s cubic-bezier(.2,.7,.2,1),transform .9s cubic-bezier(.2,.7,.2,1),filter .9s;}
+  .hero h1 .accent{color:var(--gold);font-style:italic;}
+  .hero .sub{margin-top:28px;font-size:clamp(1.08rem,1.9vw,1.32rem);color:var(--cream-70);max-width:56ch;opacity:0;transform:translateY(20px);}
+  .hero.on .sub{opacity:1;transform:none;transition:all .9s .55s cubic-bezier(.2,.7,.2,1);}
+  .hero-cta{display:flex;flex-wrap:wrap;gap:16px;margin-top:40px;opacity:0;transform:translateY(20px);}
+  .hero.on .hero-cta{opacity:1;transform:none;transition:all .9s .75s cubic-bezier(.2,.7,.2,1);}
+  .scrollcue{position:absolute;left:50%;bottom:24px;transform:translateX(-50%);z-index:2;font-size:9.5px;letter-spacing:.32em;text-transform:uppercase;color:var(--cream-45);display:flex;flex-direction:column;align-items:center;gap:10px;}
+  .scrollcue .line{width:1px;height:46px;background:linear-gradient(var(--gold),transparent);animation:cue 2.4s ease-in-out infinite;}
+  @keyframes cue{0%,100%{opacity:.3;transform:scaleY(.6)}50%{opacity:1;transform:scaleY(1)}}
+
+  /* marquee */
+  .marquee{border-top:1px solid var(--hair);border-bottom:1px solid var(--hair);background:rgba(10,18,38,.5);overflow:hidden;padding:18px 0;position:relative;z-index:2;}
+  .marquee .track{display:flex;gap:0;width:max-content;animation:mq 36s linear infinite;}
+  .marquee span{font-family:var(--serif);font-size:15px;letter-spacing:.32em;text-transform:uppercase;color:var(--cream-45);white-space:nowrap;padding:0 28px;display:flex;align-items:center;gap:28px;}
+  .marquee span i{width:7px;height:7px;background:var(--gold);border-radius:50%;display:inline-block;flex:none;}
+  @keyframes mq{to{transform:translateX(-50%)}}
+
+  /* ivory sections */
+  .ivory{background:var(--ivory);color:var(--ink);}
+  .ivory .eyebrow{color:#b48f22;} .ivory .eyebrow::before{background:#b48f22;}
+  .ivory .lede,.ivory p.body{color:var(--ink-soft);}
+  .ivory .section-head h2{color:var(--navy);}
+
+  .problem .body{font-size:clamp(1.06rem,1.7vw,1.26rem);line-height:1.75;max-width:60ch;margin-top:22px;color:var(--ink-soft);}
+  .problem .body strong{color:var(--navy);font-weight:600;}
+
+  /* TIMELINE — the 2026→2039 dial */
+  .timeline{background:linear-gradient(180deg,#04070f,#0A1226 40%,#04070f);overflow:hidden;}
+  .timeline .yearwrap{position:relative;margin:34px 0 8px;}
+  .timeline .year{font-family:var(--serif);font-size:clamp(5rem,17vw,11rem);line-height:.95;font-weight:600;
+    background:linear-gradient(180deg,#f4e6b4,#D4AF37 55%,#8f6d1f);-webkit-background-clip:text;background-clip:text;color:transparent;
+    font-variant-numeric:tabular-nums;letter-spacing:.02em;filter:drop-shadow(0 12px 44px rgba(212,175,55,.25));}
+  .timeline .stage{min-height:120px;margin-top:10px;}
+  .timeline .stage h3{font-size:clamp(1.4rem,2.6vw,1.9rem);color:var(--ivory);margin-bottom:12px;transition:opacity .4s,transform .4s;}
+  .timeline .stage p{color:var(--cream-70);max-width:56ch;font-size:1.06rem;transition:opacity .4s .05s,transform .4s .05s;}
+  .timeline .stage.swap h3,.timeline .stage.swap p{opacity:0;transform:translateY(10px);}
+  .dial{margin-top:44px;}
+  .dial input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:2px;background:linear-gradient(90deg,var(--gold) var(--fill,0%),rgba(232,217,181,.18) var(--fill,0%));border-radius:2px;outline:none;cursor:pointer;}
+  .dial input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:26px;height:26px;border-radius:50%;background:var(--gold);border:5px solid #0A1226;box-shadow:0 0 0 1px var(--gold),0 0 24px rgba(212,175,55,.7);cursor:grab;}
+  .dial input[type=range]:active::-webkit-slider-thumb{cursor:grabbing;transform:scale(1.12);}
+  .dial input[type=range]::-moz-range-thumb{width:24px;height:24px;border-radius:50%;background:var(--gold);border:5px solid #0A1226;box-shadow:0 0 0 1px var(--gold),0 0 24px rgba(212,175,55,.7);cursor:grab;}
+  .dial .ticks{display:flex;justify-content:space-between;margin-top:16px;font-size:10.5px;letter-spacing:.22em;color:var(--cream-45);font-variant-numeric:tabular-nums;}
+  .dial .ticks b{color:var(--gold);font-weight:600;}
+  .dial .hint{margin-top:22px;font-size:11px;letter-spacing:.26em;text-transform:uppercase;color:var(--cream-45);display:flex;align-items:center;gap:10px;}
+  .dial .hint .pulse{width:8px;height:8px;border-radius:50%;background:var(--gold);animation:pulse 1.8s ease-in-out infinite;}
+  @keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(212,175,55,.55)}50%{box-shadow:0 0 0 10px rgba(212,175,55,0)}}
+
+  /* serve cards — 3D tilt */
+  .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:26px;margin-top:52px;perspective:1200px;}
+  .tilt{transform-style:preserve-3d;transition:transform .35s cubic-bezier(.2,.7,.2,1),box-shadow .35s;}
+  .serve-card{background:#fff;border:1px solid var(--line-ivory);border-radius:4px;padding:44px 40px;position:relative;overflow:hidden;}
+  .serve-card::before{content:"";position:absolute;left:0;top:0;height:3px;width:0;background:var(--gold);transition:width .5s;}
+  .serve-card:hover::before{width:100%;}
+  .serve-card .sweep{position:absolute;inset:0;background:linear-gradient(105deg,transparent 42%,rgba(212,175,55,.12) 50%,transparent 58%);transform:translateX(-130%);transition:transform .8s ease;pointer-events:none;}
+  .serve-card:hover .sweep{transform:translateX(130%);}
+  .serve-card h3{font-size:1.55rem;color:var(--navy);margin-bottom:14px;}
+  .serve-card p{color:var(--ink-soft);font-size:1rem;}
+  .serve-card .kicker{font-size:11px;letter-spacing:.24em;text-transform:uppercase;color:#b48f22;font-weight:600;margin-bottom:18px;display:block;}
+
+  /* strategies grid */
+  .strat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;margin-top:52px;background:var(--hair);border:1px solid var(--hair);border-radius:4px;overflow:hidden;perspective:1200px;}
+  .strat{background:var(--navy);padding:32px 26px;transition:background .35s;min-height:186px;display:flex;flex-direction:column;gap:12px;position:relative;overflow:hidden;}
+  .strat::after{content:"";position:absolute;inset:0;background:radial-gradient(220px circle at var(--mx,50%) var(--my,50%),rgba(212,175,55,.14),transparent 65%);opacity:0;transition:opacity .3s;pointer-events:none;}
+  .strat:hover{background:var(--navy-2);} .strat:hover::after{opacity:1;}
+  .strat .spark{width:20px;height:20px;}
+  .strat h3{font-size:1.16rem;color:var(--ivory);line-height:1.2;}
+  .strat p{font-size:.92rem;color:var(--cream-45);line-height:1.55;}
+
+  /* stats + pillars */
+  .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:34px;margin-top:56px;}
+  .stat{border-top:1px solid var(--hair);padding-top:22px;}
+  .stat .num{font-family:var(--serif);font-size:clamp(2.6rem,5vw,3.8rem);color:var(--gold);line-height:1;font-variant-numeric:tabular-nums;}
+  .stat .num sup{font-size:.45em;color:var(--gold-soft);}
+  .stat .lbl{margin-top:10px;font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:var(--cream-45);font-weight:600;}
+  .stat .txt{margin-top:10px;font-size:.95rem;color:var(--cream-70);}
+
+  /* ATLAS terminal */
+  .atlas{background:linear-gradient(140deg,#060b1a,#0A1226 60%,#04070f);position:relative;overflow:hidden;}
+  .atlas::before{content:"";position:absolute;right:-12%;top:-30%;width:64%;height:170%;background:radial-gradient(circle at center,rgba(212,175,55,.12),transparent 60%);}
+  .atlas .wrap{position:relative;display:grid;grid-template-columns:1fr 1fr;gap:56px;align-items:center;}
+  .atlas h2{font-size:clamp(2rem,3.9vw,3rem);margin:20px 0 20px;color:var(--ivory);}
+  .atlas .price{display:flex;align-items:baseline;gap:12px;margin:26px 0;}
+  .atlas .price .amt{font-family:var(--serif);font-size:3.1rem;color:var(--gold);line-height:1;}
+  .atlas .price .per{font-size:12.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--cream-45);}
+  .term-frame{position:relative;border-radius:10px;padding:1px;background:conic-gradient(from var(--spin),transparent 0deg,var(--gold) 80deg,transparent 160deg,transparent 200deg,rgba(212,175,55,.6) 300deg,transparent 360deg);animation:spinb 6s linear infinite;}
+  @keyframes spinb{to{--spin:360deg}}
+  .terminal{background:#070d1e;border-radius:9px;padding:0;overflow:hidden;box-shadow:0 40px 90px -30px rgba(0,0,0,.8);}
+  .term-bar{display:flex;align-items:center;gap:8px;padding:14px 18px;border-bottom:1px solid rgba(232,217,181,.1);}
+  .term-bar i{width:10px;height:10px;border-radius:50%;background:rgba(232,217,181,.18);}
+  .term-bar i:first-child{background:rgba(212,175,55,.8);}
+  .term-bar .tl{margin-left:auto;font-size:9px;letter-spacing:.3em;text-transform:uppercase;color:var(--cream-25);}
+  .term-body{padding:24px 22px 28px;font-family:"SF Mono","Menlo","Consolas",monospace;font-size:13.5px;line-height:1.9;min-height:300px;}
+  .term-body .ln{white-space:pre-wrap;word-break:break-word;}
+  .term-body .usr{color:var(--gold-soft);}
+  .term-body .atl{color:#8fa3c8;} .term-body .atl b{color:var(--gold);font-weight:600;}
+  .term-body .ok{color:#7ec8a3;}
+  .caret{display:inline-block;width:8px;height:15px;background:var(--gold);vertical-align:-2px;animation:blink 1s steps(1) infinite;}
+  @keyframes blink{50%{opacity:0}}
+  .atlas-note{margin-top:16px;font-size:10.5px;letter-spacing:.2em;text-transform:uppercase;color:var(--cream-25);}
+
+  /* advisors */
+  .advisors{background:var(--ivory);color:var(--ink);}
+  .advisors .adv-grid{display:grid;grid-template-columns:1fr .92fr;gap:56px;align-items:center;}
+  .advisors h2{color:var(--navy);font-size:clamp(2rem,4vw,3rem);margin:22px 0 22px;}
+  .advisors .body{color:var(--ink-soft);font-size:1.08rem;max-width:52ch;}
+  .adv-frame{border-radius:10px;padding:1px;background:conic-gradient(from var(--spin),transparent,rgba(212,175,55,.85) 90deg,transparent 180deg);animation:spinb 7s linear infinite;}
+  .adv-panel{background:var(--navy);border-radius:9px;padding:42px;color:var(--ivory);}
+  .adv-panel h3{font-size:1.4rem;margin-bottom:8px;}
+  .adv-panel .sub{font-size:13px;color:var(--cream-45);margin-bottom:24px;}
+  .adv-crit{list-style:none;padding:0;margin:0 0 30px;display:flex;flex-direction:column;gap:15px;}
+  .adv-crit li{display:flex;gap:13px;font-size:.97rem;color:var(--cream-70);align-items:flex-start;}
+  .adv-crit li .spark{margin-top:5px;width:13px;height:13px;}
+  .adv-panel .btn{width:100%;}
+
+  /* about */
+  .about{background:var(--navy-2);overflow:hidden;}
+  .about .about-grid{display:grid;grid-template-columns:.85fr 1.15fr;gap:56px;align-items:start;}
+  .about .monogram{aspect-ratio:1;border:1px solid var(--hair);border-radius:8px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;background:linear-gradient(160deg,#0d1834,#0A1226);position:relative;overflow:hidden;}
+  .about .monogram::before{content:"";position:absolute;inset:-40%;background:conic-gradient(from var(--spin),transparent 70%,rgba(212,175,55,.16),transparent 100%);animation:spinb 9s linear infinite;}
+  .about .monogram .pb{position:relative;font-family:var(--serif);font-size:5.5rem;font-weight:600;background:linear-gradient(180deg,#f0dfa6,#D4AF37 60%,#a9822a);-webkit-background-clip:text;background-clip:text;color:transparent;animation:pbfloat 5s ease-in-out infinite;}
+  .about .monogram .lbl{position:relative;font-size:10px;letter-spacing:.4em;text-transform:uppercase;color:var(--cream-45);}
+  .about h2{font-size:clamp(2rem,4vw,3rem);margin:20px 0 22px;}
+  .about p{color:var(--cream-70);font-size:1.06rem;margin-bottom:20px;}
+  .about p strong{color:var(--ivory);font-weight:600;}
+  .about .sig{margin-top:8px;font-family:var(--serif);font-style:italic;font-size:1.3rem;color:var(--gold);}
+  .about .sig small{display:block;font-family:var(--sans);font-style:normal;font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--cream-45);margin-top:8px;}
+
+  /* quotes */
+  .quotes{display:grid;grid-template-columns:1fr 1fr;gap:26px;margin-top:50px;perspective:1200px;}
+  .quote{background:#fff;border:1px solid var(--line-ivory);border-radius:4px;padding:40px 38px;}
+  .quote .mark{font-family:var(--serif);font-size:4.5rem;line-height:.6;color:var(--gold);opacity:.35;height:34px;display:block;}
+  .quote p{font-family:var(--serif);font-size:1.32rem;line-height:1.5;color:var(--navy);margin:14px 0 22px;font-style:italic;}
+  .quote .who{font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-soft);font-weight:600;}
+  .proof-note{margin-top:26px;font-size:12.5px;color:var(--ink-soft);opacity:.8;}
+
+  /* faq */
+  .faq-list{margin-top:46px;border-top:1px solid var(--line-ivory);}
+  .faq-item{border-bottom:1px solid var(--line-ivory);}
+  .faq-q{width:100%;background:none;border:0;text-align:left;cursor:pointer;padding:26px 44px 26px 0;position:relative;font-family:var(--serif);font-size:clamp(1.15rem,2vw,1.4rem);color:var(--navy);}
+  .faq-q .ic{position:absolute;right:2px;top:32px;width:16px;height:16px;}
+  .faq-q .ic::before,.faq-q .ic::after{content:"";position:absolute;background:var(--gold);border-radius:2px;transition:transform .3s,opacity .3s;}
+  .faq-q .ic::before{left:0;top:7px;width:16px;height:2px;}
+  .faq-q .ic::after{left:7px;top:0;width:2px;height:16px;}
+  .faq-item.open .ic::after{transform:scaleY(0);opacity:0;}
+  .faq-a{max-height:0;overflow:hidden;transition:max-height .4s ease;}
+  .faq-a .inner{padding:0 60px 28px 0;color:var(--ink-soft);font-size:1.02rem;}
+
+  /* final cta */
+  .finalcta{position:relative;text-align:center;overflow:hidden;background:linear-gradient(180deg,#04070f,#0A1226);}
+  #stars2{position:absolute;inset:0;}
+  .finalcta .wrap{position:relative;max-width:840px;z-index:2;}
+  .finalcta h2{font-size:clamp(2.2rem,5.4vw,3.7rem);margin:22px 0 24px;}
+  .finalcta h2 .accent{color:var(--gold);font-style:italic;}
+  .finalcta .cta-row{display:flex;gap:16px;justify-content:center;flex-wrap:wrap;margin-top:12px;}
+
+  /* contact */
+  .contact{background:var(--ivory);color:var(--ink);}
+  .contact .c-grid{display:grid;grid-template-columns:.9fr 1.1fr;gap:56px;align-items:start;}
+  .contact h2{color:var(--navy);font-size:clamp(1.9rem,3.6vw,2.7rem);margin:20px 0 20px;}
+  .contact .body{color:var(--ink-soft);max-width:44ch;}
+  .contact .detail{margin-top:28px;display:flex;flex-direction:column;gap:6px;}
+  .contact .detail a{color:var(--navy);font-family:var(--serif);font-size:1.3rem;}
+  .contact .detail span{font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--ink-soft);}
+  form.cf{display:grid;gap:16px;}
+  .cf .row{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+  .cf label{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-soft);font-weight:600;display:block;margin-bottom:8px;}
+  .cf input,.cf select,.cf textarea{width:100%;background:#fff;border:1px solid var(--line-ivory);border-radius:2px;padding:14px 16px;font-family:var(--sans);font-size:15px;color:var(--ink);transition:border-color .3s,box-shadow .3s;}
+  .cf input:focus,.cf select:focus,.cf textarea:focus{outline:none;border-color:var(--gold);box-shadow:0 0 0 3px rgba(212,175,55,.16);}
+  .cf .btn{width:100%;margin-top:4px;}
+  .cf-done{background:#fff;border:1px solid var(--gold);border-radius:4px;padding:40px;text-align:center;display:none;}
+  .cf-done.show{display:block;}
+  .cf-done .spark{width:30px;height:30px;margin:0 auto 14px;display:block;}
+  .cf-done h3{color:var(--navy);font-size:1.5rem;margin-bottom:10px;}
+  .cf-done p{color:var(--ink-soft);}
+
+  footer{background:#03060d;color:var(--cream-70);padding:64px 0 34px;}
+  .foot-top{display:grid;grid-template-columns:1.4fr 1fr 1fr;gap:40px;padding-bottom:40px;border-bottom:1px solid rgba(232,217,181,.1);}
+  .foot-brand .bmark{font-family:var(--serif);font-size:24px;font-weight:600;}
+  .foot-brand .bmark .peak{color:#c9ccd6;}.foot-brand .bmark .britt{color:var(--gold);}
+  .foot-brand p{margin-top:14px;font-size:.92rem;color:var(--cream-45);max-width:34ch;}
+  .foot-col h4{font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:var(--gold);margin:0 0 18px;font-weight:600;}
+  .foot-col a{display:block;font-size:.94rem;color:var(--cream-70);padding:6px 0;transition:color .3s;}
+  .foot-col a:hover{color:var(--ivory);}
+  .disclosure{font-size:11.5px;line-height:1.7;color:var(--cream-45);padding:28px 0 0;}
+  .foot-legal{display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-top:22px;font-size:11px;letter-spacing:.08em;color:var(--cream-45);text-transform:uppercase;}
+
+  /* reveal */
+  .reveal{opacity:0;transform:translateY(30px);filter:blur(4px);transition:opacity 1s cubic-bezier(.2,.7,.2,1),transform 1s cubic-bezier(.2,.7,.2,1),filter 1s;}
+  .reveal.in{opacity:1;transform:none;filter:none;}
+  .stagger>*{opacity:0;transform:translateY(24px);transition:opacity .85s cubic-bezier(.2,.7,.2,1),transform .85s cubic-bezier(.2,.7,.2,1);}
+  .stagger.in>*{opacity:1;transform:none;}
+  .stagger.in>*:nth-child(2){transition-delay:.1s;}
+  .stagger.in>*:nth-child(3){transition-delay:.2s;}
+  .stagger.in>*:nth-child(4){transition-delay:.3s;}
+  .stagger.in>*:nth-child(5){transition-delay:.4s;}
+  .stagger.in>*:nth-child(6){transition-delay:.5s;}
+  .stagger.in>*:nth-child(7){transition-delay:.6s;}
+  .stagger.in>*:nth-child(8){transition-delay:.7s;}
+
+  @media(max-width:960px){
+    .navlinks{display:none;} .nav .btn.desk{display:none;} .navtoggle{display:block;}
+    .strat-grid{grid-template-columns:repeat(2,1fr);}
+    .stats{grid-template-columns:1fr 1fr;gap:28px;}
+    .atlas .wrap,.advisors .adv-grid,.about .about-grid,.contact .c-grid{grid-template-columns:1fr;gap:44px;}
+    .about .monogram{max-width:300px;}
+    .foot-top{grid-template-columns:1fr 1fr;}
+  }
+  @media(max-width:640px){
+    body{font-size:16px;}
+    .section{padding:66px 0;}
+    .grid-2,.quotes,.strat-grid,.stats{grid-template-columns:1fr;}
+    .cf .row{grid-template-columns:1fr;}
+    .foot-top{grid-template-columns:1fr;gap:30px;}
+    .hero{min-height:100svh;padding:120px 0 80px;}
+    .hero-cta .btn{width:100%;}
+    .foot-legal{flex-direction:column;}
+    .serve-card,.adv-panel,.quote{padding:30px 26px;}
+    .term-body{min-height:260px;font-size:12.5px;}
+    .hero-hud{display:none;}
+  }
+  @media(prefers-reduced-motion:reduce){
+    *{scroll-behavior:auto !important;animation:none !important;}
+    .reveal,.stagger>*,.hero h1 .w,.hero .sub,.hero-cta{opacity:1 !important;transform:none !important;filter:none !important;transition:none !important;}
+    .marquee .track{animation:none !important;}
+    #loader{display:none;}
+    .grain{display:none;}
+  }
+</style>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="spark" viewBox="0 0 24 24"><path d="M12 0 L13.7 10.3 L24 12 L13.7 13.7 L12 24 L10.3 13.7 L0 12 L10.3 10.3 Z"/></symbol>
+</svg>
+
+<div class="grain" aria-hidden="true"></div>
+<div id="progress" aria-hidden="true"></div>
+<div id="cursor" aria-hidden="true"></div><div id="cursor2" aria-hidden="true"></div>
+
+<!-- PRELOADER -->
+<div id="loader" aria-hidden="true">
+  <div class="pb">PB</div>
+  <div class="bar"><i></i></div>
+  <div class="cal">Calibrating horizon <b class="y">2039</b></div>
+</div>
+
+<!-- NAV -->
+<header class="nav" id="nav">
+  <div class="wrap">
+    <a class="brand" href="#top" aria-label="PeakBritt Financial Group home">
+      <span class="bmark"><span class="peak">PEAK</span><span class="britt">BRITT</span></span>
+      <span class="bsub">Financial Group</span>
+    </a>
+    <nav class="navlinks" aria-label="Primary">
+      <a href="#horizon">Horizon</a>
+      <a href="#serve">Who We Serve</a>
+      <a href="#strategies">Strategies</a>
+      <a href="#atlas">Atlas Live</a>
+      <a href="#advisors">For Advisors</a>
+      <a href="#about">About</a>
+    </nav>
+    <a href="#contact" class="btn btn-primary desk magnetic"><span class="shine"></span>Request a Consultation</a>
+    <button class="navtoggle" id="navtoggle" aria-label="Open menu" aria-expanded="false">
+      <svg viewBox="0 0 24 24"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+    </button>
+  </div>
+</header>
+
+<!-- MOBILE MENU -->
+<div class="mobilemenu" id="mobilemenu" aria-hidden="true">
+  <div class="mm-top">
+    <span style="font-family:var(--serif);font-size:21px;font-weight:600;"><span style="color:#c9ccd6">PEAK</span><span style="color:var(--gold)">BRITT</span></span>
+    <button class="navtoggle" id="navclose" aria-label="Close menu" style="display:block">
+      <svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg>
+    </button>
+  </div>
+  <nav aria-label="Mobile">
+    <a href="#horizon"><span class="idx">01</span>Horizon</a>
+    <a href="#serve"><span class="idx">02</span>Who We Serve</a>
+    <a href="#strategies"><span class="idx">03</span>Strategies</a>
+    <a href="#atlas"><span class="idx">04</span>Atlas Live</a>
+    <a href="#advisors"><span class="idx">05</span>For Advisors</a>
+    <a href="#about"><span class="idx">06</span>About</a>
+  </nav>
+  <a href="#contact" class="btn btn-primary"><span class="shine"></span>Request a Consultation</a>
+</div>
+
+<span id="top"></span>
+
+<!-- HERO -->
+<section class="hero" id="hero">
+  <canvas id="stars" aria-hidden="true"></canvas>
+  <div class="veil" aria-hidden="true"></div>
+  <div class="wrap">
+    <div class="hero-hud">
+      <span class="hud">PB //&nbsp; PRIVATE ADVANCED PLANNING</span>
+      <span class="hud">LOCAL <b id="clock">--:--</b> &nbsp;·&nbsp; HORIZON <b>2039</b></span>
+    </div>
+    <div class="hero-inner">
+      <span class="eyebrow">PeakBritt Financial Group</span>
+      <h1 id="heroline" aria-label="Most firms plan for April. We build for 2039.">
+        <span class="w">Most</span> <span class="w">firms</span> <span class="w">plan</span> <span class="w">for</span> <span class="w">April.</span><br>
+        <span class="w">We</span> <span class="w">build</span> <span class="w">for</span> <span class="w accent">2039.</span>
+      </h1>
+      <p class="sub">A boutique advanced-planning firm for high-net-worth families and business owners — engineering succession, protection, and legacy a full decade ahead of the industry. You haven&rsquo;t seen planning like this. That&rsquo;s the point.</p>
+      <div class="hero-cta">
+        <a href="#contact" class="btn btn-primary magnetic"><span class="shine"></span>Request a Private Consultation</a>
+        <a href="#atlas" class="btn btn-ghost magnetic"><span class="shine"></span>Watch Atlas Think</a>
+      </div>
+    </div>
+  </div>
+  <div class="scrollcue" aria-hidden="true"><span class="line"></span>Descend</div>
+</section>
+
+<!-- MARQUEE -->
+<div class="marquee" aria-hidden="true">
+  <div class="track" id="mqtrack">
+    <span><i></i>Business Succession <i></i>Buy-Sell Funding <i></i>Key-Person <i></i>Executive Bonus <i></i>COLI <i></i>Estate Architecture <i></i>Premium Finance <i></i>Wealth Replacement </span>
+    <span><i></i>Business Succession <i></i>Buy-Sell Funding <i></i>Key-Person <i></i>Executive Bonus <i></i>COLI <i></i>Estate Architecture <i></i>Premium Finance <i></i>Wealth Replacement </span>
+  </div>
+</div>
+
+<!-- TIME HORIZON DIAL -->
+<section class="section timeline" id="horizon">
+  <div class="wrap">
+    <div class="reveal">
+      <span class="eyebrow">The Horizon Engine</span>
+      <h2 style="color:var(--ivory);font-size:clamp(2rem,4.4vw,3.2rem);margin-top:22px;">Drag the dial. Watch your decade assemble.</h2>
+    </div>
+    <div class="reveal">
+      <div class="yearwrap"><div class="year" id="dialyear">2026</div></div>
+      <div class="stage" id="dialstage">
+        <h3 id="dialtitle">The conversation happens.</h3>
+        <p id="dialtext">The exposure is mapped, the buy-sell is funded, the key people are protected, and the plan is signed. Day one looks quiet. It isn&rsquo;t — it&rsquo;s the foundation being poured.</p>
+      </div>
+      <div class="dial">
+        <input type="range" id="dial" min="0" max="4" step="1" value="0" aria-label="Planning horizon year">
+        <div class="ticks"><b>2026</b><span>2029</span><span>2032</span><span>2035</span><b>2039</b></div>
+        <div class="hint"><span class="pulse"></span>Drag to travel — planning isn&rsquo;t prediction. It&rsquo;s construction.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PROBLEM -->
+<section class="ivory section problem" id="gap">
+  <div class="wrap reveal">
+    <span class="eyebrow">The Gap</span>
+    <h2 style="color:var(--navy);font-size:clamp(1.9rem,4vw,2.9rem);margin-top:22px;">When what you&rsquo;ve built outgrows ordinary planning.</h2>
+    <p class="body">Most firms are built for volume — a policy, a rollover, a quick illustration. But a closely held business, a concentrated estate, a key executive you cannot afford to lose: these don&rsquo;t fit an off-the-shelf answer. Left unaddressed, they quietly become <strong>the forced sale, the tax the family never planned for, the succession that was never funded.</strong> Sophisticated wealth deserves planning engineered to the same standard as the wealth itself.</p>
+  </div>
+</section>
+
+<!-- WHO WE SERVE -->
+<section class="ivory section" id="serve" style="padding-top:0;">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <span class="eyebrow">Who We Serve</span>
+      <h2>Two clients. One standard.</h2>
+    </div>
+    <div class="grid-2 stagger reveal">
+      <div class="serve-card tilt">
+        <span class="sweep"></span>
+        <span class="kicker">High-Net-Worth Individuals &amp; Families</span>
+        <h3>Wealth worth passing on with purpose.</h3>
+        <p>Concentrated estates, illiquid assets, and a legacy you intend to leave deliberately. We design the trust, insurance, and estate strategies that keep more of what you&rsquo;ve built in the family — and out of a forced sale or an avoidable tax.</p>
+      </div>
+      <div class="serve-card tilt">
+        <span class="sweep"></span>
+        <span class="kicker">Business Owners</span>
+        <h3>Your largest — and least liquid — asset.</h3>
+        <p>We fund the buy-sell, protect the people the business depends on, reward the executives who drive it, and build the succession plan that lets you exit on your terms rather than the market&rsquo;s.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- STRATEGIES -->
+<section class="section" id="strategies" style="background:var(--space);">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <span class="eyebrow">What We Design</span>
+      <h2 style="color:var(--ivory)">Strategies for complex wealth.</h2>
+      <p class="lede" style="margin-top:18px">The advanced work most firms refer out — designed in-house, coordinated with your attorney and CPA, and built to hold up to scrutiny.</p>
+    </div>
+    <div class="strat-grid reveal" id="stratgrid">
+      <div class="strat"><svg class="spark"><use href="#spark"/></svg><h3>Business Succession</h3><p>A funded, pre-priced plan for the day ownership changes hands.</p></div>
+      <div class="strat"><svg class="spark"><use href="#spark"/></svg><h3>Buy-Sell Funding</h3><p>Cross-purchase and entity designs, structured for today&rsquo;s tax landscape.</p></div>
+      <div class="strat"><svg class="spark"><use href="#spark"/></svg><h3>Key-Person Protection</h3><p>Cash for the business the day it loses someone it can&rsquo;t replace.</p></div>
+      <div class="strat"><svg class="spark"><use href="#spark"/></svg><h3>Executive Bonus &amp; REBA</h3><p>Golden-handcuff benefits that retain the people who drive results.</p></div>
+      <div class="strat"><svg class="spark"><use href="#spark"/></svg><h3>Corporate-Owned Life Insurance</h3><p>A tax-advantaged reserve on the company&rsquo;s balance sheet.</p></div>
+      <div class="strat"><svg class="spark"><use href="#spark"/></svg><h3>Estate &amp; Legacy Design</h3><p>ILIT, survivorship, and dynasty structures that keep wealth in the family.</p></div>
+      <div class="strat"><svg class="spark"><use href="#spark"/></svg><h3>Premium Financing</h3><p>Fund substantial coverage without disturbing working capital.</p></div>
+      <div class="strat"><svg class="spark"><use href="#spark"/></svg><h3>Charitable &amp; Wealth Replacement</h3><p>Give with impact while preserving the inheritance for heirs.</p></div>
+    </div>
+    <div class="stats reveal" id="stats">
+      <div class="stat"><div class="num"><span data-count="26">0</span></div><div class="lbl">Strategies Codified</div><div class="txt">A locked library of advanced designs — never improvised.</div></div>
+      <div class="stat"><div class="num"><span data-count="9">0</span></div><div class="lbl">Hard Rules Enforced</div><div class="txt">Tax-law guardrails checked on every single case.</div></div>
+      <div class="stat"><div class="num"><span data-count="100">0</span><sup>%</sup></div><div class="lbl">Designed In-House</div><div class="txt">The advanced work others refer out is our core.</div></div>
+      <div class="stat"><div class="num"><span data-count="1">0</span></div><div class="lbl">Uncompromising Standard</div><div class="txt">Boutique on purpose. Small enough to be personal.</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ATLAS LIVE -->
+<section class="section atlas" id="atlas">
+  <div class="wrap">
+    <div class="reveal">
+      <span class="eyebrow">Atlas · Live Demonstration</span>
+      <h2>Watch a case design itself.</h2>
+      <p class="lede" style="margin-bottom:8px">Case Atlas is the planning intelligence we built for our own practice — and offer to a select group of producers. Describe a client in plain language; Atlas returns the strategy, the compliance-checked language, the wholesaler handoff, and the pitch deck. This is what 2039 feels like from the driver&rsquo;s seat.</p>
+      <div class="price"><span class="amt">$97</span><span class="per">/ month · 30-day money-back guarantee</span></div>
+      <a href="#contact" class="btn btn-primary magnetic"><span class="shine"></span>Request Access</a>
+    </div>
+    <div class="reveal">
+      <div class="term-frame">
+        <div class="terminal">
+          <div class="term-bar"><i></i><i></i><i></i><span class="tl">ATLAS · CASE ENGINE</span></div>
+          <div class="term-body" id="term" aria-live="off"></div>
+        </div>
+      </div>
+      <p class="atlas-note">Live simulation · actual product output is compliance-filtered</p>
+    </div>
+  </div>
+</section>
+
+<!-- ADVISORS -->
+<section class="section advisors" id="advisors">
+  <div class="wrap">
+    <div class="adv-grid">
+      <div class="reveal">
+        <span class="eyebrow">For Advisors</span>
+        <h2>A select group of exceptional producers.</h2>
+        <p class="body">We support a small circle of independent advisors who want to play a bigger game — the advanced cases, the high-net-worth relationships, the strategies that separate a seven-figure producer from a stalled one. You keep your independence and your own brand. We bring the case design, the mentorship, and tools from a decade ahead.</p>
+        <p class="body" style="margin-top:18px;font-family:var(--serif);font-style:italic;font-size:1.35rem;color:var(--navy);">We don&rsquo;t recruit widely. We select.</p>
+      </div>
+      <div class="adv-frame reveal">
+        <div class="adv-panel">
+          <h3>Apply to Join</h3>
+          <p class="sub">By application — a handful of seats each year.</p>
+          <ul class="adv-crit">
+            <li><svg class="spark"><use href="#spark"/></svg>Licensed and independent — keep your book and your brand</li>
+            <li><svg class="spark"><use href="#spark"/></svg>An established book, or the ambition and work ethic to build one</li>
+            <li><svg class="spark"><use href="#spark"/></svg>Coachable, discreet, and ready to run advanced cases</li>
+            <li><svg class="spark"><use href="#spark"/></svg>Serious about high-net-worth and business-owner clients</li>
+          </ul>
+          <a href="#contact" class="btn btn-primary magnetic"><span class="shine"></span>Apply to Join</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ABOUT -->
+<section class="section about" id="about">
+  <div class="wrap">
+    <div class="about-grid">
+      <div class="monogram reveal" aria-hidden="true">
+        <span class="pb">PB</span>
+        <span class="lbl">Horizon 2039</span>
+      </div>
+      <div class="reveal">
+        <span class="eyebrow">Who We Are</span>
+        <h2>Built on a simple conviction.</h2>
+        <p>The families and business owners who build real wealth deserve planning built to the same standard — <strong>personal, sophisticated, and honest.</strong> We grew tired of watching advanced strategies get referred out, watered down, or sold by people who didn&rsquo;t fully understand them.</p>
+        <p>So we built the opposite of a volume shop. We go deep, we stay small, and we work personally with every client and every advisor we partner with. When you work with PeakBritt, you work with the people who design your plan — <strong>not a brand three layers removed from the advice.</strong></p>
+        <p>That&rsquo;s also why we built our own planning intelligence rather than settle for what was on the shelf. The standard is the point. The future is the address.</p>
+        <div class="sig">The PeakBritt Financial Group
+          <small>Advanced Planning · High-Net-Worth &amp; Business Owners</small>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PROOF -->
+<section class="ivory section" id="proof">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <span class="eyebrow">In Their Words</span>
+      <h2>Trusted with what matters most.</h2>
+    </div>
+    <div class="quotes stagger reveal">
+      <figure class="quote tilt" style="margin:0;">
+        <span class="mark" aria-hidden="true">&ldquo;</span>
+        <p>They saw the exposure our previous advisor missed entirely — and built the plan to close it. This is a different level of thinking.</p>
+        <figcaption class="who">Business Owner · Manufacturing</figcaption>
+      </figure>
+      <figure class="quote tilt" style="margin:0;">
+        <span class="mark" aria-hidden="true">&ldquo;</span>
+        <p>Discreet, precise, and genuinely expert. For the first time, our estate plan and our insurance actually work together.</p>
+        <figcaption class="who">Private Client · Family Office</figcaption>
+      </figure>
+    </div>
+    <p class="proof-note">Illustrative examples shown for layout. Replace with real, written client statements you&rsquo;ve obtained permission to use and had reviewed for your state&rsquo;s advertising and testimonial rules before publishing.</p>
+  </div>
+</section>
+
+<!-- FAQ -->
+<section class="ivory section" id="faq" style="padding-top:0;">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <span class="eyebrow">Questions</span>
+      <h2>What people ask first.</h2>
+    </div>
+    <div class="faq-list reveal">
+      <div class="faq-item">
+        <button class="faq-q">What makes PeakBritt different from a large agency? <span class="ic" aria-hidden="true"></span></button>
+        <div class="faq-a"><div class="inner">We&rsquo;re a boutique built specifically for advanced planning. The strategies most firms refer out — succession, buy-sell, COLI, executive benefits, advanced estate design — are our core work, designed personally rather than passed down a chain.</div></div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q">Do I have to leave my current advisor or agency to work with you? <span class="ic" aria-hidden="true"></span></button>
+        <div class="faq-a"><div class="inner">As a client, we coordinate with your existing attorney and CPA rather than replace them. As an advisor, you remain fully independent — you keep your book and your own brand, and we partner with you on the advanced cases.</div></div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q">Is there a minimum to work with you? <span class="ic" aria-hidden="true"></span></button>
+        <div class="faq-a"><div class="inner">We work best with high-net-worth individuals and business owners whose situations call for advanced design. The most useful first step is a brief, confidential conversation to see whether we&rsquo;re the right fit — there&rsquo;s no cost to that.</div></div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q">What is Case Atlas, and do I need it? <span class="ic" aria-hidden="true"></span></button>
+        <div class="faq-a"><div class="inner">Case Atlas is the case-design intelligence we built for our own practice and offer to producers at $97/month. Clients don&rsquo;t need it — it&rsquo;s a tool for advisors who want a faster, more disciplined way to design and present advanced cases.</div></div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q">Is my information kept confidential? <span class="ic" aria-hidden="true"></span></button>
+        <div class="faq-a"><div class="inner">Always. Discretion is the baseline of how we operate. Nothing you share is used or disclosed beyond the work we do together for you.</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FINAL CTA -->
+<section class="section finalcta">
+  <canvas id="stars2" aria-hidden="true"></canvas>
+  <div class="wrap reveal">
+    <span class="eyebrow center">Begin</span>
+    <h2>The future arrives either way.<br>Arrive <span class="accent">prepared.</span></h2>
+    <p class="lede" style="margin:0 auto 8px;">A single, confidential conversation is the most valuable thing you can do for what you&rsquo;ve built. No cost. No obligation. Only clarity — and a look at planning from a decade ahead.</p>
+    <div class="cta-row">
+      <a href="#contact" class="btn btn-primary magnetic"><span class="shine"></span>Request a Private Consultation</a>
+      <a href="#advisors" class="btn btn-ghost magnetic"><span class="shine"></span>Advisors: Apply to Join</a>
+    </div>
+  </div>
+</section>
+
+<!-- CONTACT -->
+<section class="section contact" id="contact">
+  <div class="wrap">
+    <div class="c-grid">
+      <div class="reveal">
+        <span class="eyebrow">Contact</span>
+        <h2>Start a private conversation.</h2>
+        <p class="body">Tell us a little about your situation — whether you&rsquo;re a client exploring advanced planning or an advisor interested in joining. We respond personally.</p>
+        <div class="detail"><span>Email</span><a href="mailto:hello@peakbritt.com">hello@peakbritt.com</a></div>
+        <div class="detail"><span>By Appointment</span><a href="#contact">Schedule a confidential call</a></div>
+      </div>
+      <div class="reveal">
+        <form class="cf" id="cf" novalidate>
+          <div class="row">
+            <div><label for="f-name">Name</label><input id="f-name" name="name" type="text" autocomplete="name" required></div>
+            <div><label for="f-email">Email</label><input id="f-email" name="email" type="email" autocomplete="email" required></div>
+          </div>
+          <div><label for="f-role">I am a…</label>
+            <select id="f-role" name="role">
+              <option>Prospective client (individual / family)</option>
+              <option>Business owner</option>
+              <option>Advisor interested in joining</option>
+              <option>Interested in Case Atlas</option>
+            </select>
+          </div>
+          <div><label for="f-msg">How can we help?</label><textarea id="f-msg" name="message" rows="4"></textarea></div>
+          <button type="submit" class="btn btn-primary magnetic"><span class="shine"></span>Send &amp; Request a Consultation</button>
+        </form>
+        <div class="cf-done" id="cfdone">
+          <svg class="spark"><use href="#spark"/></svg>
+          <h3 style="font-family:var(--serif)">Thank you.</h3>
+          <p>We&rsquo;ve received your note and will be in touch personally — usually within one business day.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="wrap">
+    <div class="foot-top">
+      <div class="foot-brand">
+        <div class="bmark"><span class="peak">PEAK</span><span class="britt">BRITT</span></div>
+        <p>A boutique advanced-planning agency for high-net-worth families, business owners, and the exceptional advisors who serve them.</p>
+      </div>
+      <div class="foot-col">
+        <h4>Explore</h4>
+        <a href="#horizon">Horizon</a>
+        <a href="#serve">Who We Serve</a>
+        <a href="#strategies">Strategies</a>
+        <a href="#atlas">Atlas Live</a>
+        <a href="#advisors">For Advisors</a>
+      </div>
+      <div class="foot-col">
+        <h4>Connect</h4>
+        <a href="#contact">Request a Consultation</a>
+        <a href="#advisors">Apply to Join</a>
+        <a href="mailto:hello@peakbritt.com">hello@peakbritt.com</a>
+      </div>
+    </div>
+    <p class="disclosure">PeakBritt Financial Group offers insurance and advanced-planning strategies. This website is for general informational purposes only and does not constitute tax, legal, or investment advice; consult your own qualified tax and legal advisors before acting on any strategy. Insurance and annuity products are subject to underwriting, and any benefits or guarantees are based on the claims-paying ability of the issuing insurer and on each policy remaining in force. Strategies described here may not be suitable for every situation. Illustrations of future planning horizons are conceptual only and do not predict or promise any outcome.</p>
+    <div class="foot-legal">
+      <span>&copy; <span id="yr"></span> PeakBritt Financial Group. All rights reserved.</span>
+      <span>Privacy · Terms · Accessibility</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+(function(){
+  var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var fine = window.matchMedia('(pointer: fine)').matches;
+
+  /* preloader */
+  var loader = document.getElementById('loader');
+  if(reduce){ loader.classList.add('done'); }
+  else { setTimeout(function(){ loader.classList.add('done'); document.getElementById('hero').classList.add('on'); }, 1500); }
+  if(reduce){ document.getElementById('hero').classList.add('on'); }
+
+  /* clock */
+  function tick(){ var d=new Date(); document.getElementById('clock').textContent = String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0'); }
+  tick(); setInterval(tick, 30000);
+
+  /* scroll progress + nav */
+  var nav = document.getElementById('nav'), prog = document.getElementById('progress');
+  function onScroll(){
+    var st = window.scrollY, h = document.documentElement.scrollHeight - innerHeight;
+    prog.style.width = (h>0 ? (st/h*100) : 0) + '%';
+    if(st>40) nav.classList.add('scrolled'); else nav.classList.remove('scrolled');
+  }
+  onScroll(); addEventListener('scroll', onScroll, {passive:true});
+
+  /* custom cursor + magnetic (desktop only) */
+  if(fine && !reduce){
+    document.body.classList.add('cursor-on');
+    var c1=document.getElementById('cursor'), c2=document.getElementById('cursor2');
+    var mx=0,my=0,rx=0,ry=0;
+    addEventListener('pointermove', function(e){ mx=e.clientX; my=e.clientY; c1.style.left=mx+'px'; c1.style.top=my+'px'; }, {passive:true});
+    (function loop(){ rx+=(mx-rx)*.16; ry+=(my-ry)*.16; c2.style.left=rx+'px'; c2.style.top=ry+'px'; requestAnimationFrame(loop); })();
+    document.querySelectorAll('a,button,input,select,textarea,.strat').forEach(function(el){
+      el.addEventListener('pointerenter', function(){ document.body.classList.add('cursor-hot'); });
+      el.addEventListener('pointerleave', function(){ document.body.classList.remove('cursor-hot'); });
+    });
+    document.querySelectorAll('.magnetic').forEach(function(btn){
+      btn.addEventListener('pointermove', function(e){
+        var r = btn.getBoundingClientRect();
+        btn.style.transform = 'translate('+((e.clientX-r.left-r.width/2)*.22)+'px,'+((e.clientY-r.top-r.height/2)*.28)+'px)';
+      });
+      btn.addEventListener('pointerleave', function(){ btn.style.transform=''; });
+    });
+  }
+
+  /* particle constellation */
+  function constellation(id, density){
+    var cv = document.getElementById(id); if(!cv) return;
+    var ctx = cv.getContext('2d'), P=[], W, H, dpr=Math.min(devicePixelRatio||1,2), px=-999, py=-999;
+    function size(){
+      var r = cv.parentElement.getBoundingClientRect();
+      W=r.width; H=r.height; cv.width=W*dpr; cv.height=H*dpr; cv.style.width=W+'px'; cv.style.height=H+'px'; ctx.setTransform(dpr,0,0,dpr,0,0);
+      var n = Math.max(30, Math.floor(W*H/density));
+      P = [];
+      for(var i=0;i<n;i++) P.push({x:Math.random()*W, y:Math.random()*H, vx:(Math.random()-.5)*.22, vy:(Math.random()-.5)*.22, r:Math.random()*1.6+.5});
+    }
+    size(); addEventListener('resize', size);
+    cv.parentElement.addEventListener('pointermove', function(e){ var r=cv.getBoundingClientRect(); px=e.clientX-r.left; py=e.clientY-r.top; }, {passive:true});
+    cv.parentElement.addEventListener('pointerleave', function(){ px=py=-999; });
+    if(reduce){ // static frame
+      ctx.fillStyle='rgba(212,175,55,.5)';
+      P.forEach(function(p){ ctx.beginPath(); ctx.arc(p.x,p.y,p.r,0,7); ctx.fill(); });
+      return;
+    }
+    (function frame(){
+      ctx.clearRect(0,0,W,H);
+      for(var i=0;i<P.length;i++){
+        var p=P[i];
+        p.x+=p.vx; p.y+=p.vy;
+        if(px>-500){ var dx=px-p.x, dy=py-p.y, d=Math.hypot(dx,dy); if(d<160 && d>1){ p.x+=dx/d*.5; p.y+=dy/d*.5; } }
+        if(p.x<0)p.x=W; if(p.x>W)p.x=0; if(p.y<0)p.y=H; if(p.y>H)p.y=0;
+        ctx.fillStyle='rgba(212,175,55,.55)';
+        ctx.beginPath(); ctx.arc(p.x,p.y,p.r,0,7); ctx.fill();
+        for(var j=i+1;j<P.length;j++){
+          var q=P[j], dx2=p.x-q.x, dy2=p.y-q.y, dd=dx2*dx2+dy2*dy2;
+          if(dd<12000){ ctx.strokeStyle='rgba(212,175,55,'+(0.13*(1-dd/12000))+')'; ctx.lineWidth=1; ctx.beginPath(); ctx.moveTo(p.x,p.y); ctx.lineTo(q.x,q.y); ctx.stroke(); }
+        }
+      }
+      requestAnimationFrame(frame);
+    })();
+  }
+  constellation('stars', innerWidth<700 ? 16000 : 11000);
+  constellation('stars2', 26000);
+
+  /* hero word cascade */
+  document.querySelectorAll('#heroline .w').forEach(function(w,i){ w.style.transitionDelay = (0.08*i)+'s'; });
+
+  /* mobile menu */
+  var mm=document.getElementById('mobilemenu'), tog=document.getElementById('navtoggle'), cls=document.getElementById('navclose');
+  function openMM(){ mm.classList.add('open'); mm.setAttribute('aria-hidden','false'); tog.setAttribute('aria-expanded','true'); document.body.style.overflow='hidden'; }
+  function closeMM(){ mm.classList.remove('open'); mm.setAttribute('aria-hidden','true'); tog.setAttribute('aria-expanded','false'); document.body.style.overflow=''; }
+  tog.addEventListener('click', openMM); cls.addEventListener('click', closeMM);
+  mm.querySelectorAll('a').forEach(function(a){ a.addEventListener('click', closeMM); });
+
+  /* reveal on scroll */
+  var io = new IntersectionObserver(function(es){ es.forEach(function(e){ if(e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target); } }); }, {threshold:.12, rootMargin:'0px 0px -8% 0px'});
+  document.querySelectorAll('.reveal,.stagger').forEach(function(el){ if(reduce) el.classList.add('in'); else io.observe(el); });
+
+  /* horizon dial */
+  var stages=[
+    {y:'2026', t:'The conversation happens.', p:'The exposure is mapped, the buy-sell is funded, the key people are protected, and the plan is signed. Day one looks quiet. It isn’t — it’s the foundation being poured.'},
+    {y:'2029', t:'The key people stay.', p:'The golden handcuffs vest on schedule. The corporate reserve compounds without annual tax while the policies remain in force. Competitors keep calling your best people — and keep hearing no.'},
+    {y:'2032', t:'The exit is on your terms.', p:'Succession funds at the agreed price — no fire sale, no negotiating under grief, no bank deciding your timeline. The business changes hands exactly the way it was designed to.'},
+    {y:'2035', t:'The estate is architecture, not accident.', p:'Trusts own the risk; the family owns the upside. What would have been the tax the family never planned for is now cash arriving precisely where the plan aimed it.'},
+    {y:'2039', t:'The legacy operates itself.', p:'What you built runs, pays, and passes exactly as designed — a structure your family lives in, not a problem they inherit. This is what a decade of deliberate construction looks like.'}
+  ];
+  var dial=document.getElementById('dial'), dy=document.getElementById('dialyear'), dt=document.getElementById('dialtitle'), dp=document.getElementById('dialtext'), ds=document.getElementById('dialstage');
+  var curYear=2026, animId=null;
+  function setFill(){ dial.style.setProperty('--fill', (dial.value/4*100)+'%'); }
+  setFill();
+  dial.addEventListener('input', function(){
+    setFill();
+    var s=stages[dial.value];
+    ds.classList.add('swap');
+    var target=parseInt(s.y,10);
+    if(animId) cancelAnimationFrame(animId);
+    (function step(){
+      if(curYear===target){ dy.textContent=target; return; }
+      curYear += curYear<target ? 1 : -1;
+      dy.textContent=curYear;
+      animId=requestAnimationFrame(function(){ setTimeout(step, 24); });
+    })();
+    setTimeout(function(){ dt.textContent=s.t; dp.textContent=s.p; ds.classList.remove('swap'); }, 220);
+  });
+
+  /* strat glow follows pointer */
+  document.querySelectorAll('.strat').forEach(function(el){
+    el.addEventListener('pointermove', function(e){ var r=el.getBoundingClientRect(); el.style.setProperty('--mx',(e.clientX-r.left)+'px'); el.style.setProperty('--my',(e.clientY-r.top)+'px'); }, {passive:true});
+  });
+
+  /* tilt cards */
+  if(fine && !reduce){
+    document.querySelectorAll('.tilt').forEach(function(el){
+      el.addEventListener('pointermove', function(e){
+        var r=el.getBoundingClientRect(), x=(e.clientX-r.left)/r.width-.5, y=(e.clientY-r.top)/r.height-.5;
+        el.style.transform='rotateY('+(x*7)+'deg) rotateX('+(-y*7)+'deg) translateY(-4px)';
+        el.style.boxShadow='0 34px 70px -34px rgba(10,18,38,.4)';
+      });
+      el.addEventListener('pointerleave', function(){ el.style.transform=''; el.style.boxShadow=''; });
+    });
+  }
+
+  /* counters */
+  var statsIO = new IntersectionObserver(function(es){
+    es.forEach(function(e){
+      if(!e.isIntersecting) return; statsIO.unobserve(e.target);
+      e.target.querySelectorAll('[data-count]').forEach(function(n){
+        var end=+n.dataset.count, t0=null;
+        if(reduce){ n.textContent=end; return; }
+        (function run(ts){ if(!t0)t0=ts; var k=Math.min((ts-t0)/1400,1); n.textContent=Math.round(end*(1-Math.pow(1-k,3))); if(k<1) requestAnimationFrame(run); })(performance.now());
+        requestAnimationFrame(function(ts){ t0=null; });
+      });
+    });
+  },{threshold:.4});
+  statsIO.observe(document.getElementById('stats'));
+
+  /* Atlas terminal typing loop */
+  var term=document.getElementById('term');
+  var script=[
+    {c:'usr', t:'> "I’ve got a guy — two partners, C-corp, $8M revenue, no funded buy-sell."', d:34},
+    {c:'atl', t:'ATLAS ▸ Reading scenario…', d:16},
+    {c:'atl', t:'ATLAS ▸ Avatar: <b>BUSINESS OWNER</b> · priority stack confirmed', d:14},
+    {c:'atl', t:'ATLAS ▸ 9 hard rules checked — <span class="ok">clear</span>', d:14},
+    {c:'atl', t:'ATLAS ▸ Strategy: <b>Buy-Sell Funding</b> (cross-purchase) + <b>Key-Person</b>', d:14},
+    {c:'atl', t:'ATLAS ▸ Compliance filter — <span class="ok">PASS</span>', d:14},
+    {c:'atl', t:'ATLAS ▸ Wholesaler handoff drafted · pitch deck assembled', d:14},
+    {c:'ok',  t:'✦ Case design ready in 41 seconds.', d:20}
+  ];
+  function typeLoop(){
+    term.innerHTML='';
+    var li=0;
+    function nextLine(){
+      if(li>=script.length){ setTimeout(function(){ if(!reduce) typeLoop(); }, 5200); return; }
+      var s=script[li++], div=document.createElement('div'); div.className='ln '+s.c; term.appendChild(div);
+      if(reduce){ div.innerHTML=s.t; nextLine(); return; }
+      var plain=s.t, i=0, caret=document.createElement('span'); caret.className='caret'; term.appendChild(caret);
+      (function ch(){
+        i++;
+        // type against HTML safely: cut plain string, then swap to full HTML at end
+        div.textContent = plain.replace(/<[^>]*>/g,'').slice(0,i);
+        if(i < plain.replace(/<[^>]*>/g,'').length){ setTimeout(ch, s.d); }
+        else { div.innerHTML = s.t; caret.remove(); setTimeout(nextLine, 420); }
+      })();
+    }
+    nextLine();
+  }
+  var termIO=new IntersectionObserver(function(es){ es.forEach(function(e){ if(e.isIntersecting){ termIO.unobserve(e.target); typeLoop(); } }); },{threshold:.3});
+  termIO.observe(term);
+
+  /* faq */
+  document.querySelectorAll('.faq-q').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      var item=btn.parentElement, a=item.querySelector('.faq-a'), open=item.classList.contains('open');
+      document.querySelectorAll('.faq-item.open').forEach(function(o){ if(o!==item){ o.classList.remove('open'); o.querySelector('.faq-a').style.maxHeight=null; } });
+      if(open){ item.classList.remove('open'); a.style.maxHeight=null; } else { item.classList.add('open'); a.style.maxHeight=a.scrollHeight+'px'; }
+    });
+  });
+
+  /* form */
+  var cf=document.getElementById('cf'), done=document.getElementById('cfdone');
+  cf.addEventListener('submit', function(e){
+    e.preventDefault();
+    var name=document.getElementById('f-name'), email=document.getElementById('f-email');
+    if(!name.value.trim()||!email.value.trim()){ (!name.value.trim()?name:email).focus(); return; }
+    cf.style.display='none'; done.classList.add('show');
+  });
+
+  document.getElementById('yr').textContent=new Date().getFullYear();
+})();
+</script>

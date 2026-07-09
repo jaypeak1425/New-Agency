@@ -40,6 +40,10 @@ function clientSafe(text: string, context: string): string {
   return result.output;
 }
 
+// GA4 loader that no-ops until a measurement ID is set — one value to fill
+// in at launch (or rely on Wix's built-in analytics if Wix-hosted).
+const ANALYTICS_SNIPPET = `<script>window.PB_GA_ID="";(function(){var id=window.PB_GA_ID;if(!id)return;var s=document.createElement("script");s.async=true;s.src="https://www.googletagmanager.com/gtag/js?id="+id;document.head.appendChild(s);window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}window.gtag=gtag;gtag("js",new Date());gtag("config",id);})();</script>`;
+
 function page(opts: {
   title: string;
   description: string;
@@ -51,7 +55,10 @@ function page(opts: {
   backLabel: string;
   ctaHtml: string;
   jsonLd?: object;
+  /** relative path prefix from this page back to the site root ("../" in blog dirs, "" at root) */
+  prefix?: string;
 }) {
+  const prefix = opts.prefix ?? "../";
   return `<!doctype html>
 <html lang="en">
 <head>
@@ -67,6 +74,10 @@ function page(opts: {
 <meta property="og:title" content="${esc(opts.title)}">
 <meta property="og:description" content="${esc(opts.description)}">
 <meta property="og:url" content="${SITE}${opts.canonicalPath}">
+<meta property="og:image" content="${SITE}/og-image.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="${SITE}/og-image.png">
+${ANALYTICS_SNIPPET}
 ${opts.jsonLd ? `<script type="application/ld+json">${JSON.stringify(opts.jsonLd)}</script>` : ""}
 <style>
   :root{--navy:#0A1226;--navy-2:#13233D;--gold:#D4AF37;--ivory:#F7F5F0;--ink:#1c2436;--ink-soft:#55607a;
@@ -98,7 +109,7 @@ ${opts.jsonLd ? `<script type="application/ld+json">${JSON.stringify(opts.jsonLd
 </head>
 <body>
 <header><div class="wrap">
-  <a class="bmark" href="../index.html">PEAK<b>BRITT</b></a>
+  <a class="bmark" href="${prefix}index.html">PEAK<b>BRITT</b></a>
   <a class="back" href="${opts.backHref}">${esc(opts.backLabel)}</a>
 </div></header>
 <main>
@@ -107,7 +118,9 @@ ${opts.jsonLd ? `<script type="application/ld+json">${JSON.stringify(opts.jsonLd
   ${opts.bodyHtml}
   ${opts.ctaHtml}
 </main>
-<footer>${DISCLOSURE} &copy; ${new Date().getFullYear()} PeakBritt Financial Group.</footer>
+<footer>${DISCLOSURE} &copy; ${new Date().getFullYear()} PeakBritt Financial Group.
+<p style="margin:12px 0 0"><a href="${prefix}privacy.html">Privacy</a> · <a href="${prefix}terms.html">Terms</a> · <a href="${prefix}accessibility.html">Accessibility</a></p>
+</footer>
 </body>
 </html>
 `;
@@ -307,12 +320,125 @@ writeFileSync(
   }),
 );
 
+// ---------- legal pages (site root) ----------
+const EFFECTIVE = "July 9, 2026";
+const legalPages: Array<{ file: string; title: string; heading: string; description: string; bodyHtml: string }> = [
+  {
+    file: "privacy.html",
+    title: "Privacy Policy | PeakBritt Financial Group",
+    heading: "Privacy Policy",
+    description: "How PeakBritt Financial Group collects, uses, and protects your information.",
+    bodyHtml: `
+  <p><em>Effective ${EFFECTIVE}</em></p>
+  <h2>What we collect</h2>
+  <p>When you contact us through this site, we collect the information you provide: your name, email
+  address, the category you select, and your message. If analytics are enabled, we also collect
+  standard usage data (pages visited, device type, approximate location) through cookies or similar
+  technologies.</p>
+  <h2>How we use it</h2>
+  <p>We use your information to respond to your inquiry, provide the services you request, and improve
+  this site. We do not sell your personal information, and we do not share it with third parties for
+  their own marketing.</p>
+  <h2>When we share</h2>
+  <p>We share information only with service providers who help us operate (such as email and hosting
+  providers, bound to confidentiality), with professionals involved in work you engage us for (such as
+  your attorney or CPA, at your direction), or when required by law.</p>
+  <h2>Security and retention</h2>
+  <p>We use commercially reasonable safeguards to protect your information and retain it only as long
+  as needed for the purposes above or as required by insurance-records regulations.</p>
+  <h2>Your choices</h2>
+  <p>You may request access to, correction of, or deletion of your personal information by emailing
+  <a href="mailto:hello@peakbritt.com">hello@peakbritt.com</a>. You can decline cookies in your browser
+  settings.</p>
+  <h2>Children</h2>
+  <p>This site is not directed to children under 13, and we do not knowingly collect their information.</p>
+  <h2>Changes</h2>
+  <p>We may update this policy from time to time; the effective date above reflects the latest version.
+  Questions: <a href="mailto:hello@peakbritt.com">hello@peakbritt.com</a>.</p>`,
+  },
+  {
+    file: "terms.html",
+    title: "Terms of Use | PeakBritt Financial Group",
+    heading: "Terms of Use",
+    description: "The terms that govern your use of the PeakBritt Financial Group website.",
+    bodyHtml: `
+  <p><em>Effective ${EFFECTIVE}</em></p>
+  <h2>Informational purposes only</h2>
+  <p>This website is for general informational purposes. Nothing on it constitutes tax, legal,
+  investment, or accounting advice, an offer to sell any product, or a recommendation for your
+  specific situation. Consult your own qualified tax and legal advisors before acting on any strategy
+  described here.</p>
+  <h2>No client relationship</h2>
+  <p>Using this site, reading its content, or submitting the contact form does not create a client,
+  advisory, or fiduciary relationship with PeakBritt Financial Group. A relationship is formed only
+  through a separately signed engagement.</p>
+  <h2>Insurance products</h2>
+  <p>Insurance and annuity products are subject to underwriting and policy terms. Any benefits or
+  guarantees are based on the claims-paying ability of the issuing insurer and on each policy
+  remaining in force. Strategies described may not be suitable for every situation, and availability
+  varies by state.</p>
+  <h2>Intellectual property</h2>
+  <p>The content, design, and branding of this site — and of Case Atlas — are the property of
+  PeakBritt Financial Group. You may not reproduce or distribute them without written permission.</p>
+  <h2>Linked services</h2>
+  <p>The Case Atlas platform is governed by its own terms presented at signup. Links to third-party
+  sites are provided for convenience; we are not responsible for their content.</p>
+  <h2>Limitation of liability</h2>
+  <p>This site is provided &ldquo;as is.&rdquo; To the fullest extent permitted by law, PeakBritt
+  Financial Group is not liable for damages arising from your use of, or reliance on, this site.</p>
+  <h2>Changes</h2>
+  <p>We may update these terms from time to time; continued use of the site constitutes acceptance.
+  Questions: <a href="mailto:hello@peakbritt.com">hello@peakbritt.com</a>.</p>`,
+  },
+  {
+    file: "accessibility.html",
+    title: "Accessibility Statement | PeakBritt Financial Group",
+    heading: "Accessibility",
+    description: "PeakBritt Financial Group's commitment to an accessible website for all visitors.",
+    bodyHtml: `
+  <p><em>Effective ${EFFECTIVE}</em></p>
+  <p>PeakBritt Financial Group is committed to making this website usable by everyone, including
+  visitors who rely on assistive technology. We aim to conform to the Web Content Accessibility
+  Guidelines (WCAG) 2.1 Level AA.</p>
+  <h2>What we do</h2>
+  <ul>
+    <li>Maintain strong color contrast between text and backgrounds.</li>
+    <li>Support keyboard navigation and visible focus states.</li>
+    <li>Honor your device&rsquo;s reduced-motion preference — animations are disabled when you ask for less motion.</li>
+    <li>Use semantic headings, labels, and alternative text so screen readers can navigate the site.</li>
+  </ul>
+  <h2>Need help or found a barrier?</h2>
+  <p>If any part of this site is difficult to use, or you&rsquo;d like this content in another format,
+  email <a href="mailto:hello@peakbritt.com">hello@peakbritt.com</a> — we respond personally and
+  we&rsquo;ll make it right.</p>`,
+  },
+];
+
+for (const lp of legalPages) {
+  writeFileSync(
+    join(OUT, lp.file),
+    page({
+      title: lp.title,
+      description: lp.description,
+      canonicalPath: `/${lp.file}`,
+      eyebrow: "PeakBritt Financial Group",
+      heading: lp.heading,
+      bodyHtml: lp.bodyHtml,
+      backHref: "index.html",
+      backLabel: "PeakBritt Home",
+      ctaHtml: "",
+      prefix: "",
+    }),
+  );
+}
+
 // ---------- sitemap + robots ----------
 const urls: Array<{ loc: string; priority: string }> = [
   { loc: `${SITE}/`, priority: "1.0" },
   { loc: `${SITE}/advisors.html`, priority: "0.9" },
   { loc: `${SITE}/insights/index.html`, priority: "0.8" },
   { loc: `${SITE}/advisor-insights/index.html`, priority: "0.8" },
+  ...legalPages.map((lp) => ({ loc: `${SITE}/${lp.file}`, priority: "0.3" })),
   ...clientLinks.map((l) => ({ loc: `${SITE}/insights/${l.slug}.html`, priority: "0.7" })),
   ...advisorLinks.map((l) => ({ loc: `${SITE}/advisor-insights/${l.slug}.html`, priority: "0.6" })),
 ];

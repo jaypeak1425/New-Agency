@@ -20,20 +20,37 @@ Source of truth: the `site/` folder on branch `claude/new-session-ollg4p`.
 - `site/privacy.html`, `site/terms.html`, `site/accessibility.html` — legal.
 - `site/og-image.png` — social share image.
 
-## How to get it into Wix (in order of fidelity)
+## How to get it into Wix
 
-1. **Design import**: `mcp__Wix__import-claude-design-from-url` accepts a
-   publicly fetchable Claude design URL. The design artifact is
-   https://claude.ai/code/artifact/a8cdd975-d079-4837-ba91-14eb7e21c3db
-   ("peakbritt-site"). It must be SHARED PUBLICLY first (owner opens it →
-   Share → anyone with the link) — private artifact URLs are rejected with
-   "Invalid design URL". Note: the artifact holds the OLDER single-page
-   version; after import, split content per the two-page structure above.
-2. **WixSiteBuilder** with a detailed prompt reproducing the two pages
-   (colors: navy #0A1226 / space #04070f, gold #D4AF37, ivory #F7F5F0;
-   fonts: Playfair Display headlines, Montserrat body).
-3. Wix blog: recreate the two Insights collections as Wix blog categories, or
-   defer the blog (it can live later on a subdomain).
+**Do NOT attempt `import-claude-design-from-url`** — it requires a publicly
+shared Claude artifact, and the owner's plan cannot share artifacts (verified
+2026-07-10: "Sharing artifacts is available on Team or Enterprise plans").
+External URLs (raw.githubusercontent, githack) are rejected with "Invalid
+design URL" — the importer only accepts Claude-hosted links.
+
+**Use `mcp__Wix__WixSiteBuilder`** with a meticulous prompt built from the
+actual HTML in `site/` (read the files first — they are the spec):
+
+- Colors: navy #0A1226 · deep space #04070f · gold #D4AF37 · gold-soft
+  #E8D9B5 · ivory #F7F5F0 · ink #1c2436.
+- Fonts: Playfair Display (serif) for all headlines, Montserrat for body/UI.
+- Page 1 (home, client-facing): dark navy hero with constellation/star
+  backdrop, eyebrow "PeakBritt Financial Group", H1 "Most firms plan for
+  April. We build for 2039." (gold italic "2039."), strategy-name ticker,
+  Horizon timeline moment (2026→2039), "When what you've built outgrows
+  ordinary planning." (ivory section), "Two clients. One standard." cards,
+  "Strategies for complex wealth." 8-card grid + 26/9/100%/1 stat row,
+  "Built on a simple conviction." about, testimonial placeholders (keep the
+  compliance note), 5-question FAQ, "The future arrives either way. Arrive
+  prepared." CTA, contact form, footer with disclosure.
+- Page 2 (/advisors): hero "A select group of exceptional producers.",
+  Atlas Live terminal demo ($297/month · 30-day money-back), Apply to Join
+  panel with 4 criteria, advisor FAQ, Agent Login as the nav button.
+- After the builder finishes, use ManageWixSite/CallWixSiteAPI to fix copy
+  drift against the HTML files, then publish.
+
+Blog: recreate as Wix blog posts later or keep the generated blog on separate
+hosting — do not block the site launch on the 52 articles.
 
 ## Must-hold requirements
 

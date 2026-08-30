@@ -45,3 +45,9 @@ yarn-error.log*
 next-env.d.ts
 
 /src/generated/prisma
+
+# python (trading/)
+__pycache__/
+*.py[cod]
+.pytest_cache/
+*.egg-info/

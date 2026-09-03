@@ -56,8 +56,9 @@ def run_backtest(
     data: MarketData,
     cfg: Config,
     active_from: datetime | None = None,
+    costs=None,
 ) -> BacktestResult:
-    engine = Engine(cfg, active_from=active_from)
+    engine = Engine(cfg, active_from=active_from, costs=costs)
     engine.run(data)
     hourly = list(data.hourly)
     return BacktestResult(

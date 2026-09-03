@@ -1,0 +1,354 @@
+//@version=6
+// =============================================================================
+// Breakout-Retest — Sleeve 5
+// Daily resistance -> 1H close through -> limit entries in the retest zone.
+//
+// RUN THIS ON A 1H CHART. The daily levels are pulled in; the execution
+// timeframe is the chart's.
+//
+// -----------------------------------------------------------------------------
+// ON REPAINTING — read this before you trust a single backtest number
+// -----------------------------------------------------------------------------
+// Every higher-timeframe read below uses the ONLY non-repainting idiom:
+//
+//     request.security(sym, "D", expr[1], lookahead = barmerge.lookahead_on)
+//
+// That combination returns the *previous completed* daily bar in both history
+// and realtime. It looks wrong — lookahead_on sounds like cheating — but the
+// [1] offset is what makes it honest: lookahead_on without an offset gives you
+// the future, and lookahead_off gives you a forming daily bar live while
+// giving you a completed one in history, which is the silent repaint that
+// makes backtests look good and live results look nothing like them.
+//
+// Cost of the idiom: a level becomes usable one daily bar later than it
+// strictly must. That is deliberate and conservative. ta.pivothigh() already
+// carries its own `pivotLookback`-bar confirmation lag; the [1] adds one more.
+//
+// This script never calls barstate.isrealtime to branch logic, never uses
+// security() on the chart timeframe, and makes every decision on bar close
+// (calc_on_every_tick is left off).
+//
+// -----------------------------------------------------------------------------
+// KNOWN DIVERGENCE FROM THE PYTHON ENGINE — this is a Pine limitation, not a bug
+// -----------------------------------------------------------------------------
+// A Pine strategy holds ONE position in ONE instrument. The Python engine arms
+// concurrent zones on different levels; this script tracks one zone at a time
+// and takes the nearest eligible level. Expect fewer trades here than in the
+// Python backtest on the same data. Reconcile the two before trusting either.
+//
+// Not financial advice. This is a system specification made executable.
+// =============================================================================
+
+strategy(
+     title                 = "Breakout-Retest (Sleeve 5)",
+     shorttitle            = "BRK-RT",
+     overlay               = true,
+     pyramiding            = 2,
+     initial_capital       = 100000,
+     default_qty_type      = strategy.fixed,
+     currency              = currency.USD,
+     commission_type       = strategy.commission.percent,
+     commission_value      = 0.005,
+     slippage              = 1,
+     calc_on_every_tick    = false,
+     calc_on_order_fills   = false,
+     process_orders_on_close = false)
+
+// ============================== INPUTS ======================================
+gL = "Levels (daily)"
+pivotLookback   = input.int(5,     "Pivot lookback (daily bars each side)", minval=1, group=gL)
+clusterTolAtr   = input.float(0.5, "Cluster tolerance (daily ATR)",  minval=0.0, step=0.1, group=gL)
+minTouches      = input.int(2,     "Min touches",                    minval=1, group=gL)
+maxLevelAgeDays = input.int(180,   "Max level age (daily bars)",     minval=1, group=gL)
+maxLevelDistAtr = input.float(10., "Max distance from price (daily ATR)", minval=0.1, group=gL)
+breakConfirmAtr = input.float(0.25,"Break confirmation (daily ATR)", minval=0.0, step=0.05, group=gL)
+atrPeriodDaily  = input.int(14,    "Daily ATR period",               minval=1, group=gL)
+touchTolAtr     = input.float(0.25,"Touch tolerance (daily ATR)",    minval=0.0, step=0.05, group=gL)
+
+gS = "Breakout (chart timeframe)"
+breakBufferPct  = input.float(0.001, "Break buffer (fraction)", minval=0.0, step=0.0005, group=gS)
+requireVolume   = input.bool(false, "Require volume expansion",  group=gS)
+volMult         = input.float(1.5,  "Volume multiple",           minval=0.1, step=0.1, group=gS)
+volLookback     = input.int(20,     "Volume average lookback",   minval=2, group=gS)
+requireBody     = input.bool(false, "Require candle body",       group=gS)
+minBodyFrac     = input.float(0.5,  "Min body fraction of range",minval=0.0, maxval=1.0, step=0.05, group=gS)
+requireCompress = input.bool(false, "Require prior compression", group=gS)
+compressLB      = input.int(20,     "Realized-vol lookback",     minval=2, group=gS)
+compressPctile  = input.float(25.,  "Max vol percentile",        minval=1.0, maxval=99.0, group=gS)
+compressHist    = input.int(500,    "Vol percentile history (bars)", minval=50, group=gS)
+
+gO = "Zone and orders"
+zoneUpperMode   = input.string("breakout_close", "Zone far bound", options=["breakout_close","breakout_high"], group=gO)
+entryFrac1      = input.float(0.33, "Entry 1 (fraction of depth from far bound)", minval=0.01, maxval=0.99, step=0.01, group=gO)
+entryFrac2      = input.float(0.66, "Entry 2 (fraction of depth from far bound)", minval=0.01, maxval=0.99, step=0.01, group=gO)
+useSecondEntry  = input.bool(true,  "Use the second ladder entry", group=gO)
+minZoneDepthAtr = input.float(0.05, "Min zone depth (chart ATR)", minval=0.0, step=0.01, group=gO)
+zoneExpiryBars  = input.int(12,     "Cancel unfilled after N bars", minval=1, group=gO)
+
+gR = "Risk"
+stopMode        = input.string("atr", "Stop mode", options=["atr","structure"], group=gR)
+atrMult         = input.float(2.5,  "ATR stop multiple",   minval=0.1, step=0.1, group=gR)
+structBufferAtr = input.float(0.5,  "Structure stop buffer (ATR)", minval=0.0, step=0.1, group=gR)
+atrPeriod       = input.int(14,     "Chart ATR period",    minval=1, group=gR)
+riskPerTrade    = input.float(0.5,  "Risk per trade (% of equity)", minval=0.01, step=0.05, group=gR) / 100.0
+maxPositionPct  = input.float(15.,  "Max position (% of equity)",   minval=0.1, step=0.5, group=gR) / 100.0
+
+gX = "Exits"
+useTrail        = input.bool(true,  "Trailing stop",  group=gX)
+trailAtrMult    = input.float(3.0,  "Trail ATR multiple",  minval=0.1, step=0.1, group=gX)
+trailActivateR  = input.float(1.0,  "Activate trail at R", minval=0.0, step=0.1, group=gX)
+useTarget       = input.bool(false, "Hard target",    group=gX)
+targetR         = input.float(2.0,  "Target (R)",     minval=0.1, step=0.1, group=gX)
+maxHoldBars     = input.int(120,    "Time stop (bars)", minval=1, group=gX)
+
+gV = "Display"
+showLevels      = input.bool(true, "Draw levels", group=gV)
+showZone        = input.bool(true, "Draw the active zone", group=gV)
+
+// ======================= HIGHER-TIMEFRAME DATA ==============================
+// ONE security call, tuple-valued. See the repainting note at the top.
+[dPivotRaw, dTime, dAtr, dClose, dHigh] = request.security(
+     syminfo.tickerid, "D",
+     [ta.pivothigh(high, pivotLookback, pivotLookback)[1], time[1], ta.atr(atrPeriodDaily)[1], close[1], high[1]],
+     lookahead = barmerge.lookahead_on)
+
+newDailyBar = not na(dTime) and dTime != dTime[1]
+
+// ============================ LEVEL BOOK ====================================
+var array<float> lvlPrice   = array.new<float>(0)   // clustered mean price
+var array<float> lvlSum     = array.new<float>(0)   // sum of member pivot prices
+var array<int>   lvlMembers = array.new<int>(0)
+var array<int>   lvlTouches = array.new<int>(0)
+var array<int>   lvlArms    = array.new<int>(0)
+var array<int>   lvlAgeDays = array.new<int>(0)
+
+removeLevel(int i) =>
+    array.remove(lvlPrice, i)
+    array.remove(lvlSum, i)
+    array.remove(lvlMembers, i)
+    array.remove(lvlTouches, i)
+    array.remove(lvlArms, i)
+    array.remove(lvlAgeDays, i)
+
+if newDailyBar and not na(dAtr) and dAtr > 0
+    // --- admit the confirmed pivot: cluster into an existing level, or create one
+    if not na(dPivotRaw)
+        merged = false
+        tol = clusterTolAtr * dAtr
+        if array.size(lvlPrice) > 0
+            for i = 0 to array.size(lvlPrice) - 1
+                if not merged and math.abs(array.get(lvlPrice, i) - dPivotRaw) <= tol
+                    array.set(lvlSum, i, array.get(lvlSum, i) + dPivotRaw)
+                    array.set(lvlMembers, i, array.get(lvlMembers, i) + 1)
+                    array.set(lvlPrice, i, array.get(lvlSum, i) / array.get(lvlMembers, i))
+                    array.set(lvlTouches, i, array.get(lvlTouches, i) + 1)
+                    merged := true
+        if not merged
+            array.push(lvlPrice, dPivotRaw), array.push(lvlSum, dPivotRaw)
+            array.push(lvlMembers, 1), array.push(lvlTouches, 1)
+            array.push(lvlArms, 0), array.push(lvlAgeDays, 0)
+
+    // --- age, touch accounting, and retirement, newest-first so removal is safe
+    if array.size(lvlPrice) > 0
+        for i = array.size(lvlPrice) - 1 to 0
+            p = array.get(lvlPrice, i)
+            array.set(lvlAgeDays, i, array.get(lvlAgeDays, i) + 1)
+            if dClose > p + breakConfirmAtr * dAtr
+                removeLevel(i)                       // broken: a daily close carried it
+            else if array.get(lvlAgeDays, i) > maxLevelAgeDays
+                removeLevel(i)                       // stale
+            else if math.abs(dHigh - p) <= touchTolAtr * dAtr and dClose <= p
+                array.set(lvlTouches, i, array.get(lvlTouches, i) + 1)
+
+// ========================= CHART-TIMEFRAME STATE ============================
+atr     = ta.atr(atrPeriod)
+volAvg  = ta.sma(volume, volLookback)[1]             // benchmark excludes this bar
+rvol    = ta.stdev(math.log(close / close[1]), compressLB)
+volRank = ta.percentrank(rvol, compressHist)[1]      // "before the break"
+bodyFrac = high == low ? 1.0 : math.abs(close - open) / (high - low)
+
+passVolume   = not requireVolume   or (not na(volAvg) and volume > volMult * volAvg)
+passBody     = not requireBody     or bodyFrac >= minBodyFrac
+passCompress = not requireCompress or (not na(volRank) and volRank <= compressPctile)
+filtersPass  = passVolume and passBody and passCompress
+
+// The nearest level that is eligible to be broken right now.
+eligibleIdx() =>
+    best = -1
+    bestDist = 1e20
+    if array.size(lvlPrice) > 0 and not na(dAtr) and dAtr > 0
+        for i = 0 to array.size(lvlPrice) - 1
+            p = array.get(lvlPrice, i)
+            d = math.abs(close - p)
+            if array.get(lvlTouches, i) >= minTouches and array.get(lvlArms, i) < 1 and d <= maxLevelDistAtr * dAtr and d < bestDist
+                bestDist := d
+                best := i
+    best
+
+// ============================ ZONE STATE ====================================
+var bool  zoneActive   = false
+var int   zoneIdx      = -1
+var float zoneLevel    = na
+var float zoneFar      = na
+var float zoneEntry1   = na
+var float zoneEntry2   = na
+var float zoneStop1    = na
+var float zoneStop2    = na
+var float zoneAtr      = na
+var int   zoneArmedBar = na
+var int   firstFillBar = na
+var bool  trailOn1     = false
+var bool  trailOn2     = false
+var float trailAnchor  = na
+var box   zoneBox      = na
+
+sizeFor(float entry, float stop, float weight) =>
+    rps = math.abs(entry - stop)
+    q = rps <= 0 ? 0.0 : (strategy.equity * riskPerTrade * weight) / rps
+    cap = entry <= 0 ? 0.0 : (strategy.equity * maxPositionPct * weight) / entry
+    math.max(math.min(q, cap), 0.0)
+
+// ---------------------------------------------------------------- ARM ------
+idx = eligibleIdx()
+canArm = not zoneActive and strategy.position_size == 0 and idx >= 0 and not na(atr) and atr > 0
+lvl = idx >= 0 ? array.get(lvlPrice, idx) : na
+brokeThrough = canArm and close > lvl * (1.0 + breakBufferPct) and close[1] <= lvl
+
+if brokeThrough and filtersPass
+    far   = zoneUpperMode == "breakout_close" ? close : high
+    depth = far - lvl
+    if depth >= minZoneDepthAtr * atr and depth > 0
+        e1 = far - entryFrac1 * depth
+        e2 = far - entryFrac2 * depth
+        s1 = stopMode == "atr" ? e1 - atrMult * atr : lvl - structBufferAtr * atr
+        s2 = stopMode == "atr" ? e2 - atrMult * atr : lvl - structBufferAtr * atr
+        w1 = useSecondEntry ? 0.5 : 1.0
+        w2 = useSecondEntry ? 0.5 : 0.0
+        q1 = sizeFor(e1, s1, w1)
+        q2 = useSecondEntry ? sizeFor(e2, s2, w2) : 0.0
+
+        if q1 > 0 and e1 > s1
+            zoneActive   := true
+            zoneIdx      := idx
+            zoneLevel    := lvl
+            zoneFar      := far
+            zoneEntry1   := e1
+            zoneEntry2   := e2
+            zoneStop1    := s1
+            zoneStop2    := s2
+            zoneAtr      := atr
+            zoneArmedBar := bar_index
+            firstFillBar := na
+            trailOn1     := false
+            trailOn2     := false
+            trailAnchor  := na
+            array.set(lvlArms, idx, array.get(lvlArms, idx) + 1)
+
+            strategy.entry("L1", strategy.long, qty=q1, limit=e1,
+                 alert_message = '{"v":1,"event":"entry","leg":1,"sym":"' + syminfo.ticker + '"}')
+            if q2 > 0 and e2 > s2
+                strategy.entry("L2", strategy.long, qty=q2, limit=e2,
+                     alert_message = '{"v":1,"event":"entry","leg":2,"sym":"' + syminfo.ticker + '"}')
+
+            if showZone
+                box.delete(zoneBox)
+                zoneBox := box.new(bar_index, far, bar_index + zoneExpiryBars, lvl,
+                     border_color=color.new(color.teal, 40), bgcolor=color.new(color.teal, 88))
+            alert('{"v":1,"event":"zone_armed","id":"' + syminfo.ticker + "-" + str.tostring(time) +
+                 '","sym":"' + syminfo.ticker + '","level":' + str.tostring(lvl) +
+                 ',"far":' + str.tostring(far) + ',"e1":' + str.tostring(e1) +
+                 ',"e2":' + str.tostring(e2) + ',"stop":' + str.tostring(s1) + '}',
+                 alert.freq_once_per_bar_close)
+
+// ------------------------------------------------------------- MANAGE ------
+inPos = strategy.position_size > 0
+if inPos and na(firstFillBar)
+    firstFillBar := bar_index
+
+// Protective stops. Re-issued every bar so the trail can tighten them.
+if zoneActive and inPos
+    st1 = zoneStop1
+    st2 = zoneStop2
+    if useTrail
+        trailAnchor := na(trailAnchor) ? high : math.max(trailAnchor, high)
+        rps1 = zoneEntry1 - zoneStop1
+        if not trailOn1 and rps1 > 0 and (close - zoneEntry1) / rps1 >= trailActivateR
+            trailOn1 := true
+        if trailOn1
+            st1 := math.max(st1, trailAnchor - trailAtrMult * atr)
+        rps2 = zoneEntry2 - zoneStop2
+        if useSecondEntry and not trailOn2 and rps2 > 0 and (close - zoneEntry2) / rps2 >= trailActivateR
+            trailOn2 := true
+        if trailOn2
+            st2 := math.max(st2, trailAnchor - trailAtrMult * atr)
+        zoneStop1 := st1
+        zoneStop2 := st2
+
+    lim1 = useTarget ? zoneEntry1 + targetR * (zoneEntry1 - zoneStop1) : na
+    lim2 = useTarget ? zoneEntry2 + targetR * (zoneEntry2 - zoneStop2) : na
+    strategy.exit("X1", from_entry="L1", stop=st1, limit=lim1,
+         alert_message = '{"v":1,"event":"exit","leg":1,"sym":"' + syminfo.ticker + '"}')
+    if useSecondEntry
+        strategy.exit("X2", from_entry="L2", stop=st2, limit=lim2,
+             alert_message = '{"v":1,"event":"exit","leg":2,"sym":"' + syminfo.ticker + '"}')
+
+// Zone expiry: cancel whatever never filled.
+if zoneActive and bar_index - zoneArmedBar >= zoneExpiryBars
+    strategy.cancel("L1")
+    strategy.cancel("L2")
+    if not inPos
+        zoneActive := false
+        zoneIdx    := -1
+
+// Invalidation: a close back under the level. Note that such a bar has almost
+// certainly already traded through the resting limits on its way down — the
+// same thing happens live, so the cancel below is a backstop, not the mechanism.
+if zoneActive and close < zoneLevel
+    strategy.cancel("L1")
+    strategy.cancel("L2")
+    if inPos
+        strategy.close_all(comment="invalidated")
+    zoneActive := false
+    zoneIdx    := -1
+    alert('{"v":1,"event":"failed_break","sym":"' + syminfo.ticker +
+         '","level":' + str.tostring(zoneLevel) + ',"close":' + str.tostring(close) + '}',
+         alert.freq_once_per_bar_close)
+
+// Time stop.
+if inPos and not na(firstFillBar) and bar_index - firstFillBar >= maxHoldBars
+    strategy.close_all(comment="time_stop")
+
+if strategy.position_size == 0 and not zoneActive
+    firstFillBar := na
+    trailAnchor  := na
+
+// ============================== DISPLAY =====================================
+float plotLvl1 = na
+float plotLvl2 = na
+if showLevels
+    if array.size(lvlPrice) > 0
+        plotLvl1 := array.get(lvlPrice, 0)
+    if array.size(lvlPrice) > 1
+        plotLvl2 := array.get(lvlPrice, 1)
+plot(plotLvl1, "Level 1", color=color.new(color.orange, 20), style=plot.style_linebr, linewidth=1)
+plot(plotLvl2, "Level 2", color=color.new(color.orange, 50), style=plot.style_linebr, linewidth=1)
+plot(zoneActive ? zoneEntry1 : na, "Entry 1", color=color.new(color.teal, 0), style=plot.style_linebr)
+plot(zoneActive and useSecondEntry ? zoneEntry2 : na, "Entry 2", color=color.new(color.teal, 40), style=plot.style_linebr)
+plot(inPos ? zoneStop1 : na, "Stop", color=color.new(color.red, 0), style=plot.style_linebr)
+
+plotshape(brokeThrough and filtersPass, "Break", shape.triangleup, location.belowbar,
+     color=color.new(color.teal, 0), size=size.tiny)
+plotshape(brokeThrough and not filtersPass, "Filtered out", shape.xcross, location.belowbar,
+     color=color.new(color.gray, 0), size=size.tiny)
+
+// Diagnostics — a level count stuck at zero means the daily data is too short.
+var table diag = table.new(position.top_right, 2, 4, border_width=1)
+if barstate.islast
+    table.cell(diag, 0, 0, "levels",  text_color=color.gray, text_size=size.tiny)
+    table.cell(diag, 1, 0, str.tostring(array.size(lvlPrice)), text_size=size.tiny)
+    table.cell(diag, 0, 1, "zone",    text_color=color.gray, text_size=size.tiny)
+    table.cell(diag, 1, 1, zoneActive ? "armed" : "-", text_size=size.tiny)
+    table.cell(diag, 0, 2, "daily ATR", text_color=color.gray, text_size=size.tiny)
+    table.cell(diag, 1, 2, str.tostring(dAtr, "#.##"), text_size=size.tiny)
+    table.cell(diag, 0, 3, "trades", text_color=color.gray, text_size=size.tiny)
+    table.cell(diag, 1, 3, str.tostring(strategy.closedtrades), text_size=size.tiny)

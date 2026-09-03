@@ -64,13 +64,14 @@ class Engine:
         cfg: Config,
         broker: SimBroker | None = None,
         active_from: datetime | None = None,
+        costs=None,
     ) -> None:
         self.cfg = cfg
         # Bars before ``active_from`` warm the level book and indicators but may
         # not arm a zone. Walk-forward folds use it so each window starts with a
         # warm engine instead of a cold one.
         self.active_from = active_from
-        self.broker = broker if broker is not None else SimBroker(cfg)
+        self.broker = broker if broker is not None else SimBroker(cfg, costs)
         self.book = LevelBook(cfg)
         self.intraday = IntradayContext(cfg)
 
@@ -84,6 +85,7 @@ class Engine:
         self._arms_by_level: dict[int, int] = {}
         self._last_bar: Bar | None = None
         self._last_index = -1
+        self._last_atr: float | None = None
 
     # ------------------------------------------------------------- equity
     @property
@@ -115,7 +117,8 @@ class Engine:
         self._last_bar = bar
         self._last_index = ctx.index
 
-        self._apply_fills(self.broker.on_bar(bar, ctx.index))
+        self._last_atr = ctx.atr
+        self._apply_fills(self.broker.on_bar(bar, ctx.index, ctx.atr))
         self._manage(ctx)
         self.equity_curve.append(EquityPoint(bar.ts, ctx.index, self.equity))
         self._scan(ctx)
@@ -125,7 +128,7 @@ class Engine:
         if self._last_bar is None:
             return
         self._apply_fills(
-            self.broker.force_close_all(self._last_bar, self._last_index),
+            self.broker.force_close_all(self._last_bar, self._last_index, self._last_atr),
             forced=True,
         )
         for trade in self.trades:
@@ -192,6 +195,14 @@ class Engine:
         leg.exit_index = fill.bar_index
         leg.commission += fill.commission
         leg.exit_pending = False
+        # Funding and borrow accrue for as long as the position was held.
+        if leg.fill_ts is not None:
+            held_days = max((fill.ts - leg.fill_ts).total_seconds() / 86400.0, 0.0)
+            carry = self.broker.costs.holding_cost(
+                leg.qty * leg.fill_price, held_days, trade.direction
+            )
+            leg.commission += carry
+            self.realized_pnl -= carry
         if fill.kind is FillKind.STOP:
             leg.exit_reason = ExitReason.TRAIL if leg.trail_active else ExitReason.STOP
         elif fill.kind is FillKind.TARGET:

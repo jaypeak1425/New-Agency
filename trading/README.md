@@ -1,4 +1,25 @@
-# Daily resistance → 1H breakout → retest entry
+# Multi-regime systematic trading system
+
+Two tiers, per the master spec:
+
+```
+TIER 1 — core/      Python: data, costs, statistics, risk, sleeves, allocation
+TIER 2 — pine/      Pine v6: single-instrument, bar-close directional sleeves
+         breakout/  Sleeve 5's engine + the shared primitives both tiers use
+```
+
+TradingView is the cockpit and the trigger. Python is the brain. Don't invert
+this — see [`core/README.md`](core/README.md) for what Tier 1 does and
+[`pine/README.md`](pine/README.md) for what Pine structurally cannot.
+
+**Start here:** [`core/README.md`](core/README.md) documents two findings that
+change how you plan a backtest — the ~60-day retention on the Moon Dev feed, and
+the latency term that disqualifies any sleeve faster than 15m on a TradingView
+bridge.
+
+---
+
+## Sleeve 5 — daily resistance → 1H breakout → retest entry
 
 A multi-timeframe breakout system that **buys the pullback, not the break**.
 
@@ -24,6 +45,7 @@ breakdown, retest from below — through the same code.
 
 ```bash
 cd trading
+python examples/data_doctor.py --source hyperliquid --symbol BTC --days 730
 python examples/run_backtest.py                    # synthetic fixture, default config
 python examples/run_backtest.py --compare          # both stop modes × both zone bounds
 python examples/run_backtest.py --audit            # the lookahead audit
@@ -31,7 +53,7 @@ python examples/run_backtest.py --walk-forward     # walk-forward + one holdout 
 python examples/run_backtest.py --short            # the mirrored short system
 python examples/run_backtest.py --hourly bars.csv --trade-log trades.csv
 
-pip install pytest && python -m pytest             # 126 tests
+pip install pytest && python -m pytest             # 238 tests
 ```
 
 CSV format: `timestamp,open,high,low,close,volume`, one row per **closed** 1H bar,
@@ -47,7 +69,9 @@ gets in. `pytest` is the sole dev dependency.
 ## Layout
 
 ```
-breakout/
+core/           Tier 1 — see core/README.md
+pine/           Tier 2 — see pine/README.md
+breakout/       Sleeve 5's engine, and the primitives core/ builds on
   config.py     every tunable number, validated at construction
   types.py      Bar, Direction, and the sign helpers that make shorts free
   indicators.py streaming ATR / mean / realized vol / percentile rank
@@ -57,7 +81,7 @@ breakout/
   orders/       zone construction, laddering, stops, sizing, broker-agnostic intents
   engine/       event loop, order state machine, simulated broker (the fill model)
   backtest/     metrics, trade log, post-mortem logs, walk-forward, lookahead audit
-tests/          126 tests
+tests/          238 tests
 examples/       runnable CLI
 ```
 

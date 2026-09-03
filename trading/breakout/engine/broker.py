@@ -78,8 +78,22 @@ class _MarketExit:
 
 
 class SimBroker:
-    def __init__(self, cfg: Config) -> None:
+    def __init__(self, cfg: Config, costs=None) -> None:
         self.cfg = cfg
+        # A CostModel supersedes the flat bps on Config. Absent one, we build the
+        # equivalent flat model so behaviour is byte-identical to not passing one.
+        if costs is None:
+            from core.costs import CostModel
+
+            costs = CostModel(
+                commission_bps=cfg.commission_bps,
+                half_spread_bps=0.0,
+                slippage_bps=cfg.slippage_bps,
+                slippage_vol_coef=0.0,
+                latency_seconds=0.0,
+            )
+        self.costs = costs
+        self._atr: float | None = None
         self._entries: dict[tuple[int, int], _Entry] = {}
         self._brackets: dict[tuple[int, int], _Bracket] = {}
         self._pending_exits: list[_MarketExit] = []
@@ -124,11 +138,13 @@ class SimBroker:
 
     # ---------------------------------------------------------- price maths
     def _commission(self, price: float, qty: float) -> float:
-        return abs(price * qty) * self.cfg.commission_bps / 10_000.0
+        return self.costs.commission(price, qty)
 
     def _slipped(self, price: float, direction: Direction) -> float:
-        """Adverse slippage on an aggressive (stop/market) exit."""
-        return price * (1.0 - direction.sign * self.cfg.slippage_bps / 10_000.0)
+        """Spread, impact and latency on an aggressive (stop/market) exit."""
+        return self.costs.fill_price(
+            price, direction, aggressive=True, atr=self._atr, is_exit=True
+        )
 
     def _limit_would_fill(self, limit: float, bar: Bar, direction: Direction) -> bool:
         adverse = bar.extreme(direction, favourable=False)  # low for a long buy
@@ -147,8 +163,9 @@ class SimBroker:
         return direction.sign * (stop - adverse) >= 0
 
     # --------------------------------------------------------------- engine
-    def on_bar(self, bar: Bar, index: int) -> list[Fill]:
+    def on_bar(self, bar: Bar, index: int, atr: float | None = None) -> list[Fill]:
         """Resolve everything resting against one closed bar, pessimistically."""
+        self._atr = atr
         fills: list[Fill] = []
 
         # 1. Market exits decided at the previous close hit this bar's open.
@@ -245,8 +262,10 @@ class SimBroker:
         return None
 
     # ------------------------------------------------------------ teardown
-    def force_close_all(self, bar: Bar, index: int) -> list[Fill]:
+    def force_close_all(self, bar: Bar, index: int, atr: float | None = None) -> list[Fill]:
         """End of data: mark every open leg out at the final close."""
+        if atr is not None:
+            self._atr = atr
         fills: list[Fill] = []
         for key in list(self._brackets):
             bracket = self._brackets.pop(key)

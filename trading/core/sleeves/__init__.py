@@ -9,6 +9,14 @@ from .base import (
     registry,
 )
 from .breakout_retest import BreakoutRetestSleeve
+from .carry import (
+    CarryConfig,
+    CarryResult,
+    CarrySleeve,
+    CarryTrade,
+    backtest_carry,
+    screen,
+)
 
 __all__ = [
     "MARKETS",
@@ -20,4 +28,10 @@ __all__ = [
     "register",
     "registry",
     "BreakoutRetestSleeve",
+    "CarryConfig",
+    "CarryResult",
+    "CarrySleeve",
+    "CarryTrade",
+    "backtest_carry",
+    "screen",
 ]

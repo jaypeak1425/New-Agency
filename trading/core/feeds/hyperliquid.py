@@ -18,6 +18,7 @@ from breakout.data.loaders import MarketData
 from breakout.types import Bar
 
 from .candles import CandleParseReport, parse_candles
+from .funding import FundingPoint, parse_funding_history
 from .http import FeedError, HttpClient
 
 BASE_URL = "https://api.hyperliquid.xyz"
@@ -85,6 +86,45 @@ class HyperliquidFeed:
                 "narrow the range or raise max_pages rather than silently truncating"
             )
         return parse_candles(collected, tz=self.tz)
+
+    def funding_history(
+        self,
+        symbol: str,
+        start: datetime | None = None,
+        end: datetime | None = None,
+        window_days: int = 30,
+    ) -> list[FundingPoint]:
+        """Hourly funding history, paged. Hyperliquid pays every hour, so a
+        year is ~8,760 rows and one request will not carry it."""
+        end = end or datetime.now(timezone.utc)
+        start = start or (end - timedelta(days=365))
+        step = timedelta(days=window_days)
+
+        collected: list[dict] = []
+        cursor = start
+        pages = 0
+        while cursor < end and pages < self.max_pages:
+            window_end = min(cursor + step, end)
+            payload = self._http.post_json(
+                "/info",
+                {
+                    "type": "fundingHistory",
+                    "coin": symbol.upper(),
+                    "startTime": int(cursor.timestamp() * 1000),
+                    "endTime": int(window_end.timestamp() * 1000),
+                },
+            )
+            if isinstance(payload, list):
+                collected.extend(r for r in payload if isinstance(r, dict))
+            pages += 1
+            cursor = window_end
+
+        if pages >= self.max_pages:
+            raise FeedError(
+                f"hit max_pages={self.max_pages} fetching funding for {symbol}; "
+                "narrow the range rather than silently truncating"
+            )
+        return parse_funding_history(collected, symbol, tz=self.tz)
 
     def market_data(
         self,

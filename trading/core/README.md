@@ -11,7 +11,7 @@ core/
   trials.py   the trial log and the G1 promotion gate
   risk.py     hard limits, drawdown governor, correlation override
   monitor.py  heartbeat, stale-data guard, idempotency, reconciliation
-  sleeves/    the Sleeve contract + Sleeve 5 adapter
+  sleeves/    the Sleeve contract, Sleeve 5 adapter, Sleeve 7 (carry)
   portfolio.py  regime gate, allocation formula, vol targeting
 ```
 
@@ -145,6 +145,80 @@ containing only winners produces a DSR that lies in your favour — asserted in
 
 ---
 
+## Sleeve 7 — carry, and why it is a cost problem
+
+Long spot, short perp, equal notional. Delta cancels; you collect funding for as
+long as leveraged longs pay to be long. Tier 1 only — two legs on two venues
+plus funding data Pine cannot reach.
+
+**Get the interval right first.** Hyperliquid pays funding **hourly**; Binance,
+Bybit and OKX pay 8-hourly. Annualizing with the wrong one is an 8× error
+(24×365 vs 3×365) in the same direction every time. `intervals_per_year` is an
+explicit field for that reason.
+
+**The signs, written out, because they are easy to reverse.** With basis
+`b = (P − S)/S`:
+
+```
+price PnL   = (S1 − S0) + (P0 − P1) = (b0 − b1) × notional
+funding PnL = Σ rate_t × notional
+```
+
+So the price leg pays when the basis **narrows** — enter rich, exit flat. And
+`CarryResult.funding_share` reports the split, because if the P&L came from the
+basis rather than from funding you ran a basis bet, not a carry trade, and it
+should be sized as the directional position it actually is. The report says so
+out loud when that share drops below half.
+
+**Costs decide this sleeve, not signal.** On the bundled fixture, same funding
+collected every time:
+
+| Costs | Trades | Net | Funding collected |
+|---|---|---|---|
+| zero | 165 | **+2,685** | +2,328 |
+| real, 10% hurdle | 165 | **−615** | +2,328 |
+| real, 25% hurdle | 110 | +445 | +2,261 |
+
+The yield was always there. Costs took it. This is the sleeve the literature
+warns backtests beautifully and loses money live, and that is the mechanism.
+
+**The churn trap.** Hourly funding flips negative for single intervals
+constantly — 44% of intervals on the fixture, while the mean stays comfortably
+positive. Reacting to each print pays a two-leg round trip every time:
+
+| Smoothing | Trades | Net | Costs |
+|---|---|---|---|
+| 1 interval | 165 | −615 | 3,300 |
+| 8 intervals | 76 | +1,084 | 1,520 |
+| 24 intervals | 44 | **+1,474** | 880 |
+| 168 intervals | 16 | +780 | 320 |
+
+Classic bias/variance: too little smoothing churns, too much misses the yield.
+**The default stays 8, not 24.** 24 won on one synthetic series, and picking it
+for that reason is exactly the fitting-to-noise the DSR machinery upstairs
+exists to catch. 8 is chosen on the prior that it matches the venue convention.
+
+Entry and exit share one smoothed signal, deliberately. An earlier version
+smoothed only the exit and churned *worse* the more it smoothed — entry fired on
+a spike the lagging mean had not registered, so the position opened and closed on
+consecutive intervals. Mismatched entry and exit rules fight, and the fight costs
+a round trip each round.
+
+**Delta-neutral is not risk-neutral.** The short perp leg has its own margin
+account and can be liquidated on a spot spike while the combined position is
+perfectly hedged. `margin_multiple` sizes it for a 3-sigma move. Liquidation is
+only *simulated* when a price series is supplied — without one, zero liquidations
+means "never looked", which both the code and the report state rather than
+letting you infer safety from a zero.
+
+```bash
+python examples/carry.py --screen                              # live, 224 symbols
+python examples/carry.py --symbol BTC --days 365 --with-prices
+python examples/carry.py --sweep                               # the churn table
+```
+
+---
+
 ## Risk, and the order it fires in
 
 `risk.py` checks every limit *before* an order goes out. The limits compound
@@ -180,9 +254,11 @@ Stated plainly so nothing here is mistaken for more than it is.
   sleeve weights at 1.0 and the gate is inert, so the stack runs today and gains
   the regime dimension when the model lands. **A missing regime engine must never
   silently switch every sleeve off**; that is asserted in the tests.
-- **Sleeves 1, 2, 3, 4, 6, 7, 8.** Only Sleeve 5 exists. Sleeve 7 (carry) is the
-  highest-Sharpe, lowest-correlation addition and works when nothing else does —
-  it is the one to build next, and it is Tier 1 only.
+- **Sleeves 1, 2, 3, 4, 6, 8.** Sleeves 5 and 7 exist. Sleeve 1 (time-series
+  trend) is the natural next one: it is Pine-eligible, and its return profile
+  (low win rate, long right tail) is genuinely uncorrelated with both of the
+  sleeves already here. Sleeve 6 (stat arb) is the biggest engineering lift and
+  should wait until Tier 1 execution is proven.
 - **Execution adapters.** The engine emits `OrderIntent`s and `SimBroker` is the
   only adapter. A live adapter implements the same `submit(intent)` surface.
 - **The webhook receiver.** `IdempotencyGuard` and `Reconciliation` are the

@@ -19,6 +19,19 @@ bridge.
 
 ---
 
+## Sleeves built so far
+
+| # | Sleeve | Tier | Lives in |
+|---|---|---|---|
+| 5 | Breakout-retest | 2 (Pine-eligible) | `breakout/`, `pine/`, `core/sleeves/breakout_retest.py` |
+| 7 | Carry / funding basis | 1 (Python only) | `core/sleeves/carry.py` |
+
+Sleeve 7 is delta-neutral and regime-agnostic — it is the one that earns when
+the market goes nowhere. It is also a cost problem rather than a signal problem;
+`core/README.md` shows the numbers.
+
+---
+
 ## Sleeve 5 — daily resistance → 1H breakout → retest entry
 
 A multi-timeframe breakout system that **buys the pullback, not the break**.
@@ -53,7 +66,7 @@ python examples/run_backtest.py --walk-forward     # walk-forward + one holdout 
 python examples/run_backtest.py --short            # the mirrored short system
 python examples/run_backtest.py --hourly bars.csv --trade-log trades.csv
 
-pip install pytest && python -m pytest             # 238 tests
+pip install pytest && python -m pytest             # 261 tests
 ```
 
 CSV format: `timestamp,open,high,low,close,volume`, one row per **closed** 1H bar,
@@ -81,7 +94,7 @@ breakout/       Sleeve 5's engine, and the primitives core/ builds on
   orders/       zone construction, laddering, stops, sizing, broker-agnostic intents
   engine/       event loop, order state machine, simulated broker (the fill model)
   backtest/     metrics, trade log, post-mortem logs, walk-forward, lookahead audit
-tests/          238 tests
+tests/          261 tests
 examples/       runnable CLI
 ```
 

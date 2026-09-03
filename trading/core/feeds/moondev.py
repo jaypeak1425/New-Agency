@@ -38,6 +38,7 @@ from breakout.data.loaders import MarketData
 from breakout.types import Bar
 
 from .candles import CandleParseReport, parse_candles
+from .funding import HOURLY, FundingSnapshot, parse_prices_snapshot
 from .http import FeedError, HttpClient
 
 BASE_URL = "https://api.moondev.com"
@@ -79,6 +80,16 @@ class MoonDevFeed:
             if isinstance(found, list):
                 return [str(s) for s in found]
         return []
+
+    def prices(self, intervals_per_year: float = HOURLY) -> FundingSnapshot:
+        """Live prices + funding + open interest across the whole universe.
+
+        This is what this feed is genuinely best at: a cross-sectional read on
+        224 symbols with no rate limit, which is exactly the screen Sleeve 7
+        wants. It is a *snapshot* — there is no funding history here, so
+        backtests take their funding from `HyperliquidFeed.funding_history`.
+        """
+        return parse_prices_snapshot(self._http.get("/api/prices"), intervals_per_year)
 
     # ----------------------------------------------------------------- bars
     def candles(
